@@ -35,7 +35,7 @@ namespace GdevApps.DAL.DataContexts.GradebookLicense.Model
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseMySql("server=209.50.52.83;database=gradebook_license;user=gbchklse;password=@Fv6eQ#wLzA3;");
+                optionsBuilder.UseMySql("");
             }
         }
 
