@@ -49,9 +49,7 @@ namespace GdevApps.Portal.Controllers
                 var accessToken = await HttpContext.GetTokenAsync("access_token");
 
                 var user = await _userManager.GetUserAsync(User);
-
                 string externalAccessToken = null;
-
                 ExternalLoginInfo info = await _signInManager.GetExternalLoginInfoAsync();
                 if (User.Identity.IsAuthenticated)
                 {
