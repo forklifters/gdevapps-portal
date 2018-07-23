@@ -35,7 +35,6 @@ namespace GdevApps.Portal.Controllers
 
         public async Task<IActionResult> GetTokens()
         {
-            var x = 10;
             var result = await _aspNetUserService.GetAllTokens();
             return Ok(result);
         }
