@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using GdevApps.Portal.Data;
 using GdevApps.Portal.Models;
 using GdevApps.Portal.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -14,32 +15,14 @@ namespace GdevApps.Portal.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IEmailSender _emailSender;
-        private readonly ILogger _logger;
-
-        public HomeController(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            IEmailSender emailSender,
-            ILogger<HomeController> logger)
-        {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _emailSender = emailSender;
-            _logger = logger;
-        }
-
         public IActionResult Index()
         {
             return View();
         }
 
-        public async Task<IActionResult> About()
+        [Authorize(Roles = "Admin")]
+        public IActionResult About()
         {
-
-            var info = await _signInManager.GetExternalLoginInfoAsync();
             ViewData["Message"] = "Your application description page.";
 
             return View();

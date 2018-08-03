@@ -19,9 +19,9 @@ D:\Gradebook\Projects\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\bin\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.deps.json
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\bin\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.dll
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\bin\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.pdb
-D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\obj\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.csprojAssemblyReference.cache
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\obj\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.csproj.CoreCompileInputs.cache
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\obj\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.AssemblyInfoInputs.cache
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\obj\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.AssemblyInfo.cs
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\obj\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.dll
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\obj\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.pdb
+D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\obj\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.csprojAssemblyReference.cache

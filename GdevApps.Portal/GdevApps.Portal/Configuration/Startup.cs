@@ -12,6 +12,9 @@ using System.Security.Claims;
 using GdevApps.Portal.Data;
 using GdevApps.Portal.Services;
 using GdevApps.Portal.Configuration;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace GdevApps.Portal
 {
@@ -54,7 +57,14 @@ namespace GdevApps.Portal
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddMvc(config => {
+                var policy = new AuthorizationPolicyBuilder()
+                                .RequireAuthenticatedUser()
+                                .Build();
+
+                config.Filters.Add(new AuthorizeFilter(policy));
+                config.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+            });
             services.AddDatabaseContexts(Configuration);
             services.AddAspNetIdentity(Configuration);
             services.AddRepositories();
@@ -82,7 +92,7 @@ namespace GdevApps.Portal
 
             // services.Configure<MySecrets>(Configuration.GetSection(nameof(MySecrets))).AddOptions().BuildServiceProvider();
 
-          /*  _clietId = "898218061018-1mvqrmk07v8206bhsdmf8cs3kkd7rni9.apps.googleusercontent.com";
+            _clietId = "898218061018-1mvqrmk07v8206bhsdmf8cs3kkd7rni9.apps.googleusercontent.com";
             _clientSecret = "5eE60z31j9J7y2vQvYQx68kK";
             services.AddAuthentication()
                 .AddGoogle(googleOptions =>
@@ -114,7 +124,7 @@ namespace GdevApps.Portal
 
                     googleOptions.AuthorizationEndpoint += "?prompt=consent";// Hack so we always get a refresh token, it only comes on the first authorization response 
                 });
-                */
+                
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

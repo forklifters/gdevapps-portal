@@ -21,6 +21,7 @@ namespace GdevApps.Portal
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
+                .UseUrls("http://localhost:60269")
                 .Build();
     }
 }

@@ -34,15 +34,15 @@ namespace GdevApps.Portal.Configuration
                 //options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))
                 options.UseMySql(configuration.GetConnectionString("DefaultConnection"))
                 );
+
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseMySql(configuration.GetConnectionString("DefaultConnection"))
+                );
         }
 
         public static void AddAspNetIdentity(this IServiceCollection services,
             IConfiguration configuration)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseMySql(configuration.GetConnectionString("DefaultConnection"))
-                );
-
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();

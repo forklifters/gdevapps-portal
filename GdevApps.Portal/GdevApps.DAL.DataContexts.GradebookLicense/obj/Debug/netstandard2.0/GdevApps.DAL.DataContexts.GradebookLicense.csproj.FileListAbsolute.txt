@@ -16,12 +16,3 @@ D:\Gradebook\Projects\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.
 D:\Gradebook\Projects\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.GradebookLicense\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.GradebookLicense.AssemblyInfo.cs
 D:\Gradebook\Projects\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.GradebookLicense\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.GradebookLicense.dll
 D:\Gradebook\Projects\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.GradebookLicense\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.GradebookLicense.pdb
-D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.GradebookLicense\bin\Debug\netstandard2.0\GdevApps.DAL.DataContexts.GradebookLicense.deps.json
-D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.GradebookLicense\bin\Debug\netstandard2.0\GdevApps.DAL.DataContexts.GradebookLicense.dll
-D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.GradebookLicense\bin\Debug\netstandard2.0\GdevApps.DAL.DataContexts.GradebookLicense.pdb
-D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.GradebookLicense\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.GradebookLicense.csprojAssemblyReference.cache
-D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.GradebookLicense\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.GradebookLicense.csproj.CoreCompileInputs.cache
-D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.GradebookLicense\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.GradebookLicense.AssemblyInfoInputs.cache
-D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.GradebookLicense\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.GradebookLicense.AssemblyInfo.cs
-D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.GradebookLicense\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.GradebookLicense.dll
-D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.GradebookLicense\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.GradebookLicense.pdb
