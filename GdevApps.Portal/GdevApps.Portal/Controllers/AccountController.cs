@@ -259,6 +259,22 @@ namespace GdevApps.Portal.Controllers
             return Challenge(properties, provider);
         }
 
+        [HttpPost]
+        [AllowAnonymous]
+        public IActionResult RequestAccount(RequestAccountViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                ViewBag.result = "Request Submitted Successfully!";
+                return View();
+            }
+            else
+            {
+                ViewBag.result = "An error occured during request submission!";
+                return View();
+            }
+        }
+
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
@@ -291,7 +307,8 @@ namespace GdevApps.Portal.Controllers
                 ViewData["ReturnUrl"] = returnUrl;
                 ViewData["LoginProvider"] = info.LoginProvider;
                 var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-                return View("ExternalLogin", new ExternalLoginViewModel { Email = email });
+                //return View("ExternalLogin", new ExternalLoginViewModel { Email = email });
+                return View("RequestAccount", new RequestAccountViewModel { Email = email, Subject = "Request an account" });
             }
         }
 

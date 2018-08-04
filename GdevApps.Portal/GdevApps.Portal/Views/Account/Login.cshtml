@@ -1,16 +1,14 @@
-@using System.Collections.Generic
-@using System.Linq
-@using Microsoft.AspNetCore.Http
-@using Microsoft.AspNetCore.Http.Authentication
-@using GdevApps.Portal.Data
-@model GdevApps.Portal.Models.AccountViewModels.LoginViewModel
-@inject Microsoft.AspNetCore.Identity.SignInManager<GdevApps.Portal.Data.ApplicationUser> SignInManager
+@using System.Collections.Generic 
+@using System.Linq 
+@using Microsoft.AspNetCore.Http 
+@using Microsoft.AspNetCore.Http.Authentication 
+@using GdevApps.Portal.Data 
+@model GdevApps.Portal.Models.AccountViewModels.LoginViewModel 
+@inject Microsoft.AspNetCore.Identity.SignInManager<GdevApps.Portal.Data.ApplicationUser> SignInManager 
+    @{ ViewData["Title"] = "Log in"; } 
+    @{ Layout = "/Views/Shared/_LoginLayout.cshtml"; }
 
-@{
-    ViewData["Title"] = "Log in";
-}
-
-<!-- <div class="row">
+    <!-- <div class="row">
     <div class="col-md-4">
         <section>
              <form returnurl="@ViewData["ReturnUrl"]" method="post">
@@ -86,36 +84,57 @@
     </div>
 </div> -->
 
-<div class="container">
-  <div class="row">
-    <div class="Absolute-Center is-Responsive">
-      <div id="logo-container"></div>
-      <div class="col-sm-6 col-md-10 col-md-offset-1">
-        <form action="" id="loginForm">
-          <div class="form-group input-group">
-            <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-            <input class="form-control" type="text" name='username' placeholder="username"/>          
-          </div>
-          <div class="form-group input-group">
-            <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
-            <input class="form-control" type="password" name='password' placeholder="password"/>     
-          </div>
-          <div class="checkbox">
-            <label>
-              <input type="checkbox"> I agree to the <a href="#">Terms and Conditions</a>
-            </label>
-          </div>
-          <div class="form-group">
-            <button type="button" class="btn btn-def btn-block">Login</button>
-          </div>
-          <div class="form-group text-center">
-            <a href="#">Forgot Password</a>&nbsp;|&nbsp;<a href="#">Support</a>
-          </div>
-        </form>        
-      </div>  
-    </div>    
-  </div>
-</div>
-@section Scripts {
-    @await Html.PartialAsync("_ValidationScriptsPartial")
-}
+    <div class="container">
+        <div class="row">
+            <div class="Absolute-Center is-Responsive col-centered">
+                <div id="logo-container"></div>
+                <div class="col-xs-5">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    <form returnurl="@ViewData["ReturnUrl"]" method="post">
+                        <div class="form-group input-group">
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                            <input asp-for="Email" class="form-control" type="text" name='Email' placeholder="Email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="form-group input-group">
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                            <input asp-for="Password" class="form-control" type="password" name='Password' placeholder="Password" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                            <input type="checkbox"> I agree to the <a href="#">Terms and Conditions</a>
+                                </label>
+                        </div>
+                        <div class="form-group">
+                            <div class="checkbox">
+                                <label asp-for="RememberMe">
+                            <input asp-for="RememberMe" />
+                            @Html.DisplayNameFor(m => m.RememberMe)
+                        </label>
+                            </div>
+                        </div>
+                        <div class="form-group text-center">
+                                <a asp-action="ForgotPassword">Forgot your password?</a>&nbsp;|&nbsp;<a href="#">Support</a>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-def btn-block">Login</button>
+                        </div>
+                        <div class="form-group text-center">
+                            OR
+                        </div>
+                    </form>
+                    <form asp-action="ExternalLogin" returnurl="@ViewData[" ReturnUrl "]" method="post" class="form-horizontal">
+                        @Html.AntiForgeryToken()
+                        <div>
+                            <p>
+                                @foreach (var provider in loginProviders) {
+                                <button type="submit" class="btn btn-def btn-block" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">Login with @provider.Name</button> }
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @section Scripts { @await Html.PartialAsync("_ValidationScriptsPartial") }

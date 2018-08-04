@@ -14,6 +14,12 @@
           "lib/netcoreapp2.0/AutoMapper.dll": {}
         }
       },
+      "BuildBundlerMinifier/2.8.391": {
+        "type": "package",
+        "build": {
+          "build/BuildBundlerMinifier.targets": {}
+        }
+      },
       "Google.Apis/1.35.1": {
         "type": "package",
         "dependencies": {
@@ -5261,6 +5267,25 @@
         "lib/netstandard2.0/AutoMapper.dll",
         "lib/netstandard2.0/AutoMapper.pdb",
         "lib/netstandard2.0/AutoMapper.xml"
+      ]
+    },
+    "BuildBundlerMinifier/2.8.391": {
+      "sha512": "JvnXAF6e55QKR9t+UcG/kVcWap22fHeKjkUcrJwl2N3vF/NpohuvZlBceqYF9S8aL8xOx6h+PX2plnymc23kiQ==",
+      "type": "package",
+      "path": "buildbundlerminifier/2.8.391",
+      "files": [
+        "build/BuildBundlerMinifier.targets",
+        "buildbundlerminifier.2.8.391.nupkg.sha512",
+        "buildbundlerminifier.nuspec",
+        "tools/net46/BundlerMinifier.dll",
+        "tools/net46/NUglify.dll",
+        "tools/net46/Newtonsoft.Json.dll",
+        "tools/netcoreapp2.0/BundlerMinifier.dll",
+        "tools/netcoreapp2.0/NUglify.dll",
+        "tools/netcoreapp2.0/Newtonsoft.Json.dll",
+        "tools/netstandard1.3/BundlerMinifier.dll",
+        "tools/netstandard1.3/NUglify.dll",
+        "tools/netstandard1.3/Newtonsoft.Json.dll"
       ]
     },
     "Google.Apis/1.35.1": {
@@ -13701,6 +13726,7 @@
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v2.0": [
       "AutoMapper >= 7.0.1",
+      "BuildBundlerMinifier >= 2.8.391",
       "GdevApps.BLL.Contracts >= 1.0.0",
       "GdevApps.BLL.Domain >= 1.0.0",
       "GdevApps.BLL.Models >= 1.0.0",
@@ -13770,6 +13796,10 @@
           "AutoMapper": {
             "target": "Package",
             "version": "[7.0.1, )"
+          },
+          "BuildBundlerMinifier": {
+            "target": "Package",
+            "version": "[2.8.391, )"
           },
           "Google.Apis": {
             "target": "Package",
