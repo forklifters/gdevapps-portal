@@ -43,7 +43,7 @@ namespace GdevApps.Portal.Controllers
         {
             // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-
+            
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
@@ -253,10 +253,15 @@ namespace GdevApps.Portal.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ExternalLogin(string provider, string returnUrl = null)
         {
-            // Request a redirect to the external login provider.
-            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            return Challenge(properties, provider);
+            if (ModelState.IsValid)
+            {
+                // Request a redirect to the external login provider.
+                var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
+                var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+                return Challenge(properties, provider);
+            }
+
+            return RedirectToAction(nameof(HomeController.Index), "Home");
         }
 
         [HttpPost]
@@ -265,12 +270,30 @@ namespace GdevApps.Portal.Controllers
         {
             if (ModelState.IsValid)
             {
-                ViewBag.result = "Request Submitted Successfully!";
+                ViewBag.result = @"<script type='text/javascript'>
+                                $( document ).ready(function() {
+                                BootstrapDialog.show({
+                                            type: BootstrapDialog.TYPE_SUCCESS,
+                                            title: 'Request an account',
+                                            message: 'Request Submitted Successfully!',
+                                        });
+                                });
+                            </script>";
+
+
                 return View();
             }
             else
             {
-                ViewBag.result = "An error occured during request submission!";
+                ViewBag.result = @"<script type='text/javascript'>
+                                $( document ).ready(function() {
+                                BootstrapDialog.show({
+                                            type: BootstrapDialog.TYPE_DANGER,
+                                            title: 'Request an account',
+                                            message: 'An error occurred during the request submission!',
+                                        });
+                                });
+                            </script>";
                 return View();
             }
         }

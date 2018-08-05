@@ -18,5 +18,9 @@ namespace GdevApps.Portal.Models.AccountViewModels
 
         [Display(Name = "Remember me?")]
         public bool RememberMe { get; set; }
+
+        [Required]
+        [Range(typeof(bool), "true", "true", ErrorMessage="Please accept our terms and conditions.")]
+        public bool AgreeWithTerms { get; set; }
     }
 }

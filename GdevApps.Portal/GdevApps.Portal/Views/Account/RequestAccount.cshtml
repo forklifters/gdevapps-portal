@@ -10,7 +10,7 @@
     Seems like you do not have account. Please, ask you teacher to create one for you or submit the request form below
 </p>
 
-<div class="row">
+<div class="row col-centered">
     <div class="col-md-4">
         <form asp-action="RequestAccount" asp-route-returnurl="@ViewData[" ReturnUrl "]" method="post">
             <div asp-validation-summary="All" class="text-danger"></div>
@@ -31,12 +31,12 @@
             </div>
             <div class="form-group">
                 <label asp-for="Message"></label>
-                <input asp-for="Message" class="form-control" />
+                <textarea asp-for="Message" class="form-control" ></textarea>
                 <span asp-validation-for="Message" class="text-danger"></span >
             </div>
             <button type="submit" class="btn btn-default">Register</button>
         </form>
-        <p>@ViewBag.result<p/>
+        @Html.Raw(ViewBag.result)
     </div>
 </div>
 
