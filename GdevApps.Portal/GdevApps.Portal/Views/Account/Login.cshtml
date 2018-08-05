@@ -1,0 +1,93 @@
+@using System.Collections.Generic 
+@using System.Linq 
+@using Microsoft.AspNetCore.Http 
+@using Microsoft.AspNetCore.Http.Authentication 
+@using GdevApps.Portal.Data 
+@model GdevApps.Portal.Models.AccountViewModels.LoginViewModel 
+@inject Microsoft.AspNetCore.Identity.SignInManager<GdevApps.Portal.Data.ApplicationUser> SignInManager 
+    @{ ViewData["Title"] = "Welcome to Gdevapps Portal!"; } 
+    @{ Layout = "/Views/Shared/_LoginLayout.cshtml"; }
+    
+    <script src="~/js/Login/login.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+            $(document).ready(function() {
+                Login.init();
+            });
+    </script>
+    <h2 class="col-centered">@ViewData["Title"]</h2>
+    <hr />
+    <div class="container">
+        <div class="row">
+            <div class="Absolute-Center is-Responsive col-centered">
+                <div id="logo-container"></div>
+                <div class="col-xs-5">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    <form returnurl="@ViewData["ReturnUrl"]" method="post">
+                        <div class="form-group input-group">
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                            <input id="txtEmail" asp-for="Email" class="form-control" type="text" name='Email' placeholder="Email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="form-group input-group">
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                            <input asp-for="Password" class="form-control" type="password" name='Password' placeholder="Password" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                        <div class="form-group input-group">
+                                <div class="checkbox" id="divChbxAgreeWithTerms">
+                                        <label>
+                                        <input asp-for="AgreeWithTerms" id="chbxAgreeWithTerms"> I agree to the <a href="#">Terms and Conditions</a>
+                                        <span asp-validation-for="AgreeWithTerms" class="text-danger"></span>
+                                        </label>
+                                    </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="checkbox">
+                                <label asp-for="RememberMe">
+                            <input asp-for="RememberMe" />
+                            @Html.DisplayNameFor(m => m.RememberMe)
+                        </label>
+                            </div>
+                        </div>
+                        <div class="form-group text-center">
+                                <a asp-action="ForgotPassword">Forgot your password?</a>&nbsp;|&nbsp;<a href="#">Support</a>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-def btn-block">Login</button>
+                        </div>
+                        <div class="form-group text-center">
+                            OR
+                        </div>
+                </form>
+                    <form asp-action="ExternalLogin" id="formExternalLogin" returnurl="@ViewData[" ReturnUrl "]" method="post" class="form-horizontal">
+                        @Html.AntiForgeryToken()
+                        <div>
+                            <p>@{
+                                    var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();  
+                                    if (loginProviders.Count == 0)
+                                    {
+                                        <div>
+                                            <p>
+                                                There are no external authentication services configured. See <a href="https://go.microsoft.com/fwlink/?LinkID=532715">this article</a>
+                                                for details on setting up this ASP.NET application to support logging in via external services.
+                                            </p>
+                                        </div>
+                                    }else{
+                                        @foreach (var provider in loginProviders) {
+                                            <button type="submit" 
+                                            id="btnLoginGoogle"
+                                            class="btn btn-def btn-block" 
+                                            name="provider" 
+                                            value="@provider.Name" 
+                                            title="Log in using your @provider.DisplayName account">Login with @provider.Name</button> 
+                                        }      
+                                    }
+                            }
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @section Scripts { @await Html.PartialAsync("_ValidationScriptsPartial") }

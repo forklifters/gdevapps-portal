@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.0",
-    "signature": "06b96f643c75ddc6b8075460d96a0373fa3103be"
+    "signature": "9f5f6a38ecabff3e39948610287705625fa15494"
   },
   "compilationOptions": {
     "defines": [
@@ -25,6 +25,7 @@
       "GdevApps.Portal/1.0.0": {
         "dependencies": {
           "AutoMapper": "7.0.1",
+          "BuildBundlerMinifier": "2.8.391",
           "GdevApps.BLL.Contracts": "1.0.0",
           "GdevApps.BLL.Domain": "1.0.0",
           "GdevApps.BLL.Models": "1.0.0",
@@ -59,6 +60,7 @@
           "lib/netcoreapp2.0/AutoMapper.dll": {}
         }
       },
+      "BuildBundlerMinifier/2.8.391": {},
       "Google.Apis/1.35.1": {
         "dependencies": {
           "Google.Apis.Core": "1.35.1",
@@ -5063,6 +5065,13 @@
       "sha512": "sha512-6xHbhsW09sWjjYuE1sqhYn25PQzB6UEUVPME5uhlaIz2NR2+L3+FGbVxvknJKug1BLp6VTLxDb5RcGXKMm0ieQ==",
       "path": "automapper/7.0.1",
       "hashPath": "automapper.7.0.1.nupkg.sha512"
+    },
+    "BuildBundlerMinifier/2.8.391": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-JvnXAF6e55QKR9t+UcG/kVcWap22fHeKjkUcrJwl2N3vF/NpohuvZlBceqYF9S8aL8xOx6h+PX2plnymc23kiQ==",
+      "path": "buildbundlerminifier/2.8.391",
+      "hashPath": "buildbundlerminifier.2.8.391.nupkg.sha512"
     },
     "Google.Apis/1.35.1": {
       "type": "package",

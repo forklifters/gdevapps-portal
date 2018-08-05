@@ -1,0 +1,43 @@
+@model RequestAccountViewModel 
+@{ ViewData["Title"] = "Register"; }
+
+<h2>@ViewData["Title"]</h2>
+<h4>Associate your @ViewData["LoginProvider"] account.</h4>
+<hr />
+@{ Layout = "/Views/Shared/_LoginLayout.cshtml"; }
+
+<p class="text-info">
+    Seems like you do not have account. Please, ask you teacher to create one for you or submit the request form below
+</p>
+
+<div class="row col-centered">
+    <div class="col-md-4">
+        <form asp-action="RequestAccount" asp-route-returnurl="@ViewData[" ReturnUrl "]" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Subject"></label>
+                <input asp-for="Subject" class="form-control" />
+                <span asp-validation-for="Subject" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Email"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Message"></label>
+                <textarea asp-for="Message" class="form-control" ></textarea>
+                <span asp-validation-for="Message" class="text-danger"></span >
+            </div>
+            <button type="submit" class="btn btn-default">Register</button>
+        </form>
+        @Html.Raw(ViewBag.result)
+    </div>
+</div>
+
+@section Scripts { @await Html.PartialAsync("_ValidationScriptsPartial") }
