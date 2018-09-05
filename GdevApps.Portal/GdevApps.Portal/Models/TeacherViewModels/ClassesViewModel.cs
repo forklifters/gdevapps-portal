@@ -13,5 +13,8 @@ namespace GdevApps.Portal.Models.TeacherViewModels
 
         [Required]
         public string Id { get; set; }
+        public string Description { get; set; }
+        public int? StudentsCount { get; set; }
+        public int? CourseWorksCount { get; set; }
     }
 }

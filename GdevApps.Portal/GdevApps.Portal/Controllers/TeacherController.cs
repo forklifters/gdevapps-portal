@@ -47,6 +47,7 @@ namespace GdevApps.Portal.Controllers
             return View();
         }
 
+        [HttpPost]
         public async Task<IActionResult> GetClasses()
         {
             try
@@ -91,7 +92,8 @@ namespace GdevApps.Portal.Controllers
 
                 // Define request parameters.
                 CoursesResource.ListRequest request = service.Courses.List();
-                request.PageSize = 10;
+                request.PageSize = 100;
+
                 try
                 {
                     // List courses.
@@ -101,10 +103,19 @@ namespace GdevApps.Portal.Controllers
                     {
                         foreach (var course in response.Courses)
                         {
+                            var courseWorksRequest = service.Courses.CourseWork.List(course.Id);
+                            ListCourseWorkResponse cwList = courseWorksRequest.Execute();
+
+                            var studentsListRequest = service.Courses.Students.List(course.Id);
+                            ListStudentsResponse studentList = studentsListRequest.Execute();
+
                             classes.Add(new ClassesViewModel
                             {
                                 Name = course.Name,
-                                Id = course.Id
+                                Id = course.Id,
+                                Description = course.Description ,
+                                CourseWorksCount = cwList?.CourseWork?.Count,
+                                StudentsCount = studentList?.Students?.Count
                             });
                         }
                     }
