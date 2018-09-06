@@ -317,6 +317,12 @@ namespace GdevApps.Portal.Controllers
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (result.Succeeded)
             {
+                // Include the access token in the properties
+                var props = new AuthenticationProperties();
+                props.StoreTokens(info.AuthenticationTokens);
+
+                await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
+
                 _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
                 return RedirectToLocal(returnUrl);
             }

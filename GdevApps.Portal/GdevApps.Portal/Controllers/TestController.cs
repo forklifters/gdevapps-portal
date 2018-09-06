@@ -71,7 +71,7 @@ namespace GdevApps.Portal.Controllers
                 var service = new SheetsService(new BaseClientService.Initializer()
                 {
                     HttpClientInitializer = googleCredential,
-                    ApplicationName = "test"
+                    ApplicationName = "Gdevapps Portal"
                 });
 
                 // String spreadsheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms";//1IYcktfn-VBqzPDh_meN1TfpL5vCJmTx6YybrlPqhOQc

@@ -7,14 +7,18 @@
     "inputFiles": [
       "wwwroot/css/site.css",
       "wwwroot/css/Login/login.css",
-      "wwwroot/css/bootstrap-dialog.min.css"
+      "wwwroot/css/bootstrap-dialog.min.css",
+      "wwwroot/lib/bootstrap/dist/css/bootstrap.css"
     ]
   },
   {
     "outputFileName": "wwwroot/js/site.min.js",
     "inputFiles": [
       "wwwroot/js/site.js",
-      "wwwroot/js/bootstrap-dialog.min.js"
+      "wwwroot/js/bootstrap-dialog.min.js",
+      "wwwroot/lib/jquery/dist/jquery.js",
+      "wwwroot/lib/jquery-validation/dist/jquery.validate.js",
+      "wwwroot/lib/bootstrap/dist/bootstrap.js"
     ],
     // Optionally specify minification options
     "minify": {
