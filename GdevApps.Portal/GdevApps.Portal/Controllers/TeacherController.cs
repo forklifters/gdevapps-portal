@@ -19,6 +19,7 @@ using System;
 namespace GdevApps.Portal.Controllers
 {
     [Authorize]
+    //[AllowAnonymous]
     public class TeacherController : Controller
     {
 
@@ -27,6 +28,8 @@ namespace GdevApps.Portal.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
+
+        private readonly List<ClassSheetsViewModel> Contacts = new List<ClassSheetsViewModel>();
 
         public TeacherController(
             UserManager<ApplicationUser> userManager,
@@ -52,15 +55,55 @@ namespace GdevApps.Portal.Controllers
         {
             try
             {
-                List<ClassesViewModel> classes = await GetClassesAsync();
+               // List<ClassesViewModel> classes = await GetClassesAsync();
+                List<ClassesViewModel> classes = new List<ClassesViewModel>
+                {
+                    new ClassesViewModel{
+                        CourseWorksCount = 10,
+                        Description = "This is the desciption",
+                        StudentsCount = 5,
+                        Name = "Math",
+                        Id = "2"
+                    },
+                    new ClassesViewModel{
+                        CourseWorksCount = 5,
+                        StudentsCount = 10,
+                        Name = "English",
+                        Id = "1"
+                    },
+                    new ClassesViewModel{
+                        CourseWorksCount = 5,
+                        Description = "This is the desciption for music",
+                        StudentsCount = 5,
+                        Name = "Music",
+                        Id = "3"
+                    }
+                };
                 return Ok(new {data = classes});
             }
             catch (Exception err)
             {
                 return BadRequest(err);
             }
+        }
 
-            return Ok(new List<ClassesViewModel>());
+
+        [HttpGet]
+        public ActionResult GetClassSheetInfo(int id)
+        {
+            var model = new ClassSheetsViewModel()
+            {
+                Name = "Pasha",
+                Age = 25
+            };
+            return PartialView("_GetClassSheetInfo", model);
+        }
+
+        [HttpPost]
+        public ActionResult GetClassSheetInfo(ClassSheetsViewModel model)
+        {
+            Contacts.Add(model);
+            return PartialView("_GetClassSheetInfo", model);
         }
 
         private async Task<List<ClassesViewModel>> GetClassesAsync()

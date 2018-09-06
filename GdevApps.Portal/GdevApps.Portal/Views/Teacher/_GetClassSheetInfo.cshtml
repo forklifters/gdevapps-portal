@@ -1,0 +1,44 @@
+@model ClassSheetsViewModel;
+
+<script type="text/javascript">
+    $(function() {});
+</script>
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12">
+            This is the test view model
+        </div>
+        <div class="modal fade" id="add-contact" tabindex="-1" role="dialog" aria-labelledby="addContactLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                        <h4 class="modal-title" id="myModal-label">
+                            Bootstrap Dialog
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/Teacher/GetClassSheetInfo" method="post" id="submitForm" asp-antiforgery="true">
+                            <div class="form-group">
+                                <label asp-for="Name"></label>
+                                <input asp-for="Name" class="form-control" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Age"></label>
+                                <input asp-for="Age" class="form-control" />
+                                <span asp-validation-for="Age" class="text-danger"></span>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-save="modal" id="btnOk">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" id="cancel">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

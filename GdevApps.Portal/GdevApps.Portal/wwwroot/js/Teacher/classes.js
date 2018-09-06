@@ -2,6 +2,33 @@ var Classes = (function () {
 
     function init() {
         initDataTables();
+        initAddButtons();
+    }
+
+    function initAddButtons(){
+        var placeholderElement = $('#modal-placeholder');
+        $('.btnClick').click(function(event) {
+            debugger;
+            var url = $(this).data('url');
+            $.get(url).done(function(data) {
+                placeholderElement.html(data);
+                placeholderElement.find('.modal').modal('show');
+            });
+        });
+    }
+
+    function getInfo(id){
+        debugger;
+        var placeholderElement = $('#modal-placeholder');
+        //$('button[data-toggle="ajax-modal"]').click(function(event) {
+            var url = "/Teacher/GetClassSheetInfo";
+            debugger;
+            var data = {id: id}
+            $.get(url, data).done(function(result) {
+                placeholderElement.html(result);
+                placeholderElement.find('.modal').modal('show');
+            });
+       // });
     }
 
     function initDataTables() {
@@ -29,7 +56,6 @@ var Classes = (function () {
                 {
                         "data": "name",
                         "render": function(data, type, full, meta) {
-                            console.log(data)
                             //https://stackoverflow.com/questions/35547647/how-to-make-datatable-row-or-cell-clickable
                             return data;
                         }
@@ -37,7 +63,6 @@ var Classes = (function () {
                     {
                         "data": "id",
                         "render": function(data, type, full, meta) {
-                            console.log(data);
                             return data;
                         }
                     }
@@ -55,13 +80,12 @@ var Classes = (function () {
                 }
             });
             $classes.data('loaded', true);
-            $('.dataTable').on('click', 'tbody tr', function() {
+            $('.dataTable').on('click', 'tbody tr td .details-control', function() {
                 console.log('API row values : ', table.row(this).data());
               });
 
               function format ( d ) {
-                // `d` is the original data object for the row
-                return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+                return '<table class="table">'+
                     '<tr>'+
                         '<td>Description:</td>'+
                         '<td>'+(d.description ? d.description : "No description")+'</td>'+
@@ -73,6 +97,10 @@ var Classes = (function () {
                     '<tr>'+
                         '<td>Number of assignments:</td>'+
                         '<td>'+(d.courseWorksCount ? d.courseWorksCount : "No assignments")+'</td>'+
+                    '</tr>'+
+                    '<tr>'+
+                        '<td>Gradebook:</td>'+
+                        '<td><button type="button" class="btn btn-primary btnClick" data-toggle="ajax-modal" onclick="Classes.getInfo('+d.id+')" data-url="@Url.Action("GetClassSheetInfo","Teacher")">Add Gradebook</button></td>'+
                     '</tr>'+
                 '</table>';
             };
@@ -96,6 +124,7 @@ var Classes = (function () {
     }
 
     return {
-        init: init
+        init: init,
+        getInfo: getInfo
     }
 })(jQuery)

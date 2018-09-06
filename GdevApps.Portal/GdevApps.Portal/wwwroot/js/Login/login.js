@@ -1,11 +1,10 @@
 var Login = (function () {
 
     function init() {
-        initHandlers();
-
+        initLoginButtons();
     }
 
-    function initHandlers() {
+    function initLoginButtons() {
         $('#btnLoginGoogle').on('click', function (event) {
             var chbxAgreeWithTerms = $('#chbxAgreeWithTerms');
             var divChbxAgreeWithTerms = $('#divChbxAgreeWithTerms');
@@ -21,7 +20,19 @@ var Login = (function () {
             } else {
                 divChbxAgreeWithTerms.removeClass("warningDiv")
             }
-        })
+        });
+
+        $('#btnLogin').on('click', function (event) {
+            var chbxAgreeWithTerms = $('#chbxAgreeWithTerms');
+            var divChbxAgreeWithTerms = $('#divChbxAgreeWithTerms');
+            if (!chbxAgreeWithTerms.is(':checked')) {
+                event.preventDefault();
+                divChbxAgreeWithTerms.addClass("warningDiv")
+                return;
+            } else {
+                divChbxAgreeWithTerms.removeClass("warningDiv")
+            }
+        });
     }
 
     return {

@@ -1,9 +1,31 @@
 <script src="~/js/Teacher/classes.js" asp-append-version="true"></script>
 <link rel="stylesheet" href="~/css/Teacher/classes.css" />
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
 <script type="text/javascript">
     $(function() {
         Classes.init();
+
+        var placeholderElement = $('#modal-placeholder');
+        $('button[data-toggle="ajax-modal"]').click(function(event) {
+            var url = $(this).data('url');
+            debugger;
+            $.get(url).done(function(data) {
+                placeholderElement.html(data);
+                placeholderElement.find('.modal').modal('show');
+            });
+        });
+
+        placeholderElement.on('click', '[data-save="modal"]', function(event) {
+            event.preventDefault();
+            var form = $(this).parents('.modal').find('form');
+            var actionUrl = form.attr('action');
+            var dataToSend = form.serialize();
+
+            $.post(actionUrl, dataToSend).done(function(data) {
+                placeholderElement.find('.modal').modal('hide');
+            });
+        });
     });
 </script>
 
@@ -33,3 +55,8 @@
         </div>
     </div>
 </div>
+
+<!-- <button type="button" class="btn btn-primary" data-toggle="ajax-modal" data-target="#add-contact" data-url="@Url.Action(" GetClassSheetInfo ","Teacher ")">
+    Open Modal
+</button>-->
+<div id="modal-placeholder"></div>
