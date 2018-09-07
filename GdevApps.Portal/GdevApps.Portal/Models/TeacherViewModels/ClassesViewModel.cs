@@ -16,5 +16,6 @@ namespace GdevApps.Portal.Models.TeacherViewModels
         public string Description { get; set; }
         public int? StudentsCount { get; set; }
         public int? CourseWorksCount { get; set; }
+        public List<ClassSheetsViewModel> ClassroomSheets {get;set;}
     }
 }

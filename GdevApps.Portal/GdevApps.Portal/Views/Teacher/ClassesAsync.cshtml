@@ -4,28 +4,7 @@
 
 <script type="text/javascript">
     $(function() {
-        Classes.init();
-
-        var placeholderElement = $('#modal-placeholder');
-        $('button[data-toggle="ajax-modal"]').click(function(event) {
-            var url = $(this).data('url');
-            debugger;
-            $.get(url).done(function(data) {
-                placeholderElement.html(data);
-                placeholderElement.find('.modal').modal('show');
-            });
-        });
-
-        placeholderElement.on('click', '[data-save="modal"]', function(event) {
-            event.preventDefault();
-            var form = $(this).parents('.modal').find('form');
-            var actionUrl = form.attr('action');
-            var dataToSend = form.serialize();
-
-            $.post(actionUrl, dataToSend).done(function(data) {
-                placeholderElement.find('.modal').modal('hide');
-            });
-        });
+        Classes.init(); 
     });
 </script>
 

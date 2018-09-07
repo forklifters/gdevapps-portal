@@ -15,21 +15,19 @@ using Google.Apis.Classroom.v1.Data;
 using System.Collections.Generic;
 using GdevApps.Portal.Models.TeacherViewModels;
 using System;
+using Microsoft.AspNetCore.Http;
 
 namespace GdevApps.Portal.Controllers
 {
-    [Authorize]
-    //[AllowAnonymous]
+    //[Authorize]
+    [AllowAnonymous]
     public class TeacherController : Controller
     {
-
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
-
-        private readonly List<ClassSheetsViewModel> Contacts = new List<ClassSheetsViewModel>();
 
         public TeacherController(
             UserManager<ApplicationUser> userManager,
@@ -50,12 +48,12 @@ namespace GdevApps.Portal.Controllers
             return View();
         }
 
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> GetClasses()
         {
             try
             {
-               // List<ClassesViewModel> classes = await GetClassesAsync();
+                // List<ClassesViewModel> classes = await GetClassesAsync();
                 List<ClassesViewModel> classes = new List<ClassesViewModel>
                 {
                     new ClassesViewModel{
@@ -63,20 +61,23 @@ namespace GdevApps.Portal.Controllers
                         Description = "This is the desciption",
                         StudentsCount = 5,
                         Name = "Math",
-                        Id = "2"
+                        Id = "2",
+                        ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "2").ToList()
                     },
                     new ClassesViewModel{
                         CourseWorksCount = 5,
                         StudentsCount = 10,
                         Name = "English",
-                        Id = "1"
+                        Id = "1",
+                        ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "1").ToList()
                     },
                     new ClassesViewModel{
                         CourseWorksCount = 5,
                         Description = "This is the desciption for music",
                         StudentsCount = 5,
                         Name = "Music",
-                        Id = "3"
+                        Id = "3",
+                        ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "3").ToList()
                     }
                 };
                 return Ok(new {data = classes});
@@ -89,20 +90,19 @@ namespace GdevApps.Portal.Controllers
 
 
         [HttpGet]
-        public ActionResult GetClassSheetInfo(int id)
+        public ActionResult GetClassSheetInfo(int classroomId)
         {
-            var model = new ClassSheetsViewModel()
-            {
-                Name = "Pasha",
-                Age = 25
-            };
-            return PartialView("_GetClassSheetInfo", model);
+            return PartialView("_GetClassSheetInfo", new ClassSheetsViewModel() { ClassroomId = classroomId.ToString() });
         }
 
         [HttpPost]
         public ActionResult GetClassSheetInfo(ClassSheetsViewModel model)
         {
-            Contacts.Add(model);
+            if (ModelState.IsValid)
+            {
+                Singleton.Instance.Sheets.Add(model);
+            }
+
             return PartialView("_GetClassSheetInfo", model);
         }
 
@@ -172,6 +172,34 @@ namespace GdevApps.Portal.Controllers
             }
 
             return new List<ClassesViewModel>();
+        }
+    }
+
+    public sealed class Singleton
+    {
+        private static Singleton instance = null;
+        private static readonly object padlock = new object();
+
+        public readonly List<ClassSheetsViewModel> Sheets;
+
+        Singleton()
+        {
+            Sheets = new List<ClassSheetsViewModel>();
+        }
+
+        public static Singleton Instance
+        {
+            get
+            {
+                lock (padlock)
+                {
+                    if (instance == null)
+                    {
+                        instance = new Singleton();
+                    }
+                    return instance;
+                }
+            }
         }
     }
 }
