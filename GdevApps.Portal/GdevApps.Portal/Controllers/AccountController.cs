@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using GdevApps.Portal.Services;
+using System.Net.Http;
+using Newtonsoft.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace GdevApps.Portal.Controllers
 {
@@ -22,16 +25,22 @@ namespace GdevApps.Portal.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
 
+        private const string _defaultAvatar = "https://www.dropbox.com/s/5r1f49l2zx5e2yv/quokka_lg.png?raw=1";
+
+        private readonly IConfiguration _configuration;
+
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender,
-            ILogger<AccountController> logger)
+            ILogger<AccountController> logger,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
+            _configuration = configuration;
         }
 
         [TempData]
@@ -266,11 +275,31 @@ namespace GdevApps.Portal.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public IActionResult RequestAccount(RequestAccountViewModel model)
+        public async Task<IActionResult> RequestAccount(RequestAccountViewModel model)
         {
             if (ModelState.IsValid)
             {
-                ViewBag.result = @"<script type='text/javascript'>
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email, Avatar = model.Avatar };
+                var result = await _userManager.CreateAsync(user);
+
+                //REMOVE THIS CODE
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("User created a new account with password.");
+                    // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
+                    // Send an email with this link
+                    //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    //var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
+                    //await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
+
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    _logger.LogInformation("User created a new account with password.");
+                    return RedirectToLocal("/");
+                }
+
+                if (result.Errors.Count() == 0)
+                {
+                    ViewBag.result = @"<script type='text/javascript'>
                                 $( document ).ready(function() {
                                 BootstrapDialog.show({
                                             type: BootstrapDialog.TYPE_SUCCESS,
@@ -279,13 +308,8 @@ namespace GdevApps.Portal.Controllers
                                         });
                                 });
                             </script>";
-
-
-                return View();
-            }
-            else
-            {
-                ViewBag.result = @"<script type='text/javascript'>
+                }else{
+                    ViewBag.result = @"<script type='text/javascript'>
                                 $( document ).ready(function() {
                                 BootstrapDialog.show({
                                             type: BootstrapDialog.TYPE_DANGER,
@@ -294,6 +318,13 @@ namespace GdevApps.Portal.Controllers
                                         });
                                 });
                             </script>";
+                }
+
+                return View();
+            }
+            else
+            {
+               
                 return View();
             }
         }
@@ -312,6 +343,9 @@ namespace GdevApps.Portal.Controllers
             {
                 return RedirectToAction(nameof(Login));
             }
+
+            // Get user profile picture 
+            var picture = info.Principal.FindFirstValue("image");
 
             // Sign in the user with this external login provider if the user already has a login.
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
@@ -336,8 +370,12 @@ namespace GdevApps.Portal.Controllers
                 ViewData["ReturnUrl"] = returnUrl;
                 ViewData["LoginProvider"] = info.LoginProvider;
                 var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-                //return View("ExternalLogin", new ExternalLoginViewModel { Email = email });
-                return View("RequestAccount", new RequestAccountViewModel { Email = email, Subject = "Request an account" });
+
+                return View("RequestAccount", new RequestAccountViewModel
+                {
+                    Email = email,
+                    Avatar = string.IsNullOrEmpty(picture) ? _defaultAvatar : picture
+                });
             }
         }
 

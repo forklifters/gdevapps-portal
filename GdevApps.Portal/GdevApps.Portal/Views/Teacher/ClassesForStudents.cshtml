@@ -1,0 +1,52 @@
+@model ClassesForStudentsViewModel
+<link rel="stylesheet" href="~/css/Teacher/students.css" />
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<script src="~/js/Teacher/students.js" asp-append-version="true"></script>
+
+<script type="text/javascript">
+    $(function() {
+        Students.init();
+        var $ddlClasses = $('#ddlClasses');
+        var hasValues = $ddlClasses.has('option').length > 0;
+        if (hasValues) {
+            $ddlClasses.change();
+        }
+    })
+</script>
+
+
+<h2>Google Classroom Students</h2>
+@Html.AntiForgeryToken()
+
+<div class="container">
+
+    <div class="row">
+        <div class="col-xs-2">
+            <label for="ddlClasses" class="control-label">Select Class</label>
+            <select id="ddlClasses" class="form-control select2" asp-items="@Model.Classes">
+                <option value="0">All</option>
+            </select>
+        </div>
+    </div>
+    <div class="row top-buffer">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title"></h3>
+                </div>
+                <div class="panel-body">
+                    <table id="grdStudents" class="table table-striped table-bordered table-hover responsive" hidden>
+                        <thead class="thin-border-bottom">
+                            <tr>
+                                <th class="googleHeader"></th>
+                                <th class="googleHeader">Student name</th>
+                                <th class="googleHeader">Id</th>
+                                <th class="googleHeader">Is student in Classroom</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

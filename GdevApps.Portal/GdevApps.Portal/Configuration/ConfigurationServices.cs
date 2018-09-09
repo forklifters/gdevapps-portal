@@ -101,8 +101,12 @@ namespace GdevApps.Portal.Configuration
                           Value = DateTime.UtcNow.ToString()
                       });
                       ctx.Properties.StoreTokens(tokens);
+
+                        ctx.Identity.AddClaim(new Claim("image", ctx.User.GetValue("image").SelectToken("url").ToString()));
+
                       return Task.CompletedTask;
                   };
+
                   googleOptions.AuthorizationEndpoint += "?prompt=consent";// Hack so we always get a refresh token, it only comes on the first authorization response 
                 });
         }

@@ -1,8 +1,4 @@
 @model ClassSheetsViewModel;
-
-<script type="text/javascript">
-    $(function() {});
-</script>
 <div class="container">
     <div class="row">
         <div class="col-xs-12">
@@ -16,25 +12,36 @@
                         &times;
                     </button>
                         <h4 class="modal-title" id="myModal-label">
-                            Bootstrap Dialog
+                            EDIT GRADEBOOK INFO
                         </h4>
                     </div>
                     <div class="modal-body">
-                        <form action="/Teacher/GetClassSheetInfo" method="post" id="submitForm" asp-antiforgery="true">
+                        <form asp-antiforgery="true" asp-action="EditGradebook" asp-controller="Teacher">
+                            <input name="IsValid" type="hidden" value="@ViewData.ModelState.IsValid.ToString()" />
+                            <div class="form-group">
+                                <label asp-for="Id"></label>
+                                <input asp-for="Id" class="form-control" />
+                                <span asp-validation-for="Id" class="text-danger"></span>
+                            </div>
                             <div class="form-group">
                                 <label asp-for="Name"></label>
                                 <input asp-for="Name" class="form-control" />
                                 <span asp-validation-for="Name" class="text-danger"></span>
                             </div>
                             <div class="form-group">
-                                <label asp-for="Age"></label>
-                                <input asp-for="Age" class="form-control" />
-                                <span asp-validation-for="Age" class="text-danger"></span>
+                                <label asp-for="Link"></label>
+                                <input asp-for="Link" class="form-control" />
+                                <span asp-validation-for="Link" class="text-danger"></span>
+                            </div>
+                            <div class="form-group hidd">
+                                <label asp-for="ClassroomId"></label>
+                                <input asp-for="ClassroomId" class="form-control" readonly="@(true)" />
+                                <span asp-validation-for="ClassroomId" class="text-danger"></span>
                             </div>
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-save="modal" id="btnOk">Save</button>
+                        <button type="button" class="btn btn-primary" data-save="modal" id="btnSave">Save</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal" id="cancel">Cancel</button>
                     </div>
                 </div>

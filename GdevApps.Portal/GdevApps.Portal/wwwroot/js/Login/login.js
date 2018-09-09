@@ -11,11 +11,11 @@ var Login = (function () {
             if (!chbxAgreeWithTerms.is(':checked')) {
                 event.preventDefault();
                 divChbxAgreeWithTerms.addClass("warningDiv")
-               /* BootstrapDialog.show({
-                    type: BootstrapDialog.TYPE_WARNING,
-                    title: 'Log in',
-                    message: 'Please, access our terms and conditions!',
-                });*/
+                // BootstrapDialog.show({
+                //     type: BootstrapDialog.TYPE_WARNING,
+                //     title: 'Log in',
+                //     message: 'Please, access our terms and conditions!',
+                // });
                 return;
             } else {
                 divChbxAgreeWithTerms.removeClass("warningDiv")

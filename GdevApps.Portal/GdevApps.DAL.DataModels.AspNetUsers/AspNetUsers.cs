@@ -28,6 +28,8 @@ namespace GdevApps.DAL.DataModels.AspNetUsers
         public bool TwoFactorEnabled { get; set; }
         public string UserName { get; set; }
 
+        public string Avatar { get; set; }
+
         public ICollection<AspNetUserClaims> AspNetUserClaims { get; set; }
         public ICollection<AspNetUserLogins> AspNetUserLogins { get; set; }
         public ICollection<AspNetUserRoles> AspNetUserRoles { get; set; }
