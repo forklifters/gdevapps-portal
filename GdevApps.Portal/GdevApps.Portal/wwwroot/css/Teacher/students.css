@@ -1,0 +1,39 @@
+li.list {
+    display: block;
+}
+
+li.list:before {
+    /*Using a Bootstrap glyphicon as the bullet point*/
+    content:"\2709";
+    float: left;
+    margin-left: -17px;
+}
+
+.details-control {
+    width: 1%;
+}
+
+.wordwrap{
+    word-wrap: break-word;
+}
+
+.top-buffer { 
+    margin-top:20px;
+ }
+
+ .infoGoogle{
+    background-color: #2196f3
+ }
+
+ .warningGoogle{
+    background-color: #ffeb3b
+ }
+
+ .successGoogle{
+    background-color: #4caf50
+ }
+
+ .dangerGoogle{
+    background-color: #f44336
+ }
+

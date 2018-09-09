@@ -1,6 +1,8 @@
 body {
     padding-top: 50px;
     padding-bottom: 20px;
+    font-family: 'Roboto',arial,sans-serif !important;
+    font-size:16px !important;
 }
 
 /* Wrapping element */
@@ -34,3 +36,180 @@ body {
     }
 }
 
+.pull-right{
+    float:right !important;
+}
+
+.pull-left{
+    float: left !important;
+}
+
+
+/* dataTables CSS modification & positioning */
+table.dataTable thead .sorting:before,
+table.dataTable thead .sorting_asc:before,
+table.dataTable thead .sorting_desc:before,
+table.dataTable thead .sorting_asc_disabled:before,
+table.dataTable thead .sorting_desc_disabled:before {
+  right: 0 !important;
+  content: "" !important;
+}
+table.dataTable thead .sorting:after,
+table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_desc:after,
+table.dataTable thead .sorting_asc_disabled:after,
+table.dataTable thead .sorting_desc_disabled:after {
+  right: 0 !important;
+  content: "" !important;
+}
+
+table.dataTable thead th {
+    position: relative;
+    background-image: none !important;
+}
+  
+table.dataTable thead th.sorting:after,
+table.dataTable thead th.sorting_asc:after,
+table.dataTable thead th.sorting_desc:after {
+    position: absolute !important;
+    top: 5px !important;
+    right: 8px !important;
+    display: block !important;
+    font-family: FontAwesome !important;
+    color: rgb(10, 10, 10) !important;
+}
+table.dataTable thead th.sorting:after {
+    content: "\f0dc" !important;
+    color: rgb(10, 10, 10) !important;
+    font-size: 1em !important;
+    padding-top: 0.05em !important;
+}
+table.dataTable thead th.sorting_asc:after {
+    content: "\f0de" !important;
+}
+table.dataTable thead th.sorting_desc:after {
+    content: "\f0dd" !important;
+}
+
+.googleHeader{
+    padding-top: 0;
+    padding-bottom: 0;
+    color: #444;
+    background: #ddd;
+    border: #bbb;
+}
+
+/*PAGINATION*/
+
+.pagination>.active>a,
+ .pagination>.active>span,
+  .pagination>.active>a:hover,
+   .pagination>.active>span:hover,
+    .pagination>.active>a:focus,
+     .pagination>.active>span:focus
+{
+    background-color: #4285f4 !important;
+}
+
+.pagination>li:first-child>a, .pagination>li:first-child>span {
+    margin-left: 0;
+     border-top-left-radius: 0px !important; 
+     border-bottom-left-radius: 0px !important; 
+}
+
+.pagination>li:last-child>a, .pagination>li:last-child>span {
+    border-top-right-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
+}
+.pagination>.disabled>span,
+ .pagination>.disabled>span:hover,
+  .pagination>.disabled>span:focus,
+   .pagination>.disabled>a,
+    .pagination>.disabled>a:hover,
+     .pagination>.disabled>a:focus{
+         color: #4285f4 !important;
+     }
+
+/*FOMR CONTROLS*/
+.form-control{
+    border-radius: 0px !important;
+    font-size: 16px !important;
+}
+
+.panel{
+    border-radius: 0px !important;
+}
+
+/*BUTTONS*/
+.btn{
+    border-radius: 0px !important;
+}
+
+.btn-primary {
+    background: #4285f4 !important;
+    color: #fff !important;
+    border-color:  #4285f4 !important;
+}
+
+.btn.btn-primary:hover, .btn.btn-primary:focus {
+    background-color: #4071d9 !important;
+}
+
+/*GSUITE*/
+.lockup {
+    height: 45px !important;
+}
+
+.gb_9a {
+    -webkit-background-size: 40px 40px;
+    background-size: 40px 40px;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    display: block;
+    margin: -1px;
+    overflow: hidden;
+    position: relative;
+    height: 40px;
+    width: 40px;
+    z-index: 0;
+}
+
+.navigation--item {
+    font-weight: 400 !important;
+    line-height: 16px !important;
+    padding: 7px !important;
+    font-size: 16px !important;
+}
+
+a.navigation--item:hover {
+    color: #448aff;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color .2s ease-out;
+}
+
+/*colors*/
+
+.green{
+    color: #4caf50 !important;
+}
+
+.red{
+    color:#f44336 !important;
+}
+
+.blue{
+    color: #448aff !important;
+}
+
+.pricing-plans__feature.feature-icon::before {
+    background-size: 24px 24px;
+    height: 24px;
+    left: 20px;
+    top: 0;
+    width: 24px;
+}
+
+.pricing-plans__feature {
+    padding: 10px 20px 10px 52px;
+}

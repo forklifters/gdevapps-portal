@@ -12,11 +12,11 @@
                         &times;
                     </button>
                         <h4 class="modal-title" id="myModal-label">
-                            Bootstrap Dialog
+                            EDIT GRADEBOOK INFO
                         </h4>
                     </div>
                     <div class="modal-body">
-                        <form asp-antiforgery="true">
+                        <form asp-antiforgery="true" asp-action="EditGradebook" asp-controller="Teacher">
                             <input name="IsValid" type="hidden" value="@ViewData.ModelState.IsValid.ToString()" />
                             <div class="form-group">
                                 <label asp-for="Id"></label>

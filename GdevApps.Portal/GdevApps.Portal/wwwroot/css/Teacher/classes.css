@@ -5,3 +5,7 @@
 .wordwrap{
     word-wrap: break-word;
 }
+
+.top-buffer { 
+    margin-top:20px;
+ }
