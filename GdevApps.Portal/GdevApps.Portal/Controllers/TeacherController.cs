@@ -18,11 +18,15 @@ using System;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using GdevApps.BLL.Contracts;
+using AutoMapper;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace GdevApps.Portal.Controllers
 {
-    //[Authorize]
-    [AllowAnonymous]
+    [Authorize]
+    //[AllowAnonymous]
     public class TeacherController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -30,19 +34,58 @@ namespace GdevApps.Portal.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
+        private readonly IGdevClassroomService _classroomService;
+        private readonly IMapper _mapper;
+
+        private readonly HttpContext _context;
+
+        private Singleton Singleton;
 
         public TeacherController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender,
-            ILogger<AccountController> logger,
-            IConfiguration configuration)
+            ILogger<TeacherController> logger,
+            IConfiguration configuration,
+            IGdevClassroomService classroomService,
+            IMapper mapper,
+            IHttpContextAccessor httpContext)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
             _configuration = configuration;
+            _classroomService = classroomService;
+            _mapper = mapper;
+            _context = httpContext.HttpContext;
+        }
+
+        private async Task<string> GetAccessToken()
+        {
+           // Include the access token in the properties
+            var access_token = await _context.GetTokenAsync("access_token");
+
+             if (string.IsNullOrEmpty(access_token))
+             {
+                if (User.Identity.IsAuthenticated)
+                {
+                    var userFromManager = await _userManager.GetUserAsync(User);
+                    string authenticationMethod = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.AuthenticationMethod)?.Value;
+                    if (authenticationMethod != null)
+                    {
+                        access_token = await _userManager.GetAuthenticationTokenAsync(userFromManager,
+                         authenticationMethod, "access_token");
+                    }
+                    else
+                    {
+                        access_token = await _userManager.GetAuthenticationTokenAsync(userFromManager,
+                         "Google", "access_token");
+                    }
+                }
+            }
+
+            return access_token;
         }
 
         public IActionResult ClassesAsync()
@@ -55,33 +98,33 @@ namespace GdevApps.Portal.Controllers
         {
             try
             {
-                // List<ClassesViewModel> classes = await GetClassesAsync();
-                List<ClassesViewModel> classes = new List<ClassesViewModel>
-                {
-                    new ClassesViewModel{
-                        CourseWorksCount = 10,
-                        Description = "This is the desciption",
-                        StudentsCount = 5,
-                        Name = "Math",
-                        Id = "2",
-                        ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "2").ToList()
-                    },
-                    new ClassesViewModel{
-                        CourseWorksCount = 5,
-                        StudentsCount = 10,
-                        Name = "English",
-                        Id = "1",
-                        ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "1").ToList()
-                    },
-                    new ClassesViewModel{
-                        CourseWorksCount = 5,
-                        Description = "This is the desciption for music",
-                        StudentsCount = 5,
-                        Name = "Music",
-                        Id = "3",
-                        ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "3").ToList()
-                    }
-                };
+                 List<ClassesViewModel> classes = await GetClassesAsync();
+                // List<ClassesViewModel> classes = new List<ClassesViewModel>
+                // {
+                //     new ClassesViewModel{
+                //         CourseWorksCount = 10,
+                //         Description = "This is the desciption",
+                //         StudentsCount = 5,
+                //         Name = "Math",
+                //         Id = "2",
+                //         ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "2").ToList()
+                //     },
+                //     new ClassesViewModel{
+                //         CourseWorksCount = 5,
+                //         StudentsCount = 10,
+                //         Name = "English",
+                //         Id = "1",
+                //         ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "1").ToList()
+                //     },
+                //     new ClassesViewModel{
+                //         CourseWorksCount = 5,
+                //         Description = "This is the desciption for music",
+                //         StudentsCount = 5,
+                //         Name = "Music",
+                //         Id = "3",
+                //         ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "3").ToList()
+                //     }
+                // };
                 return Ok(new {data = classes});
             }
             catch (Exception ex)
@@ -93,6 +136,13 @@ namespace GdevApps.Portal.Controllers
         [HttpPost]
         public async Task<IActionResult> GetStudents(string classId){
             try{
+                var studentsList = _mapper.Map<List<StudentsViewModel>>(
+                    await _classroomService.GetStudentsByClassIdAndGradebookIdAsync(await GetAccessToken(), classId, "")
+                );
+
+                return Ok(new { data = studentsList });
+
+
                 var allStudents = new List<StudentsViewModel>(){
                     new StudentsViewModel{
                         Name = "Pasha",
@@ -154,32 +204,34 @@ namespace GdevApps.Portal.Controllers
         {
             try
             {
-                List<ClassesViewModel> classes = new List<ClassesViewModel>
-                {
-                    new ClassesViewModel{
-                        CourseWorksCount = 10,
-                        Description = "This is the desciption",
-                        StudentsCount = 5,
-                        Name = "Math",
-                        Id = "2",
-                        ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "2").ToList()
-                    },
-                    new ClassesViewModel{
-                        CourseWorksCount = 5,
-                        StudentsCount = 10,
-                        Name = "English",
-                        Id = "1",
-                        ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "1").ToList()
-                    },
-                    new ClassesViewModel{
-                        CourseWorksCount = 5,
-                        Description = "This is the desciption for music",
-                        StudentsCount = 5,
-                        Name = "Music",
-                        Id = "3",
-                        ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "3").ToList()
-                    }
-                };
+                var classes = await GetClassesAsync();
+
+                // List<ClassesViewModel> classes = new List<ClassesViewModel>
+                // {
+                //     new ClassesViewModel{
+                //         CourseWorksCount = 10,
+                //         Description = "This is the desciption",
+                //         StudentsCount = 5,
+                //         Name = "Math",
+                //         Id = "2",
+                //         ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "2").ToList()
+                //     },
+                //     new ClassesViewModel{
+                //         CourseWorksCount = 5,
+                //         StudentsCount = 10,
+                //         Name = "English",
+                //         Id = "1",
+                //         ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "1").ToList()
+                //     },
+                //     new ClassesViewModel{
+                //         CourseWorksCount = 5,
+                //         Description = "This is the desciption for music",
+                //         StudentsCount = 5,
+                //         Name = "Music",
+                //         Id = "3",
+                //         ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "3").ToList()
+                //     }
+                // };
 
                 var classesList = new SelectList(classes, "Id", "Name");
 
@@ -304,70 +356,11 @@ namespace GdevApps.Portal.Controllers
 
         private async Task<List<ClassesViewModel>> GetClassesAsync()
         {
-            string externalAccessToken = null;
-            ExternalLoginInfo info = await _signInManager.GetExternalLoginInfoAsync();
-            if (User.Identity.IsAuthenticated)
-            {
-                var userFromManager = await _userManager.GetUserAsync(User);
-                string authenticationMethod = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.AuthenticationMethod)?.Value;
-                if (authenticationMethod != null)
-                {
-                    externalAccessToken = await _userManager.GetAuthenticationTokenAsync(userFromManager,
-                     authenticationMethod, "access_token");
-                }
-                else
-                {
-                    externalAccessToken = await _userManager.GetAuthenticationTokenAsync(userFromManager,
-                     "Google", "access_token");
-                }
-
-                GoogleCredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
-                // Create Classroom API service.
-                var service = new ClassroomService(new BaseClientService.Initializer()
-                {
-                    HttpClientInitializer = googleCredential,
-                    ApplicationName = _configuration["ApplicationName"],
-                });
-
-                // Define request parameters.
-                CoursesResource.ListRequest request = service.Courses.List();
-                request.PageSize = 100;
-
-                try
-                {
-                    // List courses.
-                    ListCoursesResponse response = request.Execute();
-                    var classes = new List<ClassesViewModel>();
-                    if (response.Courses != null && response.Courses.Count > 0)
-                    {
-                        foreach (var course in response.Courses)
-                        {
-                            var courseWorksRequest = service.Courses.CourseWork.List(course.Id);
-                            ListCourseWorkResponse cwList = courseWorksRequest.Execute();
-
-                            var studentsListRequest = service.Courses.Students.List(course.Id);
-                            ListStudentsResponse studentList = studentsListRequest.Execute();
-
-                            classes.Add(new ClassesViewModel
-                            {
-                                Name = course.Name,
-                                Id = course.Id,
-                                Description = course.Description ,
-                                CourseWorksCount = cwList?.CourseWork?.Count,
-                                StudentsCount = studentList?.Students?.Count
-                            });
-                        }
-                    }
-
-                    return classes;
-                }
-                catch (Exception err)
-                {
-                    return new List<ClassesViewModel>();
-                }
-            }
-
-            return new List<ClassesViewModel>();
+            var classes = _mapper.Map<List<ClassesViewModel>>(
+                await _classroomService.GetAllClassesAsync(await GetAccessToken())
+                );
+                
+            return classes;
         }
 
         private bool CheckLink(string link)
@@ -380,12 +373,12 @@ namespace GdevApps.Portal.Controllers
     {
         private static Singleton instance = null;
         private static readonly object padlock = new object();
-
         public readonly List<ClassSheetsViewModel> Sheets;
-
+        public string ExternalAccessToken;
         Singleton()
         {
             Sheets = new List<ClassSheetsViewModel>();
+            ExternalAccessToken = "";
         }
 
         public static Singleton Instance

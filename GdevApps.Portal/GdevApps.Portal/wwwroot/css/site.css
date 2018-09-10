@@ -44,6 +44,10 @@ body {
     float: left !important;
 }
 
+.wordwrap{
+    word-wrap: break-word;
+}
+
 
 /* dataTables CSS modification & positioning */
 table.dataTable thead .sorting:before,

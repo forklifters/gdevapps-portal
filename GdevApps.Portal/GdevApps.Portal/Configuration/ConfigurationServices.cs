@@ -4,6 +4,7 @@ using GdevApps.DAL.DataContexts.AspNetUsers;
 using GdevApps.DAL.Repositories.AspNetUserRepository;
 using GdevApps.Portal.Data;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -26,6 +27,7 @@ namespace GdevApps.Portal.Configuration
         public static void AddDomainServices(this IServiceCollection services)
         {
             services.AddScoped<IAspNetUserService, AspNetUserService>();
+            services.AddScoped<IGdevClassroomService, GdevClassroomService>();
         }
 
         public static void AddDatabaseContexts(this IServiceCollection services,
@@ -74,6 +76,9 @@ namespace GdevApps.Portal.Configuration
         public static void AddGoogleAuthentication(this IServiceCollection services)
         {
             services.AddAuthentication()
+              .AddCookie(o => {
+                  o.LoginPath = "/Account/Login";
+                  })
               .AddGoogle(googleOptions =>
               {
                   googleOptions.ClientId = "898218061018-1mvqrmk07v8206bhsdmf8cs3kkd7rni9.apps.googleusercontent.com";
@@ -91,9 +96,11 @@ namespace GdevApps.Portal.Configuration
                   googleOptions.Scope.Add("https://www.googleapis.com/auth/spreadsheets");
                   googleOptions.Scope.Add("https://www.googleapis.com/auth/userinfo.email");
                   googleOptions.SaveTokens = true;
-                  googleOptions.ClaimActions.MapJsonKey(ClaimTypes.Gender, "gender");
+                  //googleOptions.ClaimActions.MapJsonKey(ClaimTypes.Gender, "gender");
+                  googleOptions.AccessType = "offline"; // Gets a refresh token
                   googleOptions.Events.OnCreatingTicket = ctx =>
                   {
+                      //how to add new tokens
                       List<AuthenticationToken> tokens = ctx.Properties.GetTokens() as List<AuthenticationToken>;
                       tokens.Add(new AuthenticationToken()
                       {
@@ -102,13 +109,14 @@ namespace GdevApps.Portal.Configuration
                       });
                       ctx.Properties.StoreTokens(tokens);
 
-                        ctx.Identity.AddClaim(new Claim("image", ctx.User.GetValue("image").SelectToken("url").ToString()));
+                      ctx.Identity.AddClaim(new Claim("image", ctx.User.GetValue("image").SelectToken("url").ToString()));
 
                       return Task.CompletedTask;
                   };
 
+
                   googleOptions.AuthorizationEndpoint += "?prompt=consent";// Hack so we always get a refresh token, it only comes on the first authorization response 
-                });
+              });
         }
     }
 }

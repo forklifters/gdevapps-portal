@@ -14,6 +14,7 @@ using GdevApps.Portal.Services;
 using System.Net.Http;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace GdevApps.Portal.Controllers
 {
@@ -344,17 +345,36 @@ namespace GdevApps.Portal.Controllers
                 return RedirectToAction(nameof(Login));
             }
 
+            // var accessToken = info.AuthenticationTokens.Single(f => f.Name == "access_token").Value;
+            // var tokenType = info.AuthenticationTokens.Single(f => f.Name == "token_type").Value;
+            // var expiryDate = info.AuthenticationTokens.Single(f => f.Name == "expires_at").Value;
+
             // Get user profile picture 
             var picture = info.Principal.FindFirstValue("image");
-
             // Sign in the user with this external login provider if the user already has a login.
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+            //save access_token token_type, expires_at
+
+           // var httpContextResult = await HttpContext.AuthenticateAsync(IdentityConstants.ExternalScheme);
+            var token = await HttpContext.GetTokenAsync(IdentityConstants.ExternalScheme, "access_token");
+            var token2 = await HttpContext.GetTokenAsync(CookieAuthenticationDefaults.AuthenticationScheme, "access_token");
+            var token3 = await HttpContext.GetTokenAsync("access_token");
+
+             var refrestoken = await HttpContext.GetTokenAsync(IdentityConstants.ExternalScheme, "refresh_token");
+
+            
             if (result.Succeeded)
             {
-                // Include the access token in the properties
+                //Include the access token in the properties
+                var user =  await this._userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
                 var props = new AuthenticationProperties();
+                props.IsPersistent = true;
+                props.ExpiresUtc = DateTime.UtcNow.AddDays(5);
                 props.StoreTokens(info.AuthenticationTokens);
+                await _signInManager.SignInAsync(user, props, info.LoginProvider);
 
+                // Add this to add token to datastore
+                // Update the token
                 await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
 
                 _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
