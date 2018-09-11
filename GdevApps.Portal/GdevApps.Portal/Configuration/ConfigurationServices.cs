@@ -73,7 +73,7 @@ namespace GdevApps.Portal.Configuration
             // services.AddSingleton(Log.Logger);
         }
 
-        public static void AddGoogleAuthentication(this IServiceCollection services)
+        public static void AddGoogleAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddAuthentication()
               .AddCookie(o => {
@@ -81,8 +81,8 @@ namespace GdevApps.Portal.Configuration
                   })
               .AddGoogle(googleOptions =>
               {
-                  googleOptions.ClientId = "898218061018-1mvqrmk07v8206bhsdmf8cs3kkd7rni9.apps.googleusercontent.com";
-                  googleOptions.ClientSecret = "5eE60z31j9J7y2vQvYQx68kK";
+                  googleOptions.ClientId = configuration["installed:client_id"];//"898218061018-1mvqrmk07v8206bhsdmf8cs3kkd7rni9.apps.googleusercontent.com";
+                  googleOptions.ClientSecret = configuration["installed:client_secret"];//"5eE60z31j9J7y2vQvYQx68kK";
                   googleOptions.Scope.Add("https://www.googleapis.com/auth/classroom.courses");
                   googleOptions.Scope.Add("https://www.googleapis.com/auth/classroom.coursework.students");
                   googleOptions.Scope.Add("https://www.googleapis.com/auth/classroom.profile.emails");

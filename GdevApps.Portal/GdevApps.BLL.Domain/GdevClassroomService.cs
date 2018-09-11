@@ -21,7 +21,8 @@ namespace GdevApps.BLL.Domain
 
         public GdevClassroomService(
             IConfiguration configuration,
-            ILogger<GdevClassroomService> logger)
+            ILogger<GdevClassroomService> logger
+            )
         {
             _logger = logger;
             _configuration = configuration;
@@ -42,53 +43,92 @@ namespace GdevApps.BLL.Domain
             throw new System.NotImplementedException();
         }
 
-        public async Task<List<GoogleClass>> GetAllClassesAsync(string externalAccessToken)
+        public async Task<List<GoogleClass>> GetAllClassesAsync(string externalAccessToken, string refreshToken)
         {
+            ClassroomService service;
+            CoursesResource.ListRequest request;
+            ListCoursesResponse response;
+            try
+            {
+                //externalAccessToken +="1";
                 GoogleCredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
                 // Create Classroom API service.
-                var service = new ClassroomService(new BaseClientService.Initializer()
+                service = new ClassroomService(new BaseClientService.Initializer()
                 {
                     HttpClientInitializer = googleCredential,
-                    ApplicationName = _configuration["ApplicationName"],
+                    ApplicationName = _configuration["ApplicationName"]
                 });
 
                 // Define request parameters.
-                CoursesResource.ListRequest request = service.Courses.List();
+                request = service.Courses.List();
                 request.PageSize = 100;
-
-                try
-                {
-                    // List courses.
-                    ListCoursesResponse response = await request.ExecuteAsync();
-                    var classes = new List<GoogleClass>();
-                    if (response.Courses != null && response.Courses.Count > 0)
-                    {
-                        foreach (var course in response.Courses)
+                response = await request.ExecuteAsync();
+            }
+            catch (Google.GoogleApiException ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving courses from Google Classroom. Refreshing the token and trying again");
+                 var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
+                    var credentials = new UserCredential(new GoogleAuthorizationCodeFlow(
+                        new GoogleAuthorizationCodeFlow.Initializer
                         {
-                            var courseWorksRequest = service.Courses.CourseWork.List(course.Id);
-                            ListCourseWorkResponse cwList = await courseWorksRequest.ExecuteAsync();
-
-                            var studentsListRequest = service.Courses.Students.List(course.Id);
-                            ListStudentsResponse studentList = await studentsListRequest.ExecuteAsync();
-
-                            classes.Add(new GoogleClass
+                            ClientSecrets = new ClientSecrets
                             {
-                                Name = course.Name,
-                                Id = course.Id,
-                                Description = course.Description ,
-                                CourseWorksCount = cwList?.CourseWork?.Count,
-                                StudentsCount = studentList?.Students?.Count
-                            });
-                        }
-                    }
-
-                    return classes;
-                }
-                catch (Exception ex)
+                                ClientId = _configuration["installed:client_id"],
+                                ClientSecret = _configuration["installed:client_secret"]
+                            }
+                        }), "user", token);
+                    service = new ClassroomService(new BaseClientService.Initializer()
                 {
-                    _logger.LogError(ex, "Error occurred while retrieving classes");
-                    return new List<GoogleClass>();
+                    HttpClientInitializer = credentials,
+                    ApplicationName = _configuration["ApplicationName"]
+                });
+                     // Define request parameters.
+                request = service.Courses.List();
+                request.PageSize = 100;
+                response = await request.ExecuteAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving classes");
+                return new List<GoogleClass>();
+            }
+
+            try
+            {
+                // List courses.
+                var classes = new List<GoogleClass>();
+                if (response.Courses != null && response.Courses.Count > 0)
+                {
+                    foreach (var course in response.Courses)
+                    {
+                        var courseWorksRequest = service.Courses.CourseWork.List(course.Id);
+                        ListCourseWorkResponse cwList = await courseWorksRequest.ExecuteAsync();
+
+                        var studentsListRequest = service.Courses.Students.List(course.Id);
+                        ListStudentsResponse studentList = await studentsListRequest.ExecuteAsync();
+
+                        classes.Add(new GoogleClass
+                        {
+                            Name = course.Name,
+                            Id = course.Id,
+                            Description = course.Description,
+                            CourseWorksCount = cwList?.CourseWork?.Count,
+                            StudentsCount = studentList?.Students?.Count
+                        });
+                    }
                 }
+
+                return classes;
+            }catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving courseworks or students");
+                return new List<GoogleClass>();
+            }
+        }
+
+        private void GetNewAccessToken(Google.Apis.Services.BaseClientService service)
+        {
+
         }
 
         public Task<Gradebook> GetGradebookByIdAsync(string classroomId, string gradebookId)

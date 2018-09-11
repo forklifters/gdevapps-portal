@@ -6,7 +6,7 @@ namespace GdevApps.BLL.Contracts
 {
     public interface IGdevClassroomService
     {
-        Task<List<GoogleClass>> GetAllClassesAsync(string externalAccessToken);
+        Task<List<GoogleClass>> GetAllClassesAsync(string externalAccessToken, string refreshToken);
         Task<List<GoogleStudent>> GetStudentsByClassIdAndGradebookIdAsync(string externalAccessToken, string classId, string gradebookId);
         Task<GoogleStudent> GetStudentById(string studentId);
         Task AddGradebookAsync(string classroomId);

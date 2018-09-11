@@ -88,6 +88,33 @@ namespace GdevApps.Portal.Controllers
             return access_token;
         }
 
+        private async Task<string> GetRefreshToken()
+        {
+            // Include the access token in the properties
+            var refresh_token = await _context.GetTokenAsync("refresh_token");
+
+             if (string.IsNullOrEmpty(refresh_token))
+             {
+                if (User.Identity.IsAuthenticated)
+                {
+                    var userFromManager = await _userManager.GetUserAsync(User);
+                    string authenticationMethod = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.AuthenticationMethod)?.Value;
+                    if (authenticationMethod != null)
+                    {
+                        refresh_token = await _userManager.GetAuthenticationTokenAsync(userFromManager,
+                         authenticationMethod, "refresh_token");
+                    }
+                    else
+                    {
+                        refresh_token = await _userManager.GetAuthenticationTokenAsync(userFromManager,
+                         "Google", "refresh_token");
+                    }
+                }
+            }
+
+            return refresh_token;
+        }
+
         public IActionResult ClassesAsync()
         {
             return View();
@@ -357,7 +384,7 @@ namespace GdevApps.Portal.Controllers
         private async Task<List<ClassesViewModel>> GetClassesAsync()
         {
             var classes = _mapper.Map<List<ClassesViewModel>>(
-                await _classroomService.GetAllClassesAsync(await GetAccessToken())
+                await _classroomService.GetAllClassesAsync(await GetAccessToken(), await GetRefreshToken())
                 );
                 
             return classes;

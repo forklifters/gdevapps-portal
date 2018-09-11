@@ -61,7 +61,7 @@ namespace GdevApps.Portal
             });
             services.AddDatabaseContexts(Configuration);
             services.AddAspNetIdentity();
-            services.AddGoogleAuthentication();    
+            services.AddGoogleAuthentication(Configuration);    
             services.AddRepositories();
             services.AddDomainServices();
             services.AddSingleton(AutoMapperConfiguration.MapperConfiguration.CreateMapper());
