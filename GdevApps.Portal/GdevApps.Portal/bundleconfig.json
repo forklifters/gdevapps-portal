@@ -18,7 +18,7 @@
       "wwwroot/js/bootstrap-dialog.min.js",
       "wwwroot/lib/jquery/dist/jquery.js",
       "wwwroot/lib/jquery-validation/dist/jquery.validate.js",
-      "wwwroot/lib/bootstrap/dist/bootstrap.js"
+      "wwwroot/lib/bootstrap/dist/js/bootstrap.js"
     ],
     // Optionally specify minification options
     "minify": {
