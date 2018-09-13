@@ -25,3 +25,12 @@ D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataMo
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataModels.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataModels.AspNetUsers.dll
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataModels.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataModels.AspNetUsers.pdb
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataModels.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataModels.AspNetUsers.csprojAssemblyReference.cache
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataModels.AspNetUsers\bin\Debug\netstandard2.0\GdevApps.DAL.DataModels.AspNetUsers.deps.json
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataModels.AspNetUsers\bin\Debug\netstandard2.0\GdevApps.DAL.DataModels.AspNetUsers.dll
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataModels.AspNetUsers\bin\Debug\netstandard2.0\GdevApps.DAL.DataModels.AspNetUsers.pdb
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataModels.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataModels.AspNetUsers.csprojAssemblyReference.cache
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataModels.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataModels.AspNetUsers.csproj.CoreCompileInputs.cache
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataModels.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataModels.AspNetUsers.AssemblyInfoInputs.cache
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataModels.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataModels.AspNetUsers.AssemblyInfo.cs
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataModels.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataModels.AspNetUsers.dll
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataModels.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataModels.AspNetUsers.pdb

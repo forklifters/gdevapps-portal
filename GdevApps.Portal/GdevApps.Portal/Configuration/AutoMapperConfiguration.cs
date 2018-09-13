@@ -12,6 +12,7 @@ namespace GdevApps.Portal.Configuration
             => new MapperConfiguration(config =>
           {
               config.CreateMap<DAL.DataModels.AspNetUsers.AspNetUserTokens, BLL.Models.AspNetUsers.AspNetUserToken>();
+              config.CreateMap<BLL.Models.GDevClassroomService.GradebookStudent, BLL.Models.GDevClassroomService.GoogleStudent>();
           });
     }
 }

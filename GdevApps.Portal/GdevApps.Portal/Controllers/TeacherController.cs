@@ -41,6 +41,12 @@ namespace GdevApps.Portal.Controllers
 
         private Singleton Singleton;
 
+        private readonly IAspNetUserService _aspUserService;
+
+        private readonly IHttpContextAccessor _contextAccessor;
+
+        private readonly IGdevSpreadsheetService _spreadSheetService;
+
         public TeacherController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
@@ -49,7 +55,10 @@ namespace GdevApps.Portal.Controllers
             IConfiguration configuration,
             IGdevClassroomService classroomService,
             IMapper mapper,
-            IHttpContextAccessor httpContext)
+            IHttpContextAccessor httpContext,
+            IAspNetUserService aspUserService,
+            IHttpContextAccessor contextAccessor,
+            IGdevSpreadsheetService spreadSheetService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -59,61 +68,25 @@ namespace GdevApps.Portal.Controllers
             _classroomService = classroomService;
             _mapper = mapper;
             _context = httpContext.HttpContext;
+            _aspUserService = aspUserService;
+            _contextAccessor = contextAccessor;
+            _spreadSheetService = spreadSheetService;
         }
 
-        private async Task<string> GetAccessToken()
-        {
-           // Include the access token in the properties
-            var access_token = await _context.GetTokenAsync("access_token");
-
-             if (string.IsNullOrEmpty(access_token))
-             {
-                if (User.Identity.IsAuthenticated)
-                {
-                    var userFromManager = await _userManager.GetUserAsync(User);
-                    string authenticationMethod = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.AuthenticationMethod)?.Value;
-                    if (authenticationMethod != null)
-                    {
-                        access_token = await _userManager.GetAuthenticationTokenAsync(userFromManager,
-                         authenticationMethod, "access_token");
-                    }
-                    else
-                    {
-                        access_token = await _userManager.GetAuthenticationTokenAsync(userFromManager,
-                         "Google", "access_token");
-                    }
-                }
-            }
-
-            return access_token;
-        }
-
-        private async Task<string> GetRefreshToken()
-        {
-            // Include the access token in the properties
-            var refresh_token = await _context.GetTokenAsync("refresh_token");
-
-             if (string.IsNullOrEmpty(refresh_token))
-             {
-                if (User.Identity.IsAuthenticated)
-                {
-                    var userFromManager = await _userManager.GetUserAsync(User);
-                    string authenticationMethod = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.AuthenticationMethod)?.Value;
-                    if (authenticationMethod != null)
-                    {
-                        refresh_token = await _userManager.GetAuthenticationTokenAsync(userFromManager,
-                         authenticationMethod, "refresh_token");
-                    }
-                    else
-                    {
-                        refresh_token = await _userManager.GetAuthenticationTokenAsync(userFromManager,
-                         "Google", "refresh_token");
-                    }
-                }
-            }
-
-            return refresh_token;
-        }
+        // [HttpGet]
+        // public async Task<IActionResult> Test()
+        // {
+        //     try{
+        //         var gradeBookLink = "https://docs.google.com/spreadsheets/d/1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg/edit?usp=drive_web&ouid=106890447120707259670";
+        //         var gradebookId = "1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg";
+        //         var result = await _spreadSheetService.GetStudentsFromGradebook(await GetAccessTokenAsync(),
+        //          gradebookId, await GetRefreshTokenAsync());
+        //         return Ok(await GetAllUserTokens());
+        //     }catch(Exception ex)
+        //     {
+        //         return BadRequest(ex);
+        //     }
+        // }
 
         public IActionResult ClassesAsync()
         {
@@ -161,66 +134,72 @@ namespace GdevApps.Portal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GetStudents(string classId){
-            try{
+        public async Task<IActionResult> GetStudents(string classId)
+        {
+            try
+            {
                 var studentsList = _mapper.Map<List<StudentsViewModel>>(
-                    await _classroomService.GetStudentsByClassIdAndGradebookIdAsync(await GetAccessToken(), classId, "")
+                    await _classroomService.GetStudentsByClassIdAndGradebookIdAsync(await GetAccessTokenAsync(),
+                                                                                    classId,
+                                                                                    "1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg",
+                                                                                    await GetRefreshTokenAsync(),
+                                                                                    _userManager.GetUserId(User))
                 );
 
                 return Ok(new { data = studentsList });
 
 
-                var allStudents = new List<StudentsViewModel>(){
-                    new StudentsViewModel{
-                        Name = "Pasha",
-                        Email = "pavlo.karasyuk@gmail.com",
-                        ClassId = "1",
-                        PrentEmails = new List<string>{"parentEmail@example.xyz","parentEmail2@example.xyz"},
-                        Id = "1-1",
-                        IsInClassroom = true
-                    },
-                     new StudentsViewModel{
-                        Name = "Sasha",
-                        Email = "Sasha@gmail.com",
-                        ClassId = "1",
-                        PrentEmails = new List<string>{"parentEmail@example.xyz","parentEmail2@example.xyz"},
-                        Id = "1101",
-                        IsInClassroom = false
+                // var allStudents = new List<StudentsViewModel>(){
+                //     new StudentsViewModel{
+                //         Name = "Pasha",
+                //         Email = "pavlo.karasyuk@gmail.com",
+                //         ClassId = "1",
+                //         PrentEmails = new List<string>{"parentEmail@example.xyz","parentEmail2@example.xyz"},
+                //         Id = "1-1",
+                //         IsInClassroom = true
+                //     },
+                //      new StudentsViewModel{
+                //         Name = "Sasha",
+                //         Email = "Sasha@gmail.com",
+                //         ClassId = "1",
+                //         PrentEmails = new List<string>{"parentEmail@example.xyz","parentEmail2@example.xyz"},
+                //         Id = "1101",
+                //         IsInClassroom = false
 
-                    },
-                     new StudentsViewModel{
-                        Name = "Dasha",
-                        Email = "Dasha@gmail.com",
-                        ClassId = "1",
-                        PrentEmails = new List<string>{"parentEmail@example.xyz","parentEmail2@example.xyz"},
-                        Id = "1102",
-                        IsInClassroom = true
-                    },
-                     new StudentsViewModel{
-                        Name = "Alex",
-                        Email = "Alex@gmail.com",
-                        ClassId = "2",
-                        PrentEmails = new List<string>{"parentEmail@example.xyz","parentEmail2@example.xyz"},
-                        Id = "1103",
-                        IsInClassroom = false
-                    },
-                     new StudentsViewModel{
-                        Name = "Pasha",
-                        Email = "pavlo.karasyuk@gmail.com",
-                        ClassId = "3",
-                        PrentEmails = new List<string>{"parentEmail@example.xyz","parentEmail2@example.xyz"},
-                        Id = "1104",
-                        IsInClassroom = true
-                    }
-                };
+                //     },
+                //      new StudentsViewModel{
+                //         Name = "Dasha",
+                //         Email = "Dasha@gmail.com",
+                //         ClassId = "1",
+                //         PrentEmails = new List<string>{"parentEmail@example.xyz","parentEmail2@example.xyz"},
+                //         Id = "1102",
+                //         IsInClassroom = true
+                //     },
+                //      new StudentsViewModel{
+                //         Name = "Alex",
+                //         Email = "Alex@gmail.com",
+                //         ClassId = "2",
+                //         PrentEmails = new List<string>{"parentEmail@example.xyz","parentEmail2@example.xyz"},
+                //         Id = "1103",
+                //         IsInClassroom = false
+                //     },
+                //      new StudentsViewModel{
+                //         Name = "Pasha",
+                //         Email = "pavlo.karasyuk@gmail.com",
+                //         ClassId = "3",
+                //         PrentEmails = new List<string>{"parentEmail@example.xyz","parentEmail2@example.xyz"},
+                //         Id = "1104",
+                //         IsInClassroom = true
+                //     }
+                //};
 
-                if(classId == "0")
-                {
-                    return Ok(new { data = allStudents });
-                }
+                // if(classId == "0")
+                // {
+                //     return Ok(new { data = allStudents });
+                // }
 
-                var filteredStudents = allStudents.Where(s => s.ClassId == classId).ToList();
-                return Ok(new {data = filteredStudents});
+                // var filteredStudents = allStudents.Where(s => s.ClassId == classId).ToList();
+                // return Ok(new {data = filteredStudents});
             }catch(Exception ex){
                  return BadRequest(ex);
             }
@@ -281,7 +260,7 @@ namespace GdevApps.Portal.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddGradebook(ClassSheetsViewModel model)
+        public async Task<ActionResult> AddGradebook(ClassSheetsViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -292,7 +271,7 @@ namespace GdevApps.Portal.Controllers
                     return PartialView("_AddGradebook", model);
                 }
 
-                var isValidLink = CheckLink(model.Link);
+                var isValidLink = await CheckLink(model.Link);
                 if (!isValidLink)
                 {
                     ModelState.AddModelError("Link", $"Link is not valid. Provide a valid link");
@@ -307,14 +286,14 @@ namespace GdevApps.Portal.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditGradebook(ClassSheetsViewModel model)
+        public async Task<ActionResult> EditGradebook(ClassSheetsViewModel model)
         {
             if (ModelState.IsValid)
             {
                 var sheet = Singleton.Instance.Sheets.Where(s => s.Id == model.Id).FirstOrDefault();
                 if (sheet != null)
                 {
-                    var isValidLink = CheckLink(model.Link);
+                    var isValidLink = await CheckLink(model.Link);
                     if(!isValidLink){
                         ModelState.AddModelError("Link", $"Link is not valid. Provide a valid link");
                         return PartialView("_EditGradebook", model);
@@ -384,19 +363,94 @@ namespace GdevApps.Portal.Controllers
         private async Task<List<ClassesViewModel>> GetClassesAsync()
         {
             var classes = _mapper.Map<List<ClassesViewModel>>(
-                await _classroomService.GetAllClassesAsync(await GetAccessToken(), await GetRefreshToken())
+                await _classroomService.GetAllClassesAsync(await GetAccessTokenAsync(), await GetRefreshTokenAsync(), _userManager.GetUserId(User))
                 );
                 
             return classes;
         }
 
-        private bool CheckLink(string link)
+        private async Task<bool> CheckLink(string link)
         {
-            return link.StartsWith("https://docs.google.com");
+            if (link.StartsWith("https://docs.google.com"))
+            {
+                return await _spreadSheetService.IsGradeBook("", await GetAccessTokenAsync(), await GetRefreshTokenAsync(), _userManager.GetUserId(User), link);
+            }
+            return false;
+        }
+
+        private async Task<string> GetAccessTokenAsync()
+        {
+            // Include the access token in the properties
+            var accessToken = await _context.GetTokenAsync("access_token");
+            var tokensInfo = await GetTokensInfoAsync();
+            if (string.IsNullOrEmpty(accessToken) || tokensInfo.IsUpdated)
+            {
+                return tokensInfo.Tokens.Where(t=>t.Name == "access_token").Select(t=>t.Value).FirstOrDefault() ;
+            }
+
+            return accessToken;
+        }
+
+        private async Task<string> GetRefreshTokenAsync()
+        {
+            // Include the access token in the properties
+            var refreshToken = await _context.GetTokenAsync("refresh_token");
+            var tokensInfo = await GetTokensInfoAsync();
+            if (string.IsNullOrEmpty(refreshToken) || tokensInfo.IsUpdated)
+            {
+                return tokensInfo.Tokens.Where(t=>t.Name == "refresh_token").Select(t=>t.Value).FirstOrDefault() ;
+            }
+
+            return refreshToken;
+        }
+
+        private async Task<string> GetTockenUpdatedTimeAsync()
+        {
+            // Include the access token in the properties
+            var tockenUpdatedTime = await _context.GetTokenAsync("token_updated_time");
+            var tokensInfo = await GetTokensInfoAsync();
+            if (string.IsNullOrEmpty(tockenUpdatedTime) || tokensInfo.IsUpdated)
+            {
+                return tokensInfo.Tokens.Where(t=>t.Name == "token_updated_time").Select(t=>t.Value).FirstOrDefault() ;
+            }
+
+            return tockenUpdatedTime;
+        }
+
+        private async Task<IEnumerable<GdevApps.BLL.Models.AspNetUsers.AspNetUserToken>> GetAllUserTokens()
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+               return  await _aspUserService.GetAllTokensByUserIdAsync(_userManager.GetUserId(User));
+            }
+
+            return new List<GdevApps.BLL.Models.AspNetUsers.AspNetUserToken>();
+        }
+
+        private async Task<TokenResponse> GetTokensInfoAsync()
+        {
+            var allTokens = await GetAllUserTokens();
+            var isUpdated = allTokens.Where(t=>t.Name == "token_updated").Select(t=>t.Value).FirstOrDefault();
+            bool isUpdatedParsed;
+            Boolean.TryParse(isUpdated, out isUpdatedParsed);
+            if (!string.IsNullOrEmpty(isUpdated) && isUpdatedParsed)
+            {
+                DateTime createdDate;
+                DateTime.TryParse(allTokens.Where(t => t.Name == "created").Select(t => t.Value).FirstOrDefault(), out createdDate);
+
+                DateTime updatedDate;
+                DateTime.TryParse(allTokens.Where(t => t.Name == "token_updated_time").Select(t => t.Value).FirstOrDefault(), out updatedDate);
+                if (updatedDate > createdDate)
+                {
+                    return new TokenResponse(isUpdatedParsed, allTokens);
+                }
+            }
+
+            return new TokenResponse(false, allTokens);
         }
     }
 
-    public sealed class Singleton
+    internal sealed class Singleton
     {
         private static Singleton instance = null;
         private static readonly object padlock = new object();
@@ -423,4 +477,16 @@ namespace GdevApps.Portal.Controllers
             }
         }
     }
+
+    internal sealed class TokenResponse
+    {
+        public TokenResponse(bool isUpdated, IEnumerable<GdevApps.BLL.Models.AspNetUsers.AspNetUserToken> tokens)
+        {
+            this.IsUpdated = isUpdated;
+            this.Tokens = tokens;
+        }
+        public bool IsUpdated { get; set; }
+
+        public IEnumerable<GdevApps.BLL.Models.AspNetUsers.AspNetUserToken> Tokens { get; set; }
+    } 
 }

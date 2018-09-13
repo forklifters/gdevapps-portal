@@ -2542,11 +2542,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataContexts.AspNetUsers\\GdevApps.DAL.DataContexts.AspNetUsers.csproj",
+      "projectUniqueName": "e:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataContexts.AspNetUsers\\GdevApps.DAL.DataContexts.AspNetUsers.csproj",
       "projectName": "GdevApps.DAL.DataContexts.AspNetUsers",
-      "projectPath": "D:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataContexts.AspNetUsers\\GdevApps.DAL.DataContexts.AspNetUsers.csproj",
+      "projectPath": "e:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataContexts.AspNetUsers\\GdevApps.DAL.DataContexts.AspNetUsers.csproj",
       "packagesPath": "C:\\Users\\Pasha\\.nuget\\packages\\",
-      "outputPath": "D:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataContexts.AspNetUsers\\obj\\",
+      "outputPath": "e:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataContexts.AspNetUsers\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -2563,8 +2563,8 @@
       "frameworks": {
         "netstandard2.0": {
           "projectReferences": {
-            "D:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataModels.AspNetUsers\\GdevApps.DAL.DataModels.AspNetUsers.csproj": {
-              "projectPath": "D:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataModels.AspNetUsers\\GdevApps.DAL.DataModels.AspNetUsers.csproj"
+            "E:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataModels.AspNetUsers\\GdevApps.DAL.DataModels.AspNetUsers.csproj": {
+              "projectPath": "E:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataModels.AspNetUsers\\GdevApps.DAL.DataModels.AspNetUsers.csproj"
             }
           }
         }

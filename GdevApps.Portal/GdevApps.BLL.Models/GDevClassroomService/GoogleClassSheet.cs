@@ -1,6 +1,6 @@
 namespace GdevApps.BLL.Models.GDevClassroomService
 {
-    public class GoogleClassSheets
+    public class GoogleClassSheet
     {
 
     }

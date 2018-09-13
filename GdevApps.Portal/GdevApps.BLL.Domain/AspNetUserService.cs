@@ -24,6 +24,10 @@ namespace GdevApps.BLL.Domain
 
         public Task<IEnumerable<AspNetUserToken>> GetAllTokens()
         {
+
+            var m = _aspNetUserRepository.GetAllAsync<DAL.DataModels.AspNetUsers.AspNetUserTokens>().Result;
+
+
             return _mapper.Map<Task<IEnumerable<AspNetUserToken>>>(
                 _aspNetUserRepository.GetAllAsync<DAL.DataModels.AspNetUsers.AspNetUserTokens>());
         }
@@ -31,6 +35,19 @@ namespace GdevApps.BLL.Domain
         public Task<IEnumerable<AspNetUser>> GetAllUsersAsync()
         {
             throw new NotImplementedException();
+        }
+
+        public async Task UpdateUserTokensAsync(AspNetUserToken userTokens)
+        {
+            var userTokensModel = _mapper.Map<DAL.DataModels.AspNetUsers.AspNetUserTokens>(userTokens);
+            _aspNetUserRepository.Update<DAL.DataModels.AspNetUsers.AspNetUserTokens>(userTokensModel);
+            await _aspNetUserRepository.SaveAsync();
+        }
+
+        public Task<IEnumerable<AspNetUserToken>> GetAllTokensByUserIdAsync(string userId)
+        {
+            var models = _aspNetUserRepository.GetAsync<DAL.DataModels.AspNetUsers.AspNetUserTokens>(filter: (u => u.UserId == userId));
+            return _mapper.Map<Task<IEnumerable<AspNetUserToken>>>(models);
         }
     }
 }

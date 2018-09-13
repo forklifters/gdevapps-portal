@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using GdevApps.BLL.Contracts;
 using GdevApps.BLL.Models.GDevClassroomService;
 using Google.Apis.Auth.OAuth2;
@@ -18,14 +20,25 @@ namespace GdevApps.BLL.Domain
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
+        private readonly IGdevSpreadsheetService _gdevSpreadSheetService;
+
+        private readonly IAspNetUserService _aspUserService;
+
+        private readonly IMapper _mapper;
 
         public GdevClassroomService(
             IConfiguration configuration,
-            ILogger<GdevClassroomService> logger
+            ILogger<GdevClassroomService> logger,
+            IGdevSpreadsheetService gdevSpreadSheetService,
+            IAspNetUserService aspUserService,
+            IMapper mapper
             )
         {
             _logger = logger;
             _configuration = configuration;
+            _gdevSpreadSheetService = gdevSpreadSheetService;
+            _aspUserService = aspUserService;
+            _mapper = mapper;
         }
 
         public Task AddGradebookAsync(string classroomId)
@@ -43,14 +56,13 @@ namespace GdevApps.BLL.Domain
             throw new System.NotImplementedException();
         }
 
-        public async Task<List<GoogleClass>> GetAllClassesAsync(string externalAccessToken, string refreshToken)
+        public async Task<List<GoogleClass>> GetAllClassesAsync(string externalAccessToken, string refreshToken, string userId)
         {
             ClassroomService service;
             CoursesResource.ListRequest request;
             ListCoursesResponse response;
             try
             {
-                //externalAccessToken +="1";
                 GoogleCredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
                 // Create Classroom API service.
                 service = new ClassroomService(new BaseClientService.Initializer()
@@ -67,25 +79,27 @@ namespace GdevApps.BLL.Domain
             catch (Google.GoogleApiException ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving courses from Google Classroom. Refreshing the token and trying again");
-                 var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
-                    var credentials = new UserCredential(new GoogleAuthorizationCodeFlow(
-                        new GoogleAuthorizationCodeFlow.Initializer
+                var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
+                var credentials = new UserCredential(new GoogleAuthorizationCodeFlow(
+                    new GoogleAuthorizationCodeFlow.Initializer
+                    {
+                        ClientSecrets = new ClientSecrets
                         {
-                            ClientSecrets = new ClientSecrets
-                            {
-                                ClientId = _configuration["installed:client_id"],
-                                ClientSecret = _configuration["installed:client_secret"]
-                            }
-                        }), "user", token);
-                    service = new ClassroomService(new BaseClientService.Initializer()
+                            ClientId = _configuration["installed:client_id"],
+                            ClientSecret = _configuration["installed:client_secret"]
+                        }
+                    }), "user", token);
+                service = new ClassroomService(new BaseClientService.Initializer()
                 {
                     HttpClientInitializer = credentials,
                     ApplicationName = _configuration["ApplicationName"]
                 });
-                     // Define request parameters.
+                // Define request parameters.
                 request = service.Courses.List();
                 request.PageSize = 100;
                 response = await request.ExecuteAsync();
+
+                await UpdateAllTokens(userId, credentials);
             }
             catch (Exception ex)
             {
@@ -119,7 +133,8 @@ namespace GdevApps.BLL.Domain
                 }
 
                 return classes;
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while retrieving courseworks or students");
                 return new List<GoogleClass>();
@@ -141,52 +156,115 @@ namespace GdevApps.BLL.Domain
             throw new System.NotImplementedException();
         }
 
-        public async Task<List<GoogleStudent>> GetStudentsByClassIdAndGradebookIdAsync(string externalAccessToken, string courseId, string gradebookId)
+        public async Task<List<GoogleStudent>> GetStudentsByClassIdAndGradebookIdAsync(string externalAccessToken, string courseId, string gradebookId, string refreshToken, string userId)
         {
+
+            GoogleCredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
+            ClassroomService service;
+            CoursesResource.GetRequest request;
+            Google.Apis.Classroom.v1.CoursesResource.StudentsResource.ListRequest studentsListRequest;
+            ListStudentsResponse studentList;
+            service = new ClassroomService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = googleCredential,
+                ApplicationName = _configuration["ApplicationName"]
+            });
+
+            request = service.Courses.Get(courseId);
+            studentsListRequest = service.Courses.Students.List(courseId);
             try
             {
-                GoogleCredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
-                
                 // Create Classroom API service.
-                var service = new ClassroomService(new BaseClientService.Initializer()
+                studentList = await studentsListRequest.ExecuteAsync();
+            }
+            catch (Google.GoogleApiException ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving students from Google Classroom. Refreshing the token and trying again");
+                var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
+                var credentials = new UserCredential(new GoogleAuthorizationCodeFlow(
+                    new GoogleAuthorizationCodeFlow.Initializer
+                    {
+                        ClientSecrets = new ClientSecrets
+                        {
+                            ClientId = _configuration["installed:client_id"],
+                            ClientSecret = _configuration["installed:client_secret"]
+                        }
+                    }), "user", token);
+                service = new ClassroomService(new BaseClientService.Initializer()
                 {
-                    HttpClientInitializer = googleCredential,
+                    HttpClientInitializer = credentials,
                     ApplicationName = _configuration["ApplicationName"]
                 });
+                // Define request parameters.
+                request = service.Courses.Get(courseId);
+                studentsListRequest = service.Courses.Students.List(courseId);
+                studentList = await studentsListRequest.ExecuteAsync();
 
-                CoursesResource.GetRequest request = service.Courses.Get(courseId);
-                var studentsListRequest = service.Courses.Students.List(courseId);
-                ListStudentsResponse studentList = await studentsListRequest.ExecuteAsync();
-                var googleStudents = new List<GoogleStudent>();
-                
-                //Get students from classroom
-                
-                if (studentList != null && studentList.Students != null)
-                {
-                    foreach (var student in studentList?.Students)
-                    {
-                        googleStudents.Add(new GoogleStudent
-                        {
-                            ClassId = courseId,
-                            Email = student.Profile.EmailAddress,
-                            Id = student.UserId,
-                            IsInClassroom = true,
-                            Name = student.Profile.Name.FullName
-                        });
-                    }
-                }
-
-                //Get students from Gradebook
-                if (!string.IsNullOrEmpty(gradebookId)){
-                    //TODO
-                }
-
-                return googleStudents;
+                await UpdateAllTokens(userId, credentials);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An error occured while retrieving students by course id: {courseId} and gradebook id {gradebookId}");
                 return new List<GoogleStudent>();
+            }
+
+            //Get students from classroom
+            var googleStudents = new List<GoogleStudent>();
+            if (studentList != null && studentList.Students != null)
+            {
+                foreach (var student in studentList?.Students)
+                {
+                    googleStudents.Add(new GoogleStudent
+                    {
+                        ClassId = courseId,
+                        Email = student.Profile.EmailAddress,
+                        Id = student.UserId,
+                        IsInClassroom = false,
+                        Name = student.Profile.Name.FullName
+                    });
+                }
+            }
+
+            //Get students from Gradebook
+            if (!string.IsNullOrEmpty(gradebookId))
+            {
+                var gradebookStudents = _mapper.Map<IEnumerable<GoogleStudent>>(await _gdevSpreadSheetService.GetStudentsFromGradebook(externalAccessToken, gradebookId, refreshToken, userId));
+                var gradebookStudentsEmails = gradebookStudents.Select(s => s.Email).ToList();
+                foreach (var student in googleStudents.Where(s => gradebookStudents.Select(g => g.Email).Contains(s.Email)).ToList())
+                {
+                    student.IsInClassroom = true;
+                }
+                googleStudents.AddRange(gradebookStudents.Where(g => !googleStudents.Select(s => s.Email).Contains(g.Email)).ToList());
+            }
+
+            return googleStudents;
+        }
+        private async Task UpdateAllTokens(string userId, UserCredential credentials)
+        {
+            var userLoginTokens = await _aspUserService.GetAllTokensByUserIdAsync(userId);
+            if (userLoginTokens != null)
+            {
+                var accessTokenRecord = userLoginTokens.Where(t => t.Name == "access_token").First();
+                accessTokenRecord.Value = credentials.Token.AccessToken;
+                await _aspUserService.UpdateUserTokensAsync(accessTokenRecord);
+
+                var expiresAtTokenRecord = userLoginTokens.Where(t => t.Name == "expires_at").FirstOrDefault();
+
+                var issuedDate = credentials.Token.IssuedUtc;
+                if (credentials.Token.ExpiresInSeconds.HasValue)
+                {
+                    expiresAtTokenRecord.Value = issuedDate.AddSeconds(credentials.Token.ExpiresInSeconds.Value).ToString("o",
+                     System.Globalization.CultureInfo.InvariantCulture);
+                    await _aspUserService.UpdateUserTokensAsync(expiresAtTokenRecord);
+                }
+
+                var tokenUpdatedRecord = userLoginTokens.Where(t => t.Name == "token_updated").First();
+                tokenUpdatedRecord.Value = "true";
+                await _aspUserService.UpdateUserTokensAsync(tokenUpdatedRecord);
+
+                var tokenUpdatedTimeRecord = userLoginTokens.Where(t => t.Name == "token_updated_time").First();
+                tokenUpdatedTimeRecord.Value = DateTime.UtcNow.ToString();
+                await _aspUserService.UpdateUserTokensAsync(tokenUpdatedTimeRecord);
             }
         }
     }

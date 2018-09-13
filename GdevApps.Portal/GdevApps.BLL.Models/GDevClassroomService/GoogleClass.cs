@@ -9,6 +9,6 @@ namespace GdevApps.BLL.Models.GDevClassroomService
         public string Description { get; set; }
         public int? StudentsCount { get; set; }
         public int? CourseWorksCount { get; set; }
-        public List<GoogleClassSheets> ClassroomSheets {get;set;}
+        public List<GoogleClassSheet> ClassroomSheets {get;set;}
     }
 }

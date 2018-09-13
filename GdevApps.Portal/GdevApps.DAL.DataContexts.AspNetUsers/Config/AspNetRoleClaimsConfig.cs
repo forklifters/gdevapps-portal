@@ -11,7 +11,7 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config
     {
         public void Configure(EntityTypeBuilder<AspNetRoleClaims> builder)
         {
-            throw new NotImplementedException();
+            builder.HasKey(k => new {k.Id});
         }
     }
 }

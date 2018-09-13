@@ -31,8 +31,8 @@ namespace GdevApps.Portal
         {
             var builder = new ConfigurationBuilder()
                                .SetBasePath(env.ContentRootPath)
-                               .AddJsonFile("Configuration/appsettings.json", optional: true, reloadOnChange: true)
-                               .AddJsonFile("Configuration/credentials.json", optional: true, reloadOnChange: true)
+                               .AddJsonFile("Configuration/appsettings.json", optional: false, reloadOnChange: true)
+                               .AddJsonFile("Configuration/credentials.json", optional: false, reloadOnChange: true)
                                .AddEnvironmentVariables();
                             //    .AddJsonFile("Configuration/ConnectionStrings.json", optional: true)
                             //    .AddEnvironmentVariables();
@@ -65,6 +65,7 @@ namespace GdevApps.Portal
             services.AddRepositories();
             services.AddDomainServices();
             services.AddSingleton(AutoMapperConfiguration.MapperConfiguration.CreateMapper());
+            services.AddSingleton<IConfiguration>(Configuration);
 
             //TEST
             services.ConfigureApplicationCookie(options =>

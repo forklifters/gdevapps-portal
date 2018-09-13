@@ -182,11 +182,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "d:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Models\\GdevApps.BLL.Models.csproj",
+      "projectUniqueName": "e:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Models\\GdevApps.BLL.Models.csproj",
       "projectName": "GdevApps.BLL.Models",
-      "projectPath": "d:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Models\\GdevApps.BLL.Models.csproj",
+      "projectPath": "e:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Models\\GdevApps.BLL.Models.csproj",
       "packagesPath": "C:\\Users\\Pasha\\.nuget\\packages\\",
-      "outputPath": "d:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Models\\obj\\",
+      "outputPath": "e:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Models\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

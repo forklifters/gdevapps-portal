@@ -182,11 +182,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "d:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataModels.AspNetUsers\\GdevApps.DAL.DataModels.AspNetUsers.csproj",
+      "projectUniqueName": "e:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataModels.AspNetUsers\\GdevApps.DAL.DataModels.AspNetUsers.csproj",
       "projectName": "GdevApps.DAL.DataModels.AspNetUsers",
-      "projectPath": "d:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataModels.AspNetUsers\\GdevApps.DAL.DataModels.AspNetUsers.csproj",
+      "projectPath": "e:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataModels.AspNetUsers\\GdevApps.DAL.DataModels.AspNetUsers.csproj",
       "packagesPath": "C:\\Users\\Pasha\\.nuget\\packages\\",
-      "outputPath": "d:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataModels.AspNetUsers\\obj\\",
+      "outputPath": "e:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataModels.AspNetUsers\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

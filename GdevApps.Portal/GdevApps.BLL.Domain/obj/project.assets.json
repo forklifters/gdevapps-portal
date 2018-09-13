@@ -4120,11 +4120,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Domain\\GdevApps.BLL.Domain.csproj",
+      "projectUniqueName": "E:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Domain\\GdevApps.BLL.Domain.csproj",
       "projectName": "GdevApps.BLL.Domain",
-      "projectPath": "D:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Domain\\GdevApps.BLL.Domain.csproj",
+      "projectPath": "E:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Domain\\GdevApps.BLL.Domain.csproj",
       "packagesPath": "C:\\Users\\Pasha\\.nuget\\packages\\",
-      "outputPath": "D:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Domain\\obj\\",
+      "outputPath": "E:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Domain\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -4141,11 +4141,11 @@
       "frameworks": {
         "netstandard2.0": {
           "projectReferences": {
-            "D:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Contracts\\GdevApps.BLL.Contracts.csproj": {
-              "projectPath": "D:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Contracts\\GdevApps.BLL.Contracts.csproj"
+            "E:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Contracts\\GdevApps.BLL.Contracts.csproj": {
+              "projectPath": "E:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Contracts\\GdevApps.BLL.Contracts.csproj"
             },
-            "D:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.Repositories.AspNetUserRepository\\GdevApps.DAL.Repositories.AspNetUserRepository.csproj": {
-              "projectPath": "D:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.Repositories.AspNetUserRepository\\GdevApps.DAL.Repositories.AspNetUserRepository.csproj"
+            "E:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.Repositories.AspNetUserRepository\\GdevApps.DAL.Repositories.AspNetUserRepository.csproj": {
+              "projectPath": "E:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.Repositories.AspNetUserRepository\\GdevApps.DAL.Repositories.AspNetUserRepository.csproj"
             }
           }
         }

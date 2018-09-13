@@ -3753,11 +3753,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "d:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataContexts.GradebookLicense\\GdevApps.DAL.DataContexts.GradebookLicense.csproj",
+      "projectUniqueName": "e:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataContexts.GradebookLicense\\GdevApps.DAL.DataContexts.GradebookLicense.csproj",
       "projectName": "GdevApps.DAL.DataContexts.GradebookLicense",
-      "projectPath": "d:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataContexts.GradebookLicense\\GdevApps.DAL.DataContexts.GradebookLicense.csproj",
+      "projectPath": "e:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataContexts.GradebookLicense\\GdevApps.DAL.DataContexts.GradebookLicense.csproj",
       "packagesPath": "C:\\Users\\Pasha\\.nuget\\packages\\",
-      "outputPath": "d:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataContexts.GradebookLicense\\obj\\",
+      "outputPath": "e:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.DAL.DataContexts.GradebookLicense\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

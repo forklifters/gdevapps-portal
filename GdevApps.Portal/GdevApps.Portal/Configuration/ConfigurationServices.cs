@@ -5,6 +5,7 @@ using GdevApps.DAL.Repositories.AspNetUserRepository;
 using GdevApps.Portal.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -28,6 +29,7 @@ namespace GdevApps.Portal.Configuration
         {
             services.AddScoped<IAspNetUserService, AspNetUserService>();
             services.AddScoped<IGdevClassroomService, GdevClassroomService>();
+            services.AddScoped<IGdevSpreadsheetService, GdevSpreadsheetService>();
         }
 
         public static void AddDatabaseContexts(this IServiceCollection services,
@@ -104,8 +106,18 @@ namespace GdevApps.Portal.Configuration
                       List<AuthenticationToken> tokens = ctx.Properties.GetTokens() as List<AuthenticationToken>;
                       tokens.Add(new AuthenticationToken()
                       {
-                          Name = "TicketCreated",
+                          Name = "created",
                           Value = DateTime.UtcNow.ToString()
+                      });
+                      tokens.Add(new AuthenticationToken()
+                      {
+                          Name = "token_updated",
+                          Value = ""
+                      });
+                       tokens.Add(new AuthenticationToken()
+                      {
+                          Name = "token_updated_time",
+                          Value = DateTime.MinValue.ToString()
                       });
                       ctx.Properties.StoreTokens(tokens);
 

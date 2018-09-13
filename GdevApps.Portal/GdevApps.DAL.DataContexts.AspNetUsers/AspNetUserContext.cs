@@ -20,15 +20,15 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers
         public virtual DbSet<AspNetUserLogins> AspNetUserLogins { get; set; }
         public virtual DbSet<AspNetUserTokens> AspNetUserTokens { get; set; }
 
-        //protected override void OnModelCreating(ModelBuilder builder)
-        //{
-        //    builder.ApplyConfiguration(new AspNetRoleClaimsConfig());
-        //    builder.ApplyConfiguration(new AspNetRolesConfig());
-        //    builder.ApplyConfiguration(new AspNetUserClaimsConfig());
-        //    builder.ApplyConfiguration(new AspNetUserConfig());
-        //    builder.ApplyConfiguration(new AspNetUserLoginsConfig());
-        //    builder.ApplyConfiguration(new AspNetUserRolesConfig());
-        //    builder.ApplyConfiguration(new AspNetUserTokensConfig());
-        //}
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+           builder.ApplyConfiguration(new AspNetRoleClaimsConfig());
+           builder.ApplyConfiguration(new AspNetRolesConfig());
+           builder.ApplyConfiguration(new AspNetUserClaimsConfig());
+           builder.ApplyConfiguration(new AspNetUserConfig());
+           builder.ApplyConfiguration(new AspNetUserLoginsConfig());
+           builder.ApplyConfiguration(new AspNetUserRolesConfig());
+           builder.ApplyConfiguration(new AspNetUserTokensConfig());
+        }
     }
 }

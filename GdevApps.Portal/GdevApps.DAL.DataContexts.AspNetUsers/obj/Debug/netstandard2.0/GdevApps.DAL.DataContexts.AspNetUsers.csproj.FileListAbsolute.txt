@@ -34,3 +34,15 @@ D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataCo
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.AspNetUsers.csproj.CopyComplete
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.AspNetUsers.dll
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.AspNetUsers.pdb
+e:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.AspNetUsers\bin\Debug\netstandard2.0\GdevApps.DAL.DataContexts.AspNetUsers.deps.json
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.AspNetUsers\bin\Debug\netstandard2.0\GdevApps.DAL.DataContexts.AspNetUsers.dll
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.AspNetUsers\bin\Debug\netstandard2.0\GdevApps.DAL.DataContexts.AspNetUsers.pdb
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.AspNetUsers\bin\Debug\netstandard2.0\GdevApps.DAL.DataModels.AspNetUsers.dll
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.AspNetUsers\bin\Debug\netstandard2.0\GdevApps.DAL.DataModels.AspNetUsers.pdb
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.AspNetUsers.csprojAssemblyReference.cache
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.AspNetUsers.csproj.CoreCompileInputs.cache
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.AspNetUsers.AssemblyInfoInputs.cache
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.AspNetUsers.AssemblyInfo.cs
+e:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.AspNetUsers.csproj.CopyComplete
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.AspNetUsers.dll
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.DataContexts.AspNetUsers\obj\Debug\netstandard2.0\GdevApps.DAL.DataContexts.AspNetUsers.pdb

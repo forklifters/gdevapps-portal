@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace GdevApps.BLL.Models.GDevClassroomService
 {
-    public class GoogleStudent
+    public class GradebookStudent
     {
         public string Name { get; set; }
         public string Id { get; set; }
@@ -14,6 +14,5 @@ namespace GdevApps.BLL.Models.GDevClassroomService
         public string ClassId { get; set; }
         public string FinalGrade{get;set;}
         public string GradebookId { get; set; }
-        public bool IsInClassroom {get; set;}
     }
 }

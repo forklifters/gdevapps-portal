@@ -25,3 +25,12 @@ D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Reposi
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\obj\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.dll
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\obj\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.pdb
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\obj\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.csprojAssemblyReference.cache
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\bin\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.deps.json
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\bin\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.dll
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\bin\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.pdb
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\obj\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.csprojAssemblyReference.cache
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\obj\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.csproj.CoreCompileInputs.cache
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\obj\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.AssemblyInfoInputs.cache
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\obj\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.AssemblyInfo.cs
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\obj\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.dll
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.DAL.Repositories.BaseRepository\obj\Debug\netstandard2.0\GdevApps.DAL.Repositories.BaseRepository.pdb

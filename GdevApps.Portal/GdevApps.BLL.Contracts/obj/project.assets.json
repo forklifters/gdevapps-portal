@@ -198,11 +198,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Contracts\\GdevApps.BLL.Contracts.csproj",
+      "projectUniqueName": "E:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Contracts\\GdevApps.BLL.Contracts.csproj",
       "projectName": "GdevApps.BLL.Contracts",
-      "projectPath": "D:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Contracts\\GdevApps.BLL.Contracts.csproj",
+      "projectPath": "E:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Contracts\\GdevApps.BLL.Contracts.csproj",
       "packagesPath": "C:\\Users\\Pasha\\.nuget\\packages\\",
-      "outputPath": "D:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Contracts\\obj\\",
+      "outputPath": "E:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Contracts\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -219,8 +219,8 @@
       "frameworks": {
         "netstandard2.0": {
           "projectReferences": {
-            "D:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Models\\GdevApps.BLL.Models.csproj": {
-              "projectPath": "D:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Models\\GdevApps.BLL.Models.csproj"
+            "E:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Models\\GdevApps.BLL.Models.csproj": {
+              "projectPath": "E:\\Gradebook\\Projects\\gitHub\\GdevApps.Portal\\GdevApps.Portal\\GdevApps.BLL.Models\\GdevApps.BLL.Models.csproj"
             }
           }
         }

@@ -34,3 +34,15 @@ D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Contra
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Contracts\obj\Debug\netstandard2.0\GdevApps.BLL.Contracts.csproj.CopyComplete
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Contracts\obj\Debug\netstandard2.0\GdevApps.BLL.Contracts.dll
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Contracts\obj\Debug\netstandard2.0\GdevApps.BLL.Contracts.pdb
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Contracts\bin\Debug\netstandard2.0\GdevApps.BLL.Contracts.deps.json
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Contracts\bin\Debug\netstandard2.0\GdevApps.BLL.Contracts.dll
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Contracts\bin\Debug\netstandard2.0\GdevApps.BLL.Contracts.pdb
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Contracts\bin\Debug\netstandard2.0\GdevApps.BLL.Models.dll
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Contracts\bin\Debug\netstandard2.0\GdevApps.BLL.Models.pdb
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Contracts\obj\Debug\netstandard2.0\GdevApps.BLL.Contracts.csprojAssemblyReference.cache
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Contracts\obj\Debug\netstandard2.0\GdevApps.BLL.Contracts.csproj.CoreCompileInputs.cache
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Contracts\obj\Debug\netstandard2.0\GdevApps.BLL.Contracts.AssemblyInfoInputs.cache
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Contracts\obj\Debug\netstandard2.0\GdevApps.BLL.Contracts.AssemblyInfo.cs
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Contracts\obj\Debug\netstandard2.0\GdevApps.BLL.Contracts.csproj.CopyComplete
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Contracts\obj\Debug\netstandard2.0\GdevApps.BLL.Contracts.dll
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Contracts\obj\Debug\netstandard2.0\GdevApps.BLL.Contracts.pdb

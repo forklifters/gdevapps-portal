@@ -11,7 +11,8 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config
     {
         public void Configure(EntityTypeBuilder<AspNetUserTokens> builder)
         {
-            throw new NotImplementedException();
+            //builder.ToTable("AspNetUserTokens");
+            builder.HasKey( t => new {t.UserId, t.LoginProvider, t.Name });
         }
     }
 }

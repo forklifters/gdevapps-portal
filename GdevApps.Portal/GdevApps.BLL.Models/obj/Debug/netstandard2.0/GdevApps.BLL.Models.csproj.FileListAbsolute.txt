@@ -25,3 +25,12 @@ D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Models
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Models\obj\Debug\netstandard2.0\GdevApps.BLL.Models.AssemblyInfo.cs
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Models\obj\Debug\netstandard2.0\GdevApps.BLL.Models.dll
 D:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Models\obj\Debug\netstandard2.0\GdevApps.BLL.Models.pdb
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Models\bin\Debug\netstandard2.0\GdevApps.BLL.Models.deps.json
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Models\bin\Debug\netstandard2.0\GdevApps.BLL.Models.dll
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Models\bin\Debug\netstandard2.0\GdevApps.BLL.Models.pdb
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Models\obj\Debug\netstandard2.0\GdevApps.BLL.Models.csprojAssemblyReference.cache
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Models\obj\Debug\netstandard2.0\GdevApps.BLL.Models.csproj.CoreCompileInputs.cache
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Models\obj\Debug\netstandard2.0\GdevApps.BLL.Models.AssemblyInfoInputs.cache
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Models\obj\Debug\netstandard2.0\GdevApps.BLL.Models.AssemblyInfo.cs
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Models\obj\Debug\netstandard2.0\GdevApps.BLL.Models.dll
+E:\Gradebook\Projects\gitHub\GdevApps.Portal\GdevApps.Portal\GdevApps.BLL.Models\obj\Debug\netstandard2.0\GdevApps.BLL.Models.pdb
