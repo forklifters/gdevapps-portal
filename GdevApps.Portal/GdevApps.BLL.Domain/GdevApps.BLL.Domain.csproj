@@ -3,11 +3,11 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="7.0.1" />
-    <PackageReference Include="Google.Apis" Version="1.35.1" />
-    <PackageReference Include="Google.Apis.Auth" Version="1.35.1" />
+ <ItemGroup>
+    <PackageReference Include="Google.Apis" Version="1.35.2" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.35.2" />
     <PackageReference Include="Google.Apis.Classroom.v1" Version="1.34.0.1236" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.35.2.1344" />
     <PackageReference Include="Google.Apis.Sheets.v4" Version="1.34.0.1240" />
   </ItemGroup>
 

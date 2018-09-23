@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.0",
-    "signature": "79d48b917ed6164ad8d4eddbc0c12cdcc93beea6"
+    "signature": "ab3f8ba5d0d7ced8df28f33b381a5b9a07bf42da"
   },
   "compilationOptions": {
     "defines": [
@@ -30,8 +30,8 @@
           "GdevApps.BLL.Domain": "1.0.0",
           "GdevApps.BLL.Models": "1.0.0",
           "GdevApps.DAL.DataContexts.AspNetUsers": "1.0.0",
-          "Google.Apis": "1.35.1",
-          "Google.Apis.Auth": "1.35.1",
+          "Google.Apis": "1.35.2",
+          "Google.Apis.Auth": "1.35.2",
           "Google.Apis.Classroom.v1": "1.34.0.1236",
           "Google.Apis.Sheets.v4": "1.34.0.1240",
           "Microsoft.AspNetCore.All": "2.0.8",
@@ -62,34 +62,34 @@
         }
       },
       "BuildBundlerMinifier/2.8.391": {},
-      "Google.Apis/1.35.1": {
+      "Google.Apis/1.35.2": {
         "dependencies": {
-          "Google.Apis.Core": "1.35.1",
+          "Google.Apis.Core": "1.35.2",
           "Newtonsoft.Json": "10.0.2"
         },
         "runtime": {
           "lib/netstandard2.0/Google.Apis.dll": {
-            "assemblyVersion": "1.35.1.0",
-            "fileVersion": "1.35.1.0"
+            "assemblyVersion": "1.35.2.0",
+            "fileVersion": "1.35.2.0"
           }
         },
         "compile": {
           "lib/netstandard2.0/Google.Apis.dll": {}
         }
       },
-      "Google.Apis.Auth/1.35.1": {
+      "Google.Apis.Auth/1.35.2": {
         "dependencies": {
-          "Google.Apis": "1.35.1",
-          "Google.Apis.Core": "1.35.1"
+          "Google.Apis": "1.35.2",
+          "Google.Apis.Core": "1.35.2"
         },
         "runtime": {
           "lib/netstandard2.0/Google.Apis.Auth.PlatformServices.dll": {
-            "assemblyVersion": "1.35.1.0",
-            "fileVersion": "1.35.1.0"
+            "assemblyVersion": "1.35.2.0",
+            "fileVersion": "1.35.2.0"
           },
           "lib/netstandard2.0/Google.Apis.Auth.dll": {
-            "assemblyVersion": "1.35.1.0",
-            "fileVersion": "1.35.1.0"
+            "assemblyVersion": "1.35.2.0",
+            "fileVersion": "1.35.2.0"
           }
         },
         "compile": {
@@ -99,8 +99,8 @@
       },
       "Google.Apis.Classroom.v1/1.34.0.1236": {
         "dependencies": {
-          "Google.Apis": "1.35.1",
-          "Google.Apis.Auth": "1.35.1",
+          "Google.Apis": "1.35.2",
+          "Google.Apis.Auth": "1.35.2",
           "NETStandard.Library": "2.0.0"
         },
         "runtime": {
@@ -113,24 +113,39 @@
           "lib/netstandard1.3/Google.Apis.Classroom.v1.dll": {}
         }
       },
-      "Google.Apis.Core/1.35.1": {
+      "Google.Apis.Core/1.35.2": {
         "dependencies": {
           "Newtonsoft.Json": "10.0.2"
         },
         "runtime": {
           "lib/netstandard2.0/Google.Apis.Core.dll": {
-            "assemblyVersion": "1.35.1.0",
-            "fileVersion": "1.35.1.0"
+            "assemblyVersion": "1.35.2.0",
+            "fileVersion": "1.35.2.0"
           }
         },
         "compile": {
           "lib/netstandard2.0/Google.Apis.Core.dll": {}
         }
       },
+      "Google.Apis.Drive.v3/1.35.2.1344": {
+        "dependencies": {
+          "Google.Apis": "1.35.2",
+          "Google.Apis.Auth": "1.35.2"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Google.Apis.Drive.v3.dll": {
+            "assemblyVersion": "1.35.2.1344",
+            "fileVersion": "1.35.2.1344"
+          }
+        },
+        "compile": {
+          "lib/netstandard2.0/Google.Apis.Drive.v3.dll": {}
+        }
+      },
       "Google.Apis.Sheets.v4/1.34.0.1240": {
         "dependencies": {
-          "Google.Apis": "1.35.1",
-          "Google.Apis.Auth": "1.35.1",
+          "Google.Apis": "1.35.2",
+          "Google.Apis.Auth": "1.35.2",
           "NETStandard.Library": "2.0.0"
         },
         "runtime": {
@@ -4820,7 +4835,13 @@
       },
       "GdevApps.BLL.Contracts/1.0.0": {
         "dependencies": {
-          "GdevApps.BLL.Models": "1.0.0"
+          "AutoMapper": "7.0.1",
+          "GdevApps.BLL.Models": "1.0.0",
+          "Google.Apis": "1.35.2",
+          "Google.Apis.Auth": "1.35.2",
+          "Google.Apis.Classroom.v1": "1.34.0.1236",
+          "Google.Apis.Drive.v3": "1.35.2.1344",
+          "Google.Apis.Sheets.v4": "1.34.0.1240"
         },
         "runtime": {
           "GdevApps.BLL.Contracts.dll": {}
@@ -4831,12 +4852,12 @@
       },
       "GdevApps.BLL.Domain/1.0.0": {
         "dependencies": {
-          "AutoMapper": "7.0.1",
           "GdevApps.BLL.Contracts": "1.0.0",
           "GdevApps.DAL.Repositories.AspNetUserRepository": "1.0.0",
-          "Google.Apis": "1.35.1",
-          "Google.Apis.Auth": "1.35.1",
+          "Google.Apis": "1.35.2",
+          "Google.Apis.Auth": "1.35.2",
           "Google.Apis.Classroom.v1": "1.34.0.1236",
+          "Google.Apis.Drive.v3": "1.35.2.1344",
           "Google.Apis.Sheets.v4": "1.34.0.1240"
         },
         "runtime": {
@@ -4847,6 +4868,13 @@
         }
       },
       "GdevApps.BLL.Models/1.0.0": {
+        "dependencies": {
+          "AutoMapper": "7.0.1",
+          "Google.Apis": "1.35.2",
+          "Google.Apis.Auth": "1.35.2",
+          "Google.Apis.Classroom.v1": "1.34.0.1236",
+          "Google.Apis.Sheets.v4": "1.34.0.1240"
+        },
         "runtime": {
           "GdevApps.BLL.Models.dll": {}
         },
@@ -5094,19 +5122,19 @@
       "path": "buildbundlerminifier/2.8.391",
       "hashPath": "buildbundlerminifier.2.8.391.nupkg.sha512"
     },
-    "Google.Apis/1.35.1": {
+    "Google.Apis/1.35.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ZBWKDuj7qznEaNYHFRYcwbDfdDltqfeUrpVL8ijahy7KGG8DdHBY86uA2bpiKTAmgbOO7TKNkvaURAVJur98eQ==",
-      "path": "google.apis/1.35.1",
-      "hashPath": "google.apis.1.35.1.nupkg.sha512"
+      "sha512": "sha512-kckpDbjCQA4lN9ZJ6Hb0SlWfg8e2ei0rqh+6bpuZLgB8MAL0tjwKZyr+d+iorKfB+SlmIgTtVfgDea1aH3dpbA==",
+      "path": "google.apis/1.35.2",
+      "hashPath": "google.apis.1.35.2.nupkg.sha512"
     },
-    "Google.Apis.Auth/1.35.1": {
+    "Google.Apis.Auth/1.35.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-GklaB+R3yiC13T/duEW10uqvugSr1zgPcn1P3O4hOPcMoS4Z/NvGYns2IoEywVKXuFg4kGH/VUCZ7xSUdcAV6g==",
-      "path": "google.apis.auth/1.35.1",
-      "hashPath": "google.apis.auth.1.35.1.nupkg.sha512"
+      "sha512": "sha512-pcXQGo6gjY9Tt7+UkPcOYnh/hvBbCEKif+JEUSijkpR8Z8TxIOKcDOEhRNHXv7ohufg89hllzojm+4ae+wFQFA==",
+      "path": "google.apis.auth/1.35.2",
+      "hashPath": "google.apis.auth.1.35.2.nupkg.sha512"
     },
     "Google.Apis.Classroom.v1/1.34.0.1236": {
       "type": "package",
@@ -5115,12 +5143,19 @@
       "path": "google.apis.classroom.v1/1.34.0.1236",
       "hashPath": "google.apis.classroom.v1.1.34.0.1236.nupkg.sha512"
     },
-    "Google.Apis.Core/1.35.1": {
+    "Google.Apis.Core/1.35.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-xVzrkplgHMOCqFQHIfy9HvJBKNLQaRV+orWFHjpUAtGZe0GghHdQKG5dzLNnYjLQXICBftlK5FWk9AoAotYbYw==",
-      "path": "google.apis.core/1.35.1",
-      "hashPath": "google.apis.core.1.35.1.nupkg.sha512"
+      "sha512": "sha512-MbCIK1KxWT3yQJtuI77NwzGPmNmAaEPSYdhY9ObdypQkxe9yApw75L2V/30/YHslCc1fNrlJ5HRE9DEp90jOIw==",
+      "path": "google.apis.core/1.35.2",
+      "hashPath": "google.apis.core.1.35.2.nupkg.sha512"
+    },
+    "Google.Apis.Drive.v3/1.35.2.1344": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-524P/OOvvmsZeLrtBmr/wmO6Wu1PIKGuJ3ceRRMSItT+5/4DN/H/W72bmaL4c/GImHmu9O992vUKT82xlJW1jQ==",
+      "path": "google.apis.drive.v3/1.35.2.1344",
+      "hashPath": "google.apis.drive.v3.1.35.2.1344.nupkg.sha512"
     },
     "Google.Apis.Sheets.v4/1.34.0.1240": {
       "type": "package",

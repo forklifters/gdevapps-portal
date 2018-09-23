@@ -19,7 +19,7 @@ namespace GdevApps.Portal.Models.TeacherViewModels
 
         public bool IsInClassroom {get; set;}
 
-        public List<string> PrentEmails { get; set; }
+        public List<string> ParentEmails { get; set; }
         public string ClassId { get; set; }
     }
 }

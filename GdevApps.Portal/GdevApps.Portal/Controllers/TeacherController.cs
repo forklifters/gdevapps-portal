@@ -373,7 +373,8 @@ namespace GdevApps.Portal.Controllers
         {
             if (link.StartsWith("https://docs.google.com"))
             {
-                return await _spreadSheetService.IsGradeBook("", await GetAccessTokenAsync(), await GetRefreshTokenAsync(), _userManager.GetUserId(User), link);
+                var isGradeBookAsyncResult = await _spreadSheetService.IsGradeBookAsync("", await GetAccessTokenAsync(), await GetRefreshTokenAsync(), _userManager.GetUserId(User), link);
+                return isGradeBookAsyncResult.ResultObject.Result;
             }
             return false;
         }

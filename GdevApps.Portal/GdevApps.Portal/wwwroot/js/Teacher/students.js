@@ -20,7 +20,7 @@ var Students = (function () {
     function getParentsCell(d) {
 
         var cell = "<div class='col-xs-4'><ul class='pricing-plans__features ng-scope'>";
-        d.prentEmails.forEach(email => {
+        d.parentEmails.forEach(email => {
             //cell = cell + '<li class="list"><a target="_blank" href="https://mail.google.com/mail/?view=cm&fs=1&to=' + email + '">' + email + '</li>'
             cell = cell + '<li class="pricing-plans__feature feature-icon icon--gmail "><a target="_blank" href="https://mail.google.com/mail/?view=cm&fs=1&to=' + email + '">' + email + '</a></li>'
         });

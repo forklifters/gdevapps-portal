@@ -10,7 +10,7 @@ namespace GdevApps.BLL.Models.GDevClassroomService
         public string ParentEmail { get; set; }
         public string Comment { get; set; }
         public string Photo { get; set; }
-        public List<string> PrentEmails { get; set; }
+        public List<string> ParentEmails { get; set; }
         public string ClassId { get; set; }
         public string FinalGrade{get;set;}
         public string GradebookId { get; set; }
