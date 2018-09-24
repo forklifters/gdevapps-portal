@@ -12,6 +12,7 @@ namespace GdevApps.BLL.Models.GDevClassroomService
         public string Photo { get; set; }
         public List<string> ParentEmails { get; set; }
         public string ClassId { get; set; }
+        public string ClassName { get; set; }
         public string FinalGrade{get;set;}
         public string GradebookId { get; set; }
         public bool IsInClassroom {get; set;}

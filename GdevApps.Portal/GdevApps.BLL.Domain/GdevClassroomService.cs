@@ -21,20 +21,17 @@ namespace GdevApps.BLL.Domain
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
-        private readonly IGdevSpreadsheetService _gdevSpreadSheetService;
         private readonly IAspNetUserService _aspUserService;
         private readonly IMapper _mapper;
         public GdevClassroomService(
             IConfiguration configuration,
             ILogger<GdevClassroomService> logger,
-            IGdevSpreadsheetService gdevSpreadSheetService,
             IAspNetUserService aspUserService,
             IMapper mapper
             )
         {
             _logger = logger;
             _configuration = configuration;
-            _gdevSpreadSheetService = gdevSpreadSheetService;
             _aspUserService = aspUserService;
             _mapper = mapper;
         }
@@ -93,7 +90,7 @@ namespace GdevApps.BLL.Domain
             }
             catch (Google.GoogleApiException ex)
             {
-                switch (ex.Error.Code)
+                switch (ex?.Error?.Code)
                 {
                     case 401:
                         _logger.LogError(ex, "An error occurred while retrieving courses from Google Classroom. Token is expired. Refreshing the token and trying again");
@@ -227,7 +224,7 @@ namespace GdevApps.BLL.Domain
             }
             catch (Google.GoogleApiException ex)
             {
-                switch (ex.Error.Code)
+                switch (ex?.Error?.Code)
                 {
                     case 401:
                         _logger.LogError(ex, "An error occurred while retrieving courses from Google Classroom. Token is expired. Refreshing the token and trying again");
@@ -343,7 +340,7 @@ namespace GdevApps.BLL.Domain
             }
             catch (Google.GoogleApiException ex)
             {
-                switch (ex.Error.Code)
+                switch (ex?.Error?.Code)
                 {
                     case 401:
                         _logger.LogError(ex, "An error occurred while retrieving students from Google Classroom. Refreshing the token and trying again");
@@ -393,19 +390,6 @@ namespace GdevApps.BLL.Domain
                         Name = student.Profile.Name.FullName
                     });
                 }
-            }
-
-            //Get students from Gradebook
-            if (!string.IsNullOrEmpty(gradebookId))
-            {
-                var studentsTaskResult = await _gdevSpreadSheetService.GetStudentsFromGradebookAsync(googleCredential, gradebookId, refreshToken, userId);
-                var gradebookStudents = _mapper.Map<IEnumerable<GoogleStudent>>(studentsTaskResult.ResultObject);
-                var gradebookStudentsEmails = gradebookStudents.Select(s => s.Email).ToList();
-                foreach (var student in googleStudents.Where(s => gradebookStudents.Select(g => g.Email).Contains(s.Email)).ToList())
-                {
-                    student.IsInClassroom = true;
-                }
-                googleStudents.AddRange(gradebookStudents.Where(g => !googleStudents.Select(s => s.Email).Contains(g.Email)).ToList());
             }
 
             return new TaskResult<IEnumerable<GoogleStudent>, ICredential>(ResultType.SUCCESS, googleStudents, googleCredential);

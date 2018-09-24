@@ -23,7 +23,8 @@ namespace GdevApps.BLL.Domain
         private readonly IAspNetUserService _aspUserService;
         private readonly IGdevDriveService _driveService;
         private readonly IGdevClassroomService _classroomService;
-        private const string _studentsRange = "A1:K207";
+        private const string _studentsRange = "GradeBook";
+        private const string _settingsCourseRange = "Settings!A48:A49";
 
         public GdevSpreadsheetService(
             IConfiguration configuration,
@@ -110,7 +111,7 @@ namespace GdevApps.BLL.Domain
             }
             catch (Google.GoogleApiException ex)
             {
-                switch (ex.Error.Code)
+                switch (ex?.Error?.Code)
                 {
                     case 401:
                         _logger.LogError(ex, "An error occurred while retrieving courses from Google Classroom. Refreshing the token and trying again");
@@ -201,7 +202,7 @@ namespace GdevApps.BLL.Domain
             }
             catch (Google.GoogleApiException ex)
             {
-                switch (ex.Error.Code)
+                switch (ex?.Error?.Code)
                 {
                     case 401:
                         _logger.LogError(ex, $"An error occurred while retrieving students from GradeBook with id {gradebookId}. Refreshing the token and trying again");
@@ -235,44 +236,127 @@ namespace GdevApps.BLL.Domain
                 throw ex;
             }
 
-            values = response.Values;
-            for (var r = studentIndex; r < values.Count; r++)
+            //Get classId and name
+            SpreadsheetsResource.ValuesResource.GetRequest requestSettings = service.Spreadsheets.Values.Get(gradebookId, _settingsCourseRange);
+            requestSettings.ValueRenderOption = valueRenderOption;
+            Google.Apis.Sheets.v4.Data.ValueRange responseSettings = await request.ExecuteAsync();
+            string className = "";
+            string classId = "";
+            var courseSettings = responseSettings.Values;
+            if (courseSettings != null && courseSettings.Count > 0)
             {
-                var studentName = values[r][2].ToString();
-                if (string.IsNullOrEmpty(studentName))
-                {
-                    continue;
-                }
-
-                var email = values[r].Count >= 5 ? values[r][5].ToString() : "";
-                var comment = values[r].Count >= 9 ? values[r][9].ToString() : "";
-                var finalGrade = values[r].Count >= 3 ? values[r][3].ToString() : "";
-                var photo = values[r][1].ToString();
-                var parentEmail = values[r].Count >= 7 ? values[r][7].ToString() : "";
-
-                gradedebookStudents.Add(new GradebookStudent
-                {
-                    GradebookId = gradebookId,
-                    Email = email,
-                    Comment = comment,
-                    FinalGrade = finalGrade,
-                    Id = values[r][5].ToString(), //email as Id
-                    Photo = photo,
-                    ParentEmails = parentEmail.Split(',').ToList<string>(),
-                    Name = studentName
-                });
+                className = courseSettings[0][0]?.ToString();
+                classId = courseSettings[1][0]?.ToString();
             }
 
-            return new TaskResult<IEnumerable<GradebookStudent>, ICredential>
+            values = response.Values;
+            var subIndex = 13;
+
+            try
             {
-                Result = ResultType.SUCCESS,
-                ResultObject = gradedebookStudents,
-                Credentials = googleCredential
-            };
+                //Get course works
+                var allValues = new object[207][];
+                for (var a = 0; a < values.Count; a++)
+                {
+                    var newArrey = new object[213];
+                    Array.Copy(values[a].ToArray(), newArrey, values[a].Count);
+                    allValues[a] = newArrey;
+                }
+
+                var courseWorks = new HashSet<GradebookCourseWork>();
+                for (var c = subIndex; c < 213; c += 2)
+                {
+                    string title = allValues[0][c]?.ToString();
+                    if (allValues[0][c] == null || string.IsNullOrEmpty(title))
+                    {
+                        continue;
+                    }
+
+                    string date = allValues[1][c]?.ToString();
+                    string creationDate = date;
+                    if (string.IsNullOrEmpty(date))
+                    {
+                        creationDate = DateTime.UtcNow.ToString();
+                    }
+                    string maxPoints = allValues[2][c]?.ToString();
+                    string weight = allValues[3][c]?.ToString();
+                    string category = allValues[4][c]?.ToString();
+                    string term = allValues[4][c + 1]?.ToString();
+
+                    courseWorks.Add(new GradebookCourseWork()
+                    {
+                        Title = title,
+                        DueDate = date,
+                        CreationTime = creationDate,
+                        MaxPoints = maxPoints,
+                        Weight = weight,
+                        Category = category,
+                        ClassId = classId,
+                        IdInGradeBook = c.ToString(),
+                        IdInClassroom = "",
+                        Term = term
+                    });
+                }
+                //Get students
+                for (var r = studentIndex; r < values.Count; r++)
+                {
+                    var studentName = allValues[r][2]?.ToString();
+                    if (string.IsNullOrEmpty(studentName))
+                    {
+                        continue;
+                    }
+
+                    var email = allValues[r][5].ToString();
+                    var comment = allValues[r][9].ToString();
+                    var finalGrade = allValues[r][3].ToString();
+                    var photo = allValues[r][1].ToString();
+                    var parentEmail = allValues[r][7].ToString();
+                    var studentSubmissions = new List<GradebookStudentSubmission>();
+                    //Get sunmissions
+                    for (var c = subIndex; c < values[r].Count; c += 2)
+                    {
+                        var grade = allValues[r][c];
+                        studentSubmissions.Add(new GradebookStudentSubmission()
+                        {
+                            ClassId = classId,
+                            Grade = grade != null ? grade.ToString() : "",
+                            CourseWorkId = c.ToString(),
+                            StudentId = studentName,
+                            Email = email
+                        });
+                    }
+
+                    gradedebookStudents.Add(new GradebookStudent
+                    {
+                        GradebookId = gradebookId,
+                        Email = email,
+                        Comment = comment,
+                        FinalGrade = finalGrade,
+                        Id = allValues[r][5]?.ToString(), //email as Id
+                        Photo = photo,
+                        ParentEmails = parentEmail.Split(',').ToList<string>(),
+                        Name = studentName,
+                        ClassId = classId,
+                        ClassName = className,
+                        Submissions = studentSubmissions,
+                        CourseWorks = courseWorks
+                    });
+                }
+
+                return new TaskResult<IEnumerable<GradebookStudent>, ICredential>
+                {
+                    Result = ResultType.SUCCESS,
+                    ResultObject = gradedebookStudents,
+                    Credentials = googleCredential
+                };
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
         }
         public async Task<TaskResult<GradebookStudent, ICredential>> GetStudentByEmailFromGradebookAsync(string studentEmail, ICredential googleCredential, string gradebookId, string refreshToken, string userId)
         {
-            
             SheetsService service;
             SpreadsheetsResource.ValuesResource.GetRequest request;
             Google.Apis.Sheets.v4.Data.ValueRange response;
@@ -292,15 +376,18 @@ namespace GdevApps.BLL.Domain
             {
                 request = service.Spreadsheets.Values.Get(gradebookId, _studentsRange);
                 request.ValueRenderOption = valueRenderOption;
-                response = request.Execute();
+                response = await request.ExecuteAsync();
             }
             catch (Google.GoogleApiException ex)
             {
-                switch (ex.Error.Code)
+                switch (ex?.Error?.Code)
                 {
                     case 401:
                         _logger.LogError(ex, $"An error occurred while retrieving students from GradeBook with id {gradebookId}. Token has expired. Refreshing the token and trying again");
-                        var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
+                        var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse
+                        {
+                            RefreshToken = refreshToken
+                        };
                         googleCredential = new UserCredential(new GoogleAuthorizationCodeFlow(
                            new GoogleAuthorizationCodeFlow.Initializer
                            {
@@ -363,6 +450,17 @@ namespace GdevApps.BLL.Domain
                     Name = studentName
                 };
 
+                //Get classId and name
+                request = service.Spreadsheets.Values.Get(gradebookId, _settingsCourseRange);
+                request.ValueRenderOption = valueRenderOption;
+                response = await request.ExecuteAsync();
+                var courseSettings = response.Values;
+                if (courseSettings != null && courseSettings.Count > 0)
+                {
+                    student.ClassName = courseSettings[0][0]?.ToString();
+                    student.ClassId = courseSettings[1][0]?.ToString();
+                }
+
                 return new TaskResult<GradebookStudent, ICredential>
                 {
                     Credentials = googleCredential,
@@ -379,68 +477,204 @@ namespace GdevApps.BLL.Domain
         }
         public async Task<TaskResult<BoolResult, ICredential>> SaveStudentIntoParentGradebookAsync(GradebookStudent student, string parentGradebookId, ICredential googleCredential, string refreshToken, string userId)
         {
-             if (student == null ||
-                string.IsNullOrEmpty(parentGradebookId))
+            if (student == null)
                 return new TaskResult<BoolResult, ICredential>
                 {
                     Result = ResultType.EMPTY,
                     ResultObject = new BoolResult(false)
                 };
-
-            var rootFolderIdResult = await _driveService.GetRootFolderIdAsync(googleCredential, refreshToken, userId);
-            googleCredential = rootFolderIdResult.Credentials;
-            var isFileExistsResult = await _driveService.IsFileExistsAsync(parentGradebookId, googleCredential, refreshToken, userId);
-            googleCredential = isFileExistsResult.Credentials;
-
-            if (isFileExistsResult.Result == ResultType.SUCCESS && !isFileExistsResult.ResultObject.Result)
+            try
             {
 
-            }
-            else
-            {
-                var googleClassResult = await _classroomService.GetClassByIdAsync(student.ClassId, googleCredential, refreshToken, userId);
-                googleCredential = googleClassResult.Credentials;
+                var rootFolderIdResult = await _driveService.GetRootFolderIdAsync(googleCredential, refreshToken, userId);
+                googleCredential = rootFolderIdResult.Credentials;
+                var isFileExistsResult = await _driveService.IsFileExistsAsync(parentGradebookId, googleCredential, refreshToken, userId);
+                googleCredential = isFileExistsResult.Credentials;
 
-                string parentGradebookName = "";
-                if (googleClassResult.Result == ResultType.SUCCESS && googleClassResult.ResultObject == null)
+                if (isFileExistsResult.Result == ResultType.SUCCESS && isFileExistsResult.ResultObject.Result)
                 {
-                    var studentGradebookResult = await _classroomService.GetGradebookByIdAsync(student.ClassId, student.GradebookId);
-                    parentGradebookName = $"{studentGradebookResult.ResultObject.Name}_{student.Email}";
+                    //TEST
+
                 }
                 else
                 {
-                    parentGradebookName = $"{googleClassResult.ResultObject.Name}_{student.Email}";
-                }
+                    var googleClassResult = await _classroomService.GetClassByIdAsync(student.ClassId, googleCredential, refreshToken, userId);
+                    googleCredential = googleClassResult.Credentials;
 
-                var innerFolderIdResult = await _driveService.CreateInnerFolderAsync(rootFolderIdResult.ResultObject, student.Email, googleCredential, refreshToken, userId);
-                googleCredential = innerFolderIdResult.Credentials;
-                var service = new SheetsService(new BaseClientService.Initializer()
-                {
-                    HttpClientInitializer = googleCredential,
-                    ApplicationName = _configuration["ApplicationName"]
-                });
-
-                var newSpreadSheet = await service.Spreadsheets.Create(new Spreadsheet()
-                {
-                    Properties = new SpreadsheetProperties()
+                    string parentGradebookName = "";
+                    if (googleClassResult.Result == ResultType.SUCCESS && googleClassResult.ResultObject == null)
                     {
-                        Title = parentGradebookName
+                        var studentGradebookResult = await _classroomService.GetGradebookByIdAsync(student.ClassId, student.GradebookId);
+                        parentGradebookName = $"{studentGradebookResult.ResultObject.Name}_{student.Email}";
                     }
-                }).ExecuteAsync();
-                //get values
-                //TODO: Check the range
-                string parentGradebookRange = "Data!A1:N207";
-                var parentGradeBookRequest = await service.Spreadsheets.Values.Get(newSpreadSheet.SpreadsheetId, parentGradebookRange).ExecuteAsync();
-                //IList<IList<Object>> values = parentGradeBookRequest.Values;
-                //2 - email, name
-                var numberOfCourseWorks = student.GradebookCourseWorks.Count();
+                    else
+                    {
+                        parentGradebookName = $"{googleClassResult.ResultObject.Name}_{student.Email}";
+                    }
 
+                    var innerFolderIdResult = await _driveService.CreateInnerFolderAsync(rootFolderIdResult.ResultObject, student.Email, googleCredential, refreshToken, userId);
+                    googleCredential = innerFolderIdResult.Credentials;
+                    var service = new SheetsService(new BaseClientService.Initializer()
+                    {
+                        HttpClientInitializer = googleCredential,
+                        ApplicationName = _configuration["ApplicationName"]
+                    });
 
+                    var newSpreadSheet = await service.Spreadsheets.Create(new Spreadsheet()
+                    {
+                        Properties = new SpreadsheetProperties()
+                        {
+                            Title = parentGradebookName
+                        }
+                    }).ExecuteAsync();
 
+                    BatchUpdateSpreadsheetRequest updateSpreadsheetRequest = new BatchUpdateSpreadsheetRequest()
+                    {
+                        Requests = new List<Request>
+                    {
+                        new Request()
+                        {
+                            UpdateSheetProperties = new UpdateSheetPropertiesRequest(){
+                                Properties = new SheetProperties(){
+                                    Index = 0,
+                                    Title = "GradeBook"
+                                },
+                                Fields = "title"
+                            }
+                        }
+                    },
+                        ResponseIncludeGridData = false,
+                        IncludeSpreadsheetInResponse = false
+                    };
+                    await service.Spreadsheets.BatchUpdate(updateSpreadsheetRequest, newSpreadSheet.SpreadsheetId).ExecuteAsync();
 
+                    //get values
+                    //TODO: Check the range
+                    string parentGradebookRange = "GradeBook";
+                    var parentGradeBookRequest = await service.Spreadsheets.Values.Get(newSpreadSheet.SpreadsheetId, parentGradebookRange).ExecuteAsync();
+                    var numberOfCourseWorks = student.Submissions.Count();
+                    /*
+                    Col #1
+                    Student Name
+                    Col #2
+                    Student Email
+                    Col # 3
+                    Assignment title
+                    Col # 4
+                    Date
+                    Col # 5
+                    Total mark
+                    Col # 6
+                    Weight
+                    Col # 7
+                    Mark
+                     */
+                    IList<IList<object>> values = new object[7][]{
+                    new string[2+numberOfCourseWorks],
+                    new string[2+numberOfCourseWorks],
+                    new string[2+numberOfCourseWorks],
+                    new string[2+numberOfCourseWorks],
+                    new string[2+numberOfCourseWorks],
+                    new string[2+numberOfCourseWorks],
+                    new string[2+numberOfCourseWorks]
+                };
+
+                    var studentCourseWorks = student.Submissions.ToArray();
+
+                    for (var i = 0; i < values.Count; i++)
+                    {
+                        for (var j = 0; j < values[i].Count; j++)
+                        {
+                            if (i == 0)
+                            {
+                                var str = "";
+                                switch (j)
+                                {
+                                    case 0:
+                                        str = "Student Name";
+                                        break;
+                                    case 1:
+                                        str = "Student Email";
+                                        break;
+                                    case 2:
+                                        str = "Assignment title";
+                                        break;
+                                    case 3:
+                                        str = "Date";
+                                        break;
+                                    case 4:
+                                        str = "Total Mark";
+                                        break;
+                                    case 5:
+                                        str = "Weight";
+                                        break;
+                                    case 6:
+                                        str = "Mark";
+                                        break;
+                                }
+
+                                values[i][j] = str;
+                            }
+                            else if (i > 0 && i < 2)
+                            {
+                                var str = "";
+                                switch (j)
+                                {
+                                    case 0:
+                                        str = student.Name;
+                                        break;
+                                    case 1:
+                                        str = student.Email;
+                                        break;
+                                }
+
+                                values[i][j] = str;
+                            }
+                            else if (i >= 2)
+                            {
+                                var str = "";
+                                // switch (j)
+                                // {
+                                //     case 2:
+                                //         str = studentCourseWorks[j - 2].Title;
+                                //         break;
+                                //     case 3:
+                                //         str = studentCourseWorks[j - 2].DueDate;
+                                //         break;
+                                //     case 4:
+                                //         str = studentCourseWorks[j - 2].TotalPoints.HasValue ? studentCourseWorks[j - 2].TotalPoints.ToString() : "";
+                                //         break;
+                                //     case 5:
+                                //         str = studentCourseWorks[j - 2].Weight;
+                                //         break;
+                                //     case 6:
+                                //         str = studentCourseWorks[j - 2].Mark;
+                                //         break;
+                                // }
+
+                                values[i][j] = str;
+                            }
+                        }
+                    }
+
+                    var valueRange = new ValueRange()
+                    {
+                        Range = parentGradebookRange,
+                        MajorDimension = "ROWS",
+                        Values = values
+                    };
+
+                    var moveResult = await _driveService.MoveFileToFolderAsync(newSpreadSheet.SpreadsheetId, innerFolderIdResult.ResultObject, googleCredential, refreshToken, userId);
+
+                    return moveResult;
+                }
+            }
+            catch (Exception exception)
+            {
+                throw exception;
             }
 
-                throw new NotFiniteNumberException();
+            throw new NotFiniteNumberException();
         }
 
         #region Private methods

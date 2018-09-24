@@ -18,7 +18,7 @@ namespace GdevApps.BLL.Domain
 {
     public class GdevDriveService : IGdevDriveService
     {
-        private const string _mainFolderName = "Gdevapps_Portal";
+        private const string _mainFolderName = "Gdevapps Google Portal";
         private readonly IAspNetUserService _aspUserService;
         private readonly IConfiguration _configuration;
 
@@ -86,7 +86,7 @@ namespace GdevApps.BLL.Domain
             }
             catch (Google.GoogleApiException exception)
             {
-                switch (exception.Error.Code)
+                switch (exception?.Error?.Code)
                 {
                     case 401:
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
@@ -133,7 +133,7 @@ namespace GdevApps.BLL.Domain
             }
             catch (Google.GoogleApiException exception)
             {
-                switch (exception.Error.Code)
+                switch (exception?.Error?.Code)
                 {
                     case 401:
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
@@ -199,10 +199,10 @@ namespace GdevApps.BLL.Domain
             }
             catch (Google.GoogleApiException exception)
             {
-                switch (exception.Error.Code)
+                switch (exception?.Error?.Code)
                 {
                     case 404:
-                        return new TaskResult<BoolResult, ICredential>(ResultType.SUCCESS, new BoolResult(false), googleCredential);
+                        return new TaskResult<BoolResult, ICredential>(ResultType.ERROR, new BoolResult(false), googleCredential);
                     case 401:
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
                         googleCredential = new UserCredential(new GoogleAuthorizationCodeFlow(
@@ -226,7 +226,8 @@ namespace GdevApps.BLL.Domain
                         await UpdateAllTokens(userId, googleCredential as UserCredential);
                         return new TaskResult<BoolResult, ICredential>(ResultType.SUCCESS, new BoolResult(file.Id != null), googleCredential);
 
-                    default: throw exception;
+                    default: 
+                    return new TaskResult<BoolResult, ICredential>(ResultType.ERROR, new BoolResult(false), googleCredential);
                 }
             }
             catch (Exception err)
@@ -261,7 +262,7 @@ namespace GdevApps.BLL.Domain
             }
             catch (Google.GoogleApiException exception)
             {
-                switch (exception.Error.Code)
+                switch (exception?.Error?.Code)
                 {
                     case 401:
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };

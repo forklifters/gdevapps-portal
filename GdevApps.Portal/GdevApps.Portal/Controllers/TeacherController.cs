@@ -22,6 +22,7 @@ using GdevApps.BLL.Contracts;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using GdevApps.BLL.Models.GDevClassroomService;
 
 namespace GdevApps.Portal.Controllers
 {
@@ -73,20 +74,40 @@ namespace GdevApps.Portal.Controllers
             _spreadSheetService = spreadSheetService;
         }
 
-        // [HttpGet]
-        // public async Task<IActionResult> Test()
-        // {
-        //     try{
-        //         var gradeBookLink = "https://docs.google.com/spreadsheets/d/1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg/edit?usp=drive_web&ouid=106890447120707259670";
-        //         var gradebookId = "1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg";
-        //         var result = await _spreadSheetService.GetStudentsFromGradebook(await GetAccessTokenAsync(),
-        //          gradebookId, await GetRefreshTokenAsync());
-        //         return Ok(await GetAllUserTokens());
-        //     }catch(Exception ex)
-        //     {
-        //         return BadRequest(ex);
-        //     }
-        // }
+        [HttpGet]
+        public async Task<IActionResult> Test()
+        {
+            try
+            {
+                var gradeBookLink = "https://docs.google.com/spreadsheets/d/1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg/edit?usp=drive_web&ouid=106890447120707259670";
+                var gradebookId = "1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg";
+                //var gradebookId = "";
+                var userId = _userManager.GetUserId(User);
+                var students = await _spreadSheetService.GetStudentsFromGradebookAsync(
+                    await GetAccessTokenAsync(),
+                    gradebookId,
+                    await GetRefreshTokenAsync(),
+                    userId
+                );
+
+
+                // var student = await _spreadSheetService.GetStudentByEmailFromGradebookAsync("paulivankbs@gmail.com", 
+                // await GetAccessTokenAsync(),
+                // "1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg",
+                // await GetRefreshTokenAsync(),
+                // _userManager.GetUserId(User));
+                // var result = await _spreadSheetService.SaveStudentIntoParentGradebookAsync(student.ResultObject,
+                //  gradebookId,
+                // await GetAccessTokenAsync(),
+                //  await GetRefreshTokenAsync(),
+                // _userManager.GetUserId(User));
+                return Ok(students);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
 
         public IActionResult ClassesAsync()
         {
@@ -99,32 +120,6 @@ namespace GdevApps.Portal.Controllers
             try
             {
                  List<ClassesViewModel> classes = await GetClassesAsync();
-                // List<ClassesViewModel> classes = new List<ClassesViewModel>
-                // {
-                //     new ClassesViewModel{
-                //         CourseWorksCount = 10,
-                //         Description = "This is the desciption",
-                //         StudentsCount = 5,
-                //         Name = "Math",
-                //         Id = "2",
-                //         ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "2").ToList()
-                //     },
-                //     new ClassesViewModel{
-                //         CourseWorksCount = 5,
-                //         StudentsCount = 10,
-                //         Name = "English",
-                //         Id = "1",
-                //         ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "1").ToList()
-                //     },
-                //     new ClassesViewModel{
-                //         CourseWorksCount = 5,
-                //         Description = "This is the desciption for music",
-                //         StudentsCount = 5,
-                //         Name = "Music",
-                //         Id = "3",
-                //         ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "3").ToList()
-                //     }
-                // };
                 return Ok(new {data = classes});
             }
             catch (Exception ex)
@@ -138,69 +133,36 @@ namespace GdevApps.Portal.Controllers
         {
             try
             {
-                var studentsList = _mapper.Map<List<StudentsViewModel>>(
-                    await _classroomService.GetStudentsByClassIdAndGradebookIdAsync(await GetAccessTokenAsync(),
+                var userId = _userManager.GetUserId(User);
+                var googleClassroomStudentResult = await _classroomService.GetStudentsByClassIdAndGradebookIdAsync(await GetAccessTokenAsync(),
                                                                                     classId,
                                                                                     "1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg",
                                                                                     await GetRefreshTokenAsync(),
-                                                                                    _userManager.GetUserId(User))
-                );
+                                                                                    userId);
+                var googleStudents = googleClassroomStudentResult.ResultObject.ToList();
+                //Get students from Gradebook
+                if (!string.IsNullOrEmpty(classId))
+                {
+                    var studentsTaskResult = await _spreadSheetService.GetStudentsFromGradebookAsync(googleClassroomStudentResult.Credentials,
+                     classId,
+                      await GetRefreshTokenAsync(),
+                       userId);
+                    var gradebookStudents = _mapper.Map<IEnumerable<GoogleStudent>>(studentsTaskResult.ResultObject);
+                    var gradebookStudentsEmails = gradebookStudents.Select(s => s.Email).ToList();
+                    foreach (var student in googleStudents.Where(s => gradebookStudents.Select(g => g.Email).Contains(s.Email)).ToList())
+                    {
+                        student.IsInClassroom = true;
+                    }
+
+                    googleStudents.AddRange(gradebookStudents.Where(g => !googleStudents.Select(s => s.Email).Contains(g.Email)).ToList());
+                }
+
+                var studentsList = _mapper.Map<List<StudentsViewModel>>(googleStudents);
 
                 return Ok(new { data = studentsList });
-
-
-                // var allStudents = new List<StudentsViewModel>(){
-                //     new StudentsViewModel{
-                //         Name = "Pasha",
-                //         Email = "pavlo.karasyuk@gmail.com",
-                //         ClassId = "1",
-                //         PrentEmails = new List<string>{"parentEmail@example.xyz","parentEmail2@example.xyz"},
-                //         Id = "1-1",
-                //         IsInClassroom = true
-                //     },
-                //      new StudentsViewModel{
-                //         Name = "Sasha",
-                //         Email = "Sasha@gmail.com",
-                //         ClassId = "1",
-                //         PrentEmails = new List<string>{"parentEmail@example.xyz","parentEmail2@example.xyz"},
-                //         Id = "1101",
-                //         IsInClassroom = false
-
-                //     },
-                //      new StudentsViewModel{
-                //         Name = "Dasha",
-                //         Email = "Dasha@gmail.com",
-                //         ClassId = "1",
-                //         PrentEmails = new List<string>{"parentEmail@example.xyz","parentEmail2@example.xyz"},
-                //         Id = "1102",
-                //         IsInClassroom = true
-                //     },
-                //      new StudentsViewModel{
-                //         Name = "Alex",
-                //         Email = "Alex@gmail.com",
-                //         ClassId = "2",
-                //         PrentEmails = new List<string>{"parentEmail@example.xyz","parentEmail2@example.xyz"},
-                //         Id = "1103",
-                //         IsInClassroom = false
-                //     },
-                //      new StudentsViewModel{
-                //         Name = "Pasha",
-                //         Email = "pavlo.karasyuk@gmail.com",
-                //         ClassId = "3",
-                //         PrentEmails = new List<string>{"parentEmail@example.xyz","parentEmail2@example.xyz"},
-                //         Id = "1104",
-                //         IsInClassroom = true
-                //     }
-                //};
-
-                // if(classId == "0")
-                // {
-                //     return Ok(new { data = allStudents });
-                // }
-
-                // var filteredStudents = allStudents.Where(s => s.ClassId == classId).ToList();
-                // return Ok(new {data = filteredStudents});
-            }catch(Exception ex){
+            }
+            catch (Exception ex)
+            {
                  return BadRequest(ex);
             }
         }
@@ -211,34 +173,6 @@ namespace GdevApps.Portal.Controllers
             try
             {
                 var classes = await GetClassesAsync();
-
-                // List<ClassesViewModel> classes = new List<ClassesViewModel>
-                // {
-                //     new ClassesViewModel{
-                //         CourseWorksCount = 10,
-                //         Description = "This is the desciption",
-                //         StudentsCount = 5,
-                //         Name = "Math",
-                //         Id = "2",
-                //         ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "2").ToList()
-                //     },
-                //     new ClassesViewModel{
-                //         CourseWorksCount = 5,
-                //         StudentsCount = 10,
-                //         Name = "English",
-                //         Id = "1",
-                //         ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "1").ToList()
-                //     },
-                //     new ClassesViewModel{
-                //         CourseWorksCount = 5,
-                //         Description = "This is the desciption for music",
-                //         StudentsCount = 5,
-                //         Name = "Music",
-                //         Id = "3",
-                //         ClassroomSheets = Singleton.Instance.Sheets.Where(s => s.ClassroomId == "3").ToList()
-                //     }
-                // };
-
                 var classesList = new SelectList(classes, "Id", "Name");
 
                 return View("ClassesForStudents",new ClassesForStudentsViewModel{Classes = classesList});

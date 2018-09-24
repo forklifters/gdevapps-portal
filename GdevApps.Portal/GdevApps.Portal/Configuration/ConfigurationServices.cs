@@ -30,6 +30,7 @@ namespace GdevApps.Portal.Configuration
             services.AddScoped<IAspNetUserService, AspNetUserService>();
             services.AddScoped<IGdevClassroomService, GdevClassroomService>();
             services.AddScoped<IGdevSpreadsheetService, GdevSpreadsheetService>();
+            services.AddScoped<IGdevDriveService, GdevDriveService>();
         }
 
         public static void AddDatabaseContexts(this IServiceCollection services,
