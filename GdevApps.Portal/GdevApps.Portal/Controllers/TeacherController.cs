@@ -83,25 +83,25 @@ namespace GdevApps.Portal.Controllers
                 var gradebookId = "1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg";
                 //var gradebookId = "";
                 var userId = _userManager.GetUserId(User);
-                var students = await _spreadSheetService.GetStudentsFromGradebookAsync(
-                    await GetAccessTokenAsync(),
-                    gradebookId,
-                    await GetRefreshTokenAsync(),
-                    userId
-                );
+                // var students = await _spreadSheetService.GetStudentsFromGradebookAsync(
+                //     await GetAccessTokenAsync(),
+                //     gradebookId,
+                //     await GetRefreshTokenAsync(),
+                //     userId
+                // );
 
 
-                // var student = await _spreadSheetService.GetStudentByEmailFromGradebookAsync("paulivankbs@gmail.com", 
-                // await GetAccessTokenAsync(),
-                // "1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg",
-                // await GetRefreshTokenAsync(),
-                // _userManager.GetUserId(User));
-                // var result = await _spreadSheetService.SaveStudentIntoParentGradebookAsync(student.ResultObject,
-                //  gradebookId,
-                // await GetAccessTokenAsync(),
-                //  await GetRefreshTokenAsync(),
-                // _userManager.GetUserId(User));
-                return Ok(students);
+                var student = await _spreadSheetService.GetStudentByEmailFromGradebookAsync("paulivankbs@gmail.com", 
+                await GetAccessTokenAsync(),
+                gradebookId,
+                await GetRefreshTokenAsync(),
+                _userManager.GetUserId(User));
+                var result = await _spreadSheetService.SaveStudentIntoParentGradebookAsync(student.ResultObject,
+                 "",
+                await GetAccessTokenAsync(),
+                 await GetRefreshTokenAsync(),
+                _userManager.GetUserId(User));
+                return Ok(student);
             }
             catch (Exception ex)
             {

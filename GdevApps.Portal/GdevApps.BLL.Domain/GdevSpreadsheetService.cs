@@ -239,7 +239,7 @@ namespace GdevApps.BLL.Domain
             //Get classId and name
             SpreadsheetsResource.ValuesResource.GetRequest requestSettings = service.Spreadsheets.Values.Get(gradebookId, _settingsCourseRange);
             requestSettings.ValueRenderOption = valueRenderOption;
-            Google.Apis.Sheets.v4.Data.ValueRange responseSettings = await request.ExecuteAsync();
+            Google.Apis.Sheets.v4.Data.ValueRange responseSettings = await requestSettings.ExecuteAsync();
             string className = "";
             string classId = "";
             var courseSettings = responseSettings.Values;
@@ -360,7 +360,6 @@ namespace GdevApps.BLL.Domain
             SheetsService service;
             SpreadsheetsResource.ValuesResource.GetRequest request;
             Google.Apis.Sheets.v4.Data.ValueRange response;
-            List<GradebookStudent> gradedebookStudents = new List<GradebookStudent>();
             IList<IList<object>> values;
             // Create Classroom API service.
             service = new SheetsService(new BaseClientService.Initializer()
@@ -418,55 +417,127 @@ namespace GdevApps.BLL.Domain
                 throw ex;
             }
 
-            values = response.Values;
-            for (var r = studentIndex; r < values.Count; r++)
+            //Get classId and name
+            SpreadsheetsResource.ValuesResource.GetRequest requestSettings = service.Spreadsheets.Values.Get(gradebookId, _settingsCourseRange);
+            requestSettings.ValueRenderOption = valueRenderOption;
+            Google.Apis.Sheets.v4.Data.ValueRange responseSettings = await requestSettings.ExecuteAsync();
+            string className = "";
+            string classId = "";
+            var courseSettings = responseSettings.Values;
+            if (courseSettings != null && courseSettings.Count > 0)
             {
-                var studentName = values[r][2].ToString();
-                if (string.IsNullOrEmpty(studentName))
+                className = courseSettings[0][0]?.ToString();
+                classId = courseSettings[1][0]?.ToString();
+            }
+
+            values = response.Values;
+            var subIndex = 13;
+
+            try
+            {
+                //Get course works
+                var allValues = new object[207][];
+                for (var a = 0; a < values.Count; a++)
                 {
-                    continue;
+                    var newArrey = new object[213];
+                    Array.Copy(values[a].ToArray(), newArrey, values[a].Count);
+                    allValues[a] = newArrey;
                 }
 
-                var email = values[r].Count >= 5 ? values[r][5].ToString() : "";
-                if (email != studentEmail)
+                var courseWorks = new HashSet<GradebookCourseWork>();
+                for (var c = subIndex; c < 213; c += 2)
                 {
-                    continue;
+                    string title = allValues[0][c]?.ToString();
+                    if (allValues[0][c] == null || string.IsNullOrEmpty(title))
+                    {
+                        continue;
+                    }
+
+                    string date = allValues[1][c]?.ToString();
+                    string creationDate = date;
+                    if (string.IsNullOrEmpty(date))
+                    {
+                        creationDate = DateTime.UtcNow.ToString();
+                    }
+                    string maxPoints = allValues[2][c]?.ToString();
+                    string weight = allValues[3][c]?.ToString();
+                    string category = allValues[4][c]?.ToString();
+                    string term = allValues[4][c + 1]?.ToString();
+
+                    courseWorks.Add(new GradebookCourseWork()
+                    {
+                        Title = title,
+                        DueDate = date,
+                        CreationTime = creationDate,
+                        MaxPoints = maxPoints,
+                        Weight = weight,
+                        Category = category,
+                        ClassId = classId,
+                        IdInGradeBook = c.ToString(),
+                        IdInClassroom = "",
+                        Term = term
+                    });
                 }
-
-                var comment = values[r].Count >= 9 ? values[r][9].ToString() : "";
-                var finalGrade = values[r].Count >= 3 ? values[r][3].ToString() : "";
-                var photo = values[r][1].ToString();
-                var parentEmail = values[r].Count >= 7 ? values[r][7].ToString() : "";
-
-                var student = new GradebookStudent
+                //Get students
+                for (var r = studentIndex; r < values.Count; r++)
                 {
-                    GradebookId = gradebookId,
-                    Email = email,
-                    Comment = comment,
-                    FinalGrade = finalGrade,
-                    Id = values[r][5].ToString(), //email as Id
-                    Photo = photo,
-                    ParentEmails = parentEmail.Split(',').ToList<string>(),
-                    Name = studentName
-                };
+                    var studentName = allValues[r][2]?.ToString();
+                    if (string.IsNullOrEmpty(studentName))
+                    {
+                        continue;
+                    }
 
-                //Get classId and name
-                request = service.Spreadsheets.Values.Get(gradebookId, _settingsCourseRange);
-                request.ValueRenderOption = valueRenderOption;
-                response = await request.ExecuteAsync();
-                var courseSettings = response.Values;
-                if (courseSettings != null && courseSettings.Count > 0)
-                {
-                    student.ClassName = courseSettings[0][0]?.ToString();
-                    student.ClassId = courseSettings[1][0]?.ToString();
+                    var email = allValues[r][5].ToString();
+                    if (email != studentEmail)
+                    {
+                        continue;
+                    }
+
+                    var comment = allValues[r][9].ToString();
+                    var finalGrade = allValues[r][3].ToString();
+                    var photo = allValues[r][1].ToString();
+                    var parentEmail = allValues[r][7].ToString();
+                    var studentSubmissions = new List<GradebookStudentSubmission>();
+                    //Get sunmissions
+                    for (var c = subIndex; c < values[r].Count; c += 2)
+                    {
+                        var grade = allValues[r][c];
+                        studentSubmissions.Add(new GradebookStudentSubmission()
+                        {
+                            ClassId = classId,
+                            Grade = grade != null ? grade.ToString() : "",
+                            CourseWorkId = c.ToString(),
+                            StudentId = studentName,
+                            Email = email
+                        });
+                    }
+
+                    return new TaskResult<GradebookStudent, ICredential>
+                    {
+                        Result = ResultType.SUCCESS,
+                        Credentials = googleCredential,
+                        ResultObject = new GradebookStudent
+                        {
+                            GradebookId = gradebookId,
+                            Email = email,
+                            Comment = comment,
+                            FinalGrade = finalGrade,
+                            Id = allValues[r][5]?.ToString(), //email as Id
+                            Photo = photo,
+                            ParentEmails = parentEmail.Split(',').ToList<string>(),
+                            Name = studentName,
+                            ClassId = classId,
+                            ClassName = className,
+                            Submissions = studentSubmissions,
+                            CourseWorks = courseWorks
+                        }
+
+                    };
                 }
-
-                return new TaskResult<GradebookStudent, ICredential>
-                {
-                    Credentials = googleCredential,
-                    Result = ResultType.SUCCESS,
-                    ResultObject = student
-                };
+            }
+            catch (Exception exception)
+            {
+                throw exception;
             }
 
             return new TaskResult<GradebookStudent, ICredential>
@@ -552,110 +623,46 @@ namespace GdevApps.BLL.Domain
                     //TODO: Check the range
                     string parentGradebookRange = "GradeBook";
                     var parentGradeBookRequest = await service.Spreadsheets.Values.Get(newSpreadSheet.SpreadsheetId, parentGradebookRange).ExecuteAsync();
-                    var numberOfCourseWorks = student.Submissions.Count();
-                    /*
-                    Col #1
-                    Student Name
-                    Col #2
-                    Student Email
-                    Col # 3
-                    Assignment title
-                    Col # 4
-                    Date
-                    Col # 5
-                    Total mark
-                    Col # 6
-                    Weight
-                    Col # 7
-                    Mark
-                     */
-                    IList<IList<object>> values = new object[7][]{
-                    new string[2+numberOfCourseWorks],
-                    new string[2+numberOfCourseWorks],
-                    new string[2+numberOfCourseWorks],
-                    new string[2+numberOfCourseWorks],
-                    new string[2+numberOfCourseWorks],
-                    new string[2+numberOfCourseWorks],
-                    new string[2+numberOfCourseWorks]
-                };
-
-                    var studentCourseWorks = student.Submissions.ToArray();
-
-                    for (var i = 0; i < values.Count; i++)
+                    var numberOfCourseWorks = student.CourseWorks != null ? student.CourseWorks.Count() : 0;
+                    IList<IList<object>> values = new object[2 + numberOfCourseWorks][];
+                    values[0] = new object[8]{
+                        "Student name",
+                        student.Name,
+                        "Max points",
+                        "Weight",
+                        "Category",
+                        "Term",
+                        "Date",
+                        "Grade"
+                    };
+                    values[1] = new object[8]{
+                        "Student email",
+                        student.Email,
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    };
+                    var index = 2;
+                    var studentCourseWorks = student.CourseWorks.ToList();
+                    foreach (var cw in studentCourseWorks)
                     {
-                        for (var j = 0; j < values[i].Count; j++)
-                        {
-                            if (i == 0)
-                            {
-                                var str = "";
-                                switch (j)
-                                {
-                                    case 0:
-                                        str = "Student Name";
-                                        break;
-                                    case 1:
-                                        str = "Student Email";
-                                        break;
-                                    case 2:
-                                        str = "Assignment title";
-                                        break;
-                                    case 3:
-                                        str = "Date";
-                                        break;
-                                    case 4:
-                                        str = "Total Mark";
-                                        break;
-                                    case 5:
-                                        str = "Weight";
-                                        break;
-                                    case 6:
-                                        str = "Mark";
-                                        break;
-                                }
-
-                                values[i][j] = str;
-                            }
-                            else if (i > 0 && i < 2)
-                            {
-                                var str = "";
-                                switch (j)
-                                {
-                                    case 0:
-                                        str = student.Name;
-                                        break;
-                                    case 1:
-                                        str = student.Email;
-                                        break;
-                                }
-
-                                values[i][j] = str;
-                            }
-                            else if (i >= 2)
-                            {
-                                var str = "";
-                                // switch (j)
-                                // {
-                                //     case 2:
-                                //         str = studentCourseWorks[j - 2].Title;
-                                //         break;
-                                //     case 3:
-                                //         str = studentCourseWorks[j - 2].DueDate;
-                                //         break;
-                                //     case 4:
-                                //         str = studentCourseWorks[j - 2].TotalPoints.HasValue ? studentCourseWorks[j - 2].TotalPoints.ToString() : "";
-                                //         break;
-                                //     case 5:
-                                //         str = studentCourseWorks[j - 2].Weight;
-                                //         break;
-                                //     case 6:
-                                //         str = studentCourseWorks[j - 2].Mark;
-                                //         break;
-                                // }
-
-                                values[i][j] = str;
-                            }
-                        }
+                        var array = new object[8]{
+                            "Title",
+                            cw.Title,
+                            cw.MaxPoints,
+                            cw.Weight,
+                            cw.Category,
+                            cw.Term,
+                            cw.DueDate,
+                            student.Submissions.Where(s => s.CourseWorkId == cw.IdInGradeBook).Select(s => s.Grade).FirstOrDefault()
+                        };
+                        values[index] = array;
+                        index++;
                     }
+
 
                     var valueRange = new ValueRange()
                     {
@@ -663,6 +670,11 @@ namespace GdevApps.BLL.Domain
                         MajorDimension = "ROWS",
                         Values = values
                     };
+
+                    var updateRequest = service.Spreadsheets.Values.Update(valueRange, newSpreadSheet.SpreadsheetId, parentGradebookRange);
+                    updateRequest.ResponseValueRenderOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ResponseValueRenderOptionEnum.FORMULA;
+                    updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+                    await updateRequest.ExecuteAsync();
 
                     var moveResult = await _driveService.MoveFileToFolderAsync(newSpreadSheet.SpreadsheetId, innerFolderIdResult.ResultObject, googleCredential, refreshToken, userId);
 
