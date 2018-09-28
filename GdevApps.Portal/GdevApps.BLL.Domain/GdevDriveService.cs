@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.IO;
 using File = Google.Apis.Drive.v3.Data.File;
 using GdevApps.BLL.Models;
+using GdevApps.DAL.Repositories.GradeBookRepository;
 
 namespace GdevApps.BLL.Domain
 {
@@ -21,11 +22,13 @@ namespace GdevApps.BLL.Domain
         private const string _mainFolderName = "Gdevapps Google Portal";
         private readonly IAspNetUserService _aspUserService;
         private readonly IConfiguration _configuration;
+        private readonly IGradeBookRepository _gradeBookRepository;
 
-        public GdevDriveService(IAspNetUserService aspUserService, IConfiguration configuration)
+        public GdevDriveService(IAspNetUserService aspUserService, IConfiguration configuration, IGradeBookRepository gradeBookRepository)
         {
             _aspUserService = aspUserService;
             _configuration = configuration;
+            _gradeBookRepository = gradeBookRepository;
         }
 
         public async Task<TaskResult<string, ICredential>> CreateRootFolderAsync(string externalAccessToken, string refreshToken, string userId)

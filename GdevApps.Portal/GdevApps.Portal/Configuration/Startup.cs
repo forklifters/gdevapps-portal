@@ -87,7 +87,9 @@ namespace GdevApps.Portal
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env,
+         UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager
+        )
         {
             if (env.IsDevelopment())
             {
@@ -102,6 +104,7 @@ namespace GdevApps.Portal
 
             app.UseStaticFiles();
             app.UseAuthentication();
+            IdentityInitializer.SeedData(userManager, roleManager);
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
