@@ -2,6 +2,7 @@
 using GdevApps.BLL.Domain;
 using GdevApps.DAL.DataContexts.AspNetUsers;
 using GdevApps.DAL.Repositories.AspNetUserRepository;
+using GdevApps.DAL.Repositories.GradeBookRepository;
 using GdevApps.Portal.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -23,6 +24,7 @@ namespace GdevApps.Portal.Configuration
         public static void AddRepositories(this IServiceCollection services)
         {
             services.AddScoped<IAspNetUserRepository, AspNetUserRepository>();
+            services.AddScoped<IGradeBookRepository, GradeBookRepository>();
         }
 
         public static void AddDomainServices(this IServiceCollection services)

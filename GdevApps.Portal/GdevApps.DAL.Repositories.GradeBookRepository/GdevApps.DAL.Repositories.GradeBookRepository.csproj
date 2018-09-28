@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+<ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GdevApps.DAL.DataContexts.GradeBook\GdevApps.DAL.DataContexts.GradeBook.csproj" />
+    <ProjectReference Include="..\GdevApps.DAL.Repositories.BaseRepository\GdevApps.DAL.Repositories.BaseRepository.csproj" />
+  </ItemGroup>
+</Project>

@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\GdevApps.BLL.Contracts\GdevApps.BLL.Contracts.csproj" />
     <ProjectReference Include="..\GdevApps.DAL.Repositories.AspNetUserRepository\GdevApps.DAL.Repositories.AspNetUserRepository.csproj" />
+    <ProjectReference Include="..\GdevApps.DAL.Repositories.GradeBookRepository\GdevApps.DAL.Repositories.GradeBookRepository.csproj" />
   </ItemGroup>
 
 </Project>
