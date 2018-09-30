@@ -34,10 +34,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GdevApps.BLL.Models", "Gdev
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GdevApps.BLL.Domain", "GdevApps.BLL.Domain\GdevApps.BLL.Domain.csproj", "{C69525E7-B1BE-4394-BCF8-B8289B6B0556}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GdevApps.DAL.DataContexts.GradeBook", "GdevApps.DAL.DataContexts.GradeBook\GdevApps.DAL.DataContexts.GradeBook.csproj", "{19EE5473-89BF-437D-8653-CE89AE0494CA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GdevApps.DAL.DataModels.GradeBook", "GdevApps.DAL.DataModels.GradeBook\GdevApps.DAL.DataModels.GradeBook.csproj", "{20A4C67B-33CC-4172-9232-ECFB765070A5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GdevApps.DAL.Repositories.GradeBookRepository", "GdevApps.DAL.Repositories.GradeBookRepository\GdevApps.DAL.Repositories.GradeBookRepository.csproj", "{F027FAEE-8064-49A0-9C31-7DFD5EAD8853}"
 EndProject
 Global
@@ -82,14 +78,6 @@ Global
 		{C69525E7-B1BE-4394-BCF8-B8289B6B0556}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C69525E7-B1BE-4394-BCF8-B8289B6B0556}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C69525E7-B1BE-4394-BCF8-B8289B6B0556}.Release|Any CPU.Build.0 = Release|Any CPU
-		{19EE5473-89BF-437D-8653-CE89AE0494CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{19EE5473-89BF-437D-8653-CE89AE0494CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{19EE5473-89BF-437D-8653-CE89AE0494CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{19EE5473-89BF-437D-8653-CE89AE0494CA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{20A4C67B-33CC-4172-9232-ECFB765070A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{20A4C67B-33CC-4172-9232-ECFB765070A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{20A4C67B-33CC-4172-9232-ECFB765070A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{20A4C67B-33CC-4172-9232-ECFB765070A5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F027FAEE-8064-49A0-9C31-7DFD5EAD8853}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F027FAEE-8064-49A0-9C31-7DFD5EAD8853}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F027FAEE-8064-49A0-9C31-7DFD5EAD8853}.Release|Any CPU.ActiveCfg = Release|Any CPU

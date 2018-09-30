@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GdevApps.DAL.DataModels.GradeBook
+namespace GdevApps.DAL.DataModels.AspNetUsers.GradeBook
 {
      public partial class GradeBook
     {
@@ -19,7 +19,7 @@ namespace GdevApps.DAL.DataModels.GradeBook
         public string CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
 
-        public GdevApps.DAL.DataModels.AspNetUsers.AspNetUsers CreatedByNavigation { get; set; }
+        public GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.AspNetUsers CreatedByNavigation { get; set; }
         public ICollection<ParentGradeBook> ParentGradeBook { get; set; }
     }
 }

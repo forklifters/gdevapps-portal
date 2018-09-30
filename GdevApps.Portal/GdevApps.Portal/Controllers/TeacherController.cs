@@ -23,6 +23,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using GdevApps.BLL.Models.GDevClassroomService;
+using System.Text.RegularExpressions;
 
 namespace GdevApps.Portal.Controllers
 {
@@ -198,13 +199,6 @@ namespace GdevApps.Portal.Controllers
         {
             if (ModelState.IsValid)
             {
-                var sheet = Singleton.Instance.Sheets.Where(s => s.ClassroomId == model.ClassroomId && s.Id == model.Id).FirstOrDefault();
-                if (sheet != null)
-                {
-                    ModelState.AddModelError("Id", $"Gradebook with suck id already exists");
-                    return PartialView("_AddGradebook", model);
-                }
-
                 var isValidLink = await CheckLink(model.Link);
                 if (!isValidLink)
                 {
@@ -212,7 +206,28 @@ namespace GdevApps.Portal.Controllers
                     return PartialView("_AddGradebook", model);
                 }
 
-                Singleton.Instance.Sheets.Add(model);
+
+                var sheet = await _classroomService.GetGradebookByIdAsync(model.Id);
+                if (sheet != null)
+                {
+                    ModelState.AddModelError("Id", $"Gradebook with suck id already exists");
+                    return PartialView("_AddGradebook", model);
+                }
+
+
+                var gradeBookModel = new GradeBook
+                {
+                    ClassroomId = model.ClassroomId,
+                    CreatedBy = _userManager.GetUserId(User),
+                    CreatedDate = DateTime.UtcNow,
+                    GoogleUniqueId = GetGradeBookIdFromLink(model.Link),
+                    Name = model.Name,
+                    Link = model.Link,
+                    IsDeleted = false
+                };
+
+                var result = _classroomService.AddGradebookAsync(gradeBookModel);
+
                 return PartialView("_AddGradebook", model);
             }
 
@@ -296,11 +311,17 @@ namespace GdevApps.Portal.Controllers
 
         private async Task<List<ClassesViewModel>> GetClassesAsync()
         {
-            var classes = _mapper.Map<List<ClassesViewModel>>(
-                await _classroomService.GetAllClassesAsync(await GetAccessTokenAsync(), await GetRefreshTokenAsync(), _userManager.GetUserId(User))
-                );
-                
-            return classes;
+            try
+            {
+                var serviceClasses = await _classroomService.GetAllClassesAsync(await GetAccessTokenAsync(), await GetRefreshTokenAsync(), _userManager.GetUserId(User));
+                var classes = _mapper.Map<List<ClassesViewModel>>(serviceClasses);
+
+                return classes;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         private async Task<bool> CheckLink(string link)
@@ -382,6 +403,20 @@ namespace GdevApps.Portal.Controllers
             }
 
             return new TokenResponse(false, allTokens);
+        }
+
+        private string GetGradeBookIdFromLink(string gradeBookLink)
+        {
+            var regex = new Regex(@"/[-\w]{25,}/");
+            var match = regex.Match(gradeBookLink);
+            if (match.Success)
+            {
+                return match.Value.Replace("/", ""); ;
+            }
+            else
+            {
+                return "";
+            }
         }
     }
 

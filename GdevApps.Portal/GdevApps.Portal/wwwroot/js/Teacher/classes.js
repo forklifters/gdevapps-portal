@@ -85,7 +85,7 @@ var Classes = (function () {
                         '<div class="d-flex w-100 justify-content-between">' +
                         ' <h4 class="mb-1">' + sheet.name + '</h4>' +
                         '</div>' +
-                        '<p class="mb-1 wordwrap">' + sheet.id + '</p></a></center></div>' +
+                        '<p class="mb-1 wordwrap">' + sheet.GoogleUniqueId + '</p></a></center></div>' +
                         '<div class="col-xs-2 list-group"><button type="button" class="btn btn-danger" data-id="' + sheet.id + '" data-classroomid="' + sheet.classroomId + '" onclick="Classes.removeGradebook(this)">REMOVE</button>' +
                         '</div>'
                 });

@@ -16,9 +16,9 @@ namespace GdevApps.BLL.Contracts
         Task<TaskResult<IEnumerable<GoogleStudent>, ICredential>> GetStudentsByClassIdAndGradebookIdAsync(ICredential googleCredential, string classId, string gradebookId, string refreshToken, string userId);
         Task<TaskResult<GoogleStudent, ICredential>> GetStudentByIdAsync(string studentId, string externalAccessToken, string refreshToken, string userId);
         Task<TaskResult<GoogleStudent, ICredential>> GetStudentByIdAsync(string studentId, ICredential googleCredential, string refreshToken, string userId);
-        Task<TaskResult<BoolResult, ICredential>> AddGradebookAsync(string classroomId);
-        Task<TaskResult<BoolResult, ICredential>> EditGradebookAsync(Gradebook model);
-        Task<TaskResult<Gradebook, ICredential>> GetGradebookByIdAsync(string classroomId, string gradebookId);
+        bool AddGradebookAsync(GdevApps.BLL.Models.GDevClassroomService.GradeBook model);
+        Task<TaskResult<BoolResult, ICredential>> EditGradebookAsync(GdevApps.BLL.Models.GDevClassroomService.GradeBook model);
+        Task<GdevApps.BLL.Models.GDevClassroomService.GradeBook> GetGradebookByIdAsync(string gradebookId);
         Task<TaskResult<BoolResult, ICredential>> DeleteGradeBookAsync(string classroomId, string gradebookId); 
     }
 }

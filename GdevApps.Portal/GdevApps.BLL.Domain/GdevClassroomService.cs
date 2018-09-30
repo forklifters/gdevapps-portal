@@ -6,6 +6,7 @@ using AutoMapper;
 using GdevApps.BLL.Contracts;
 using GdevApps.BLL.Models;
 using GdevApps.BLL.Models.GDevClassroomService;
+using GdevApps.DAL.Repositories.GradeBookRepository;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
 using Google.Apis.Auth.OAuth2.Requests;
@@ -23,28 +24,42 @@ namespace GdevApps.BLL.Domain
         private readonly ILogger _logger;
         private readonly IAspNetUserService _aspUserService;
         private readonly IMapper _mapper;
+
+        private readonly IGradeBookRepository _gradeBookRepository;
         public GdevClassroomService(
             IConfiguration configuration,
             ILogger<GdevClassroomService> logger,
             IAspNetUserService aspUserService,
-            IMapper mapper
+            IMapper mapper,
+            IGradeBookRepository gradeBookRepository
             )
         {
             _logger = logger;
             _configuration = configuration;
             _aspUserService = aspUserService;
             _mapper = mapper;
+            _gradeBookRepository = gradeBookRepository;
         }
 
-        public Task<TaskResult<BoolResult, ICredential>> AddGradebookAsync(string classroomId)
+        public bool AddGradebookAsync(GdevApps.BLL.Models.GDevClassroomService.GradeBook model)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                var gradeBookModel = _mapper.Map<GdevApps.BLL.Models.GDevClassroomService.GradeBook>(model);
+                _gradeBookRepository.Create<GdevApps.BLL.Models.GDevClassroomService.GradeBook>(gradeBookModel);
+
+                return true;
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
         }
         public Task<TaskResult<BoolResult, ICredential>> DeleteGradeBookAsync(string classroomId, string gradebookId)
         {
             throw new System.NotImplementedException();
         }
-        public Task<TaskResult<BoolResult, ICredential>> EditGradebookAsync(Gradebook model)
+        public Task<TaskResult<BoolResult, ICredential>> EditGradebookAsync(GradeBook model)
         {
             throw new System.NotImplementedException();
         }
@@ -53,9 +68,11 @@ namespace GdevApps.BLL.Domain
             ICredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
             return await GetAllClassesAsync(googleCredential, refreshToken, userId);
         }
-        public Task<TaskResult<Gradebook, ICredential>> GetGradebookByIdAsync(string classroomId, string gradebookId)
+        public async Task<GdevApps.BLL.Models.GDevClassroomService.GradeBook> GetGradebookByIdAsync(string gradebookId)
         {
-            throw new System.NotImplementedException();
+           var dataModelGradebook = await _gradeBookRepository.GetByIdAsync<GdevApps.BLL.Models.GDevClassroomService.GradeBook>(gradebookId);
+           var gradebook = _mapper.Map<GdevApps.BLL.Models.GDevClassroomService.GradeBook>(dataModelGradebook);
+           return gradebook;
         }
         public Task<TaskResult<GoogleStudent, ICredential>> GetStudentByIdAsync(string studentId, string externalAccessToken, string refreshToken, string userId)
         {
@@ -193,6 +210,8 @@ namespace GdevApps.BLL.Domain
                         }
                     } while (!string.IsNullOrEmpty(studentsListRequest.PageToken));
 
+                    var dalSheets = await _gradeBookRepository.GetAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>(filter: x=> x.ClassroomId == course.Id);
+                    var sheets = _mapper.Map<List<GoogleClassSheet>>(dalSheets);
 
                     classes.Add(new GoogleClass
                     {
@@ -200,7 +219,8 @@ namespace GdevApps.BLL.Domain
                         Id = course.Id,
                         Description = course.Description,
                         CourseWorksCount = courseWorks.Count,
-                        StudentsCount = students.Count
+                        StudentsCount = students.Count,
+                        ClassroomSheets = sheets
                     });
                 }
             }

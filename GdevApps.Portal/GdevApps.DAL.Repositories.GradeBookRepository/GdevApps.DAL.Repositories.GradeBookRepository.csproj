@@ -8,7 +8,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GdevApps.DAL.DataContexts.GradeBook\GdevApps.DAL.DataContexts.GradeBook.csproj" />
+    <ProjectReference Include="..\GdevApps.DAL.DataContexts.AspNetUsers\GdevApps.DAL.DataContexts.AspNetUsers.csproj" />
     <ProjectReference Include="..\GdevApps.DAL.Repositories.BaseRepository\GdevApps.DAL.Repositories.BaseRepository.csproj" />
   </ItemGroup>
 </Project>

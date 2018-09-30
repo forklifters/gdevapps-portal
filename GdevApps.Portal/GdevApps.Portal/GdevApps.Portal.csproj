@@ -25,6 +25,5 @@
     <ProjectReference Include="..\GdevApps.BLL.Domain\GdevApps.BLL.Domain.csproj" />
     <ProjectReference Include="..\GdevApps.BLL.Models\GdevApps.BLL.Models.csproj" />
     <ProjectReference Include="..\GdevApps.DAL.DataContexts.AspNetUsers\GdevApps.DAL.DataContexts.AspNetUsers.csproj" />
-    <ProjectReference Include="..\GdevApps.DAL.DataContexts.GradeBook\GdevApps.DAL.DataContexts.GradeBook.csproj" />
   </ItemGroup>
 </Project>

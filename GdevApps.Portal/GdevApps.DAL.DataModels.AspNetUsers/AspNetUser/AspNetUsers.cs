@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using GdevApps.DAL.DataModels.AspNetUsers.GradeBook;
 
-namespace GdevApps.DAL.DataModels.AspNetUsers
+
+namespace GdevApps.DAL.DataModels.AspNetUsers.AspNetUser
 {
     public partial class AspNetUsers
     {
@@ -10,6 +12,11 @@ namespace GdevApps.DAL.DataModels.AspNetUsers
             AspNetUserClaims = new HashSet<AspNetUserClaims>();
             AspNetUserLogins = new HashSet<AspNetUserLogins>();
             AspNetUserRoles = new HashSet<AspNetUserRoles>();
+            Folder = new HashSet<Folder>();
+            GradeBook = new HashSet<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>();
+            ParentGradeBook = new HashSet<ParentGradeBook>();
+            ParentSharedGradeBookAspnetUser = new HashSet<ParentSharedGradeBook>();
+            ParentSharedGradeBookParent = new HashSet<ParentSharedGradeBook>();
         }
 
         public string Id { get; set; }
@@ -27,11 +34,15 @@ namespace GdevApps.DAL.DataModels.AspNetUsers
         public string SecurityStamp { get; set; }
         public bool TwoFactorEnabled { get; set; }
         public string UserName { get; set; }
-
         public string Avatar { get; set; }
 
         public ICollection<AspNetUserClaims> AspNetUserClaims { get; set; }
         public ICollection<AspNetUserLogins> AspNetUserLogins { get; set; }
         public ICollection<AspNetUserRoles> AspNetUserRoles { get; set; }
+        public ICollection<Folder> Folder { get; set; }
+        public ICollection<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook> GradeBook { get; set; }
+        public ICollection<ParentGradeBook> ParentGradeBook { get; set; }
+        public ICollection<ParentSharedGradeBook> ParentSharedGradeBookAspnetUser { get; set; }
+        public ICollection<ParentSharedGradeBook> ParentSharedGradeBookParent { get; set; }
     }
 }

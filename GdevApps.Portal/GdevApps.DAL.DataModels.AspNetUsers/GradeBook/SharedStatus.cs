@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GdevApps.DAL.DataModels.GradeBook
+namespace GdevApps.DAL.DataModels.AspNetUsers.GradeBook
 {
      public partial class SharedStatus
     {

@@ -25,11 +25,11 @@ namespace GdevApps.BLL.Domain
         public Task<IEnumerable<AspNetUserToken>> GetAllTokens()
         {
 
-            var m = _aspNetUserRepository.GetAllAsync<DAL.DataModels.AspNetUsers.AspNetUserTokens>().Result;
+            var m = _aspNetUserRepository.GetAllAsync<DAL.DataModels.AspNetUsers.AspNetUser.AspNetUserTokens>().Result;
 
 
             return _mapper.Map<Task<IEnumerable<AspNetUserToken>>>(
-                _aspNetUserRepository.GetAllAsync<DAL.DataModels.AspNetUsers.AspNetUserTokens>());
+                _aspNetUserRepository.GetAllAsync<DAL.DataModels.AspNetUsers.AspNetUser.AspNetUserTokens>());
         }
 
         public Task<IEnumerable<AspNetUser>> GetAllUsersAsync()
@@ -39,14 +39,14 @@ namespace GdevApps.BLL.Domain
 
         public async Task UpdateUserTokensAsync(AspNetUserToken userTokens)
         {
-            var userTokensModel = _mapper.Map<DAL.DataModels.AspNetUsers.AspNetUserTokens>(userTokens);
-            _aspNetUserRepository.Update<DAL.DataModels.AspNetUsers.AspNetUserTokens>(userTokensModel);
+            var userTokensModel = _mapper.Map<DAL.DataModels.AspNetUsers.AspNetUser.AspNetUserTokens>(userTokens);
+            _aspNetUserRepository.Update<DAL.DataModels.AspNetUsers.AspNetUser.AspNetUserTokens>(userTokensModel);
             await _aspNetUserRepository.SaveAsync();
         }
 
         public Task<IEnumerable<AspNetUserToken>> GetAllTokensByUserIdAsync(string userId)
         {
-            var models = _aspNetUserRepository.GetAsync<DAL.DataModels.AspNetUsers.AspNetUserTokens>(filter: (u => u.UserId == userId));
+            var models = _aspNetUserRepository.GetAsync<DAL.DataModels.AspNetUsers.AspNetUser.AspNetUserTokens>(filter: (u => u.UserId == userId));
             return _mapper.Map<Task<IEnumerable<AspNetUserToken>>>(models);
         }
     }

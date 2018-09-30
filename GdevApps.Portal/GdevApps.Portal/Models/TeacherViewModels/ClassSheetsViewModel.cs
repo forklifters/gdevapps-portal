@@ -3,8 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 public class ClassSheetsViewModel
 {
-    [Required]
-    [DisplayName("Google sheet unique id")]
+    
     public string Id { get; set; }
 
     [Required]
@@ -18,4 +17,8 @@ public class ClassSheetsViewModel
     [Required]
     [DisplayName("Class id")]
     public string ClassroomId { get; set; }
+
+    [Required]
+    [DisplayName("Google sheet unique id")]
+    public string GoogleUniqueId { get; set; }
 }

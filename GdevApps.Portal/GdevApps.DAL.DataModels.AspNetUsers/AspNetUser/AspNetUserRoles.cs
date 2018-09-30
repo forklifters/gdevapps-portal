@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GdevApps.DAL.DataModels.AspNetUsers
+namespace GdevApps.DAL.DataModels.AspNetUsers.AspNetUser
 {
     public partial class AspNetUserRoles
     {

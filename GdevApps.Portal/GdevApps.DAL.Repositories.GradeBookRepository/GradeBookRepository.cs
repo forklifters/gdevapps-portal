@@ -1,19 +1,19 @@
-using GdevApps.DAL.DataContexts.GradeBook;
+using GdevApps.DAL.DataContexts.AspNetUsers;
 using GdevApps.DAL.Repositories.BaseRepository;
 
 namespace GdevApps.DAL.Repositories.GradeBookRepository
 {
-    public class GradeBookRepository :  EntityFrameworkRepository<GradeBookContext>,
+    public class GradeBookRepository :  EntityFrameworkRepository<AspNetUserContext>,
         IGradeBookRepository 
     {
 
-         public GradeBookRepository(GradeBookContext context) :
+         public GradeBookRepository(AspNetUserContext context) :
             base(context)
         {
         }
 
         public GradeBookRepository() :
-            base(new GradeBookContext())
+            base(new AspNetUserContext())
         {
         }
     }
