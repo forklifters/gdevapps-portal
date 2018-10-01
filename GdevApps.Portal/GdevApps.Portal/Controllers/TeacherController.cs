@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using GdevApps.BLL.Models.GDevClassroomService;
 using System.Text.RegularExpressions;
+using GdevApps.BLL.Models;
 
 namespace GdevApps.Portal.Controllers
 {
@@ -207,7 +208,7 @@ namespace GdevApps.Portal.Controllers
                 }
 
 
-                var sheet = await _classroomService.GetGradebookByIdAsync(model.Id);
+                var sheet = await _classroomService.GetGradebookByUniqueIdAsync(model.GoogleUniqueId);
                 if (sheet != null)
                 {
                     ModelState.AddModelError("Id", $"Gradebook with suck id already exists");
@@ -285,15 +286,14 @@ namespace GdevApps.Portal.Controllers
         }
 
         [HttpPost]
-        public ActionResult RemoveGradebook(string classroomId, string gradebookId){
+        public async Task<ActionResult> RemoveGradebook(string classroomId, string gradebookId){
             try
             {
                 if (!string.IsNullOrEmpty(classroomId) && !string.IsNullOrEmpty(gradebookId))
                 {
-                    var sheet = Singleton.Instance.Sheets.Where(s => s.ClassroomId == classroomId && s.Id == gradebookId).FirstOrDefault();
-                    if (sheet != null)
+                    var result = await _classroomService.DeleteGradeBookAsync(classroomId, gradebookId);
+                    if (result)
                     {
-                        Singleton.Instance.Sheets.Remove(sheet);
                         return Ok();
                     }
                     else
@@ -313,10 +313,15 @@ namespace GdevApps.Portal.Controllers
         {
             try
             {
-                var serviceClasses = await _classroomService.GetAllClassesAsync(await GetAccessTokenAsync(), await GetRefreshTokenAsync(), _userManager.GetUserId(User));
-                var classes = _mapper.Map<List<ClassesViewModel>>(serviceClasses);
+                var serviceClassesRespnse = await _classroomService.GetAllClassesAsync(await GetAccessTokenAsync(), await GetRefreshTokenAsync(), _userManager.GetUserId(User));
+                if(serviceClassesRespnse.Result == ResultType.SUCCESS){
+                    var classes = _mapper.Map<List<ClassesViewModel>>(serviceClassesRespnse.ResultObject);
 
-                return classes;
+                    return classes;
+                }else{
+                    throw new Exception(string.Join(",", serviceClassesRespnse.Errors));
+                }
+                
             }
             catch (Exception ex)
             {
@@ -328,7 +333,8 @@ namespace GdevApps.Portal.Controllers
         {
             if (link.StartsWith("https://docs.google.com"))
             {
-                var isGradeBookAsyncResult = await _spreadSheetService.IsGradeBookAsync("", await GetAccessTokenAsync(), await GetRefreshTokenAsync(), _userManager.GetUserId(User), link);
+                var gradebookId = GetGradeBookIdFromLink(link);
+                var isGradeBookAsyncResult = await _spreadSheetService.IsGradeBookAsync(gradebookId, await GetAccessTokenAsync(), await GetRefreshTokenAsync(), _userManager.GetUserId(User), link);
                 return isGradeBookAsyncResult.ResultObject.Result;
             }
             return false;

@@ -9,9 +9,19 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.AspNetUser
 {
      public class SharedStatusConfig : IEntityTypeConfiguration<SharedStatus>
     {
-        public void Configure(EntityTypeBuilder<SharedStatus> builder)
+        public void Configure(EntityTypeBuilder<SharedStatus> entity)
         {
-            builder.HasKey(k => new {k.Id});
+            entity.HasIndex(e => e.Id)
+                    .HasName("id_UNIQUE")
+                    .IsUnique();
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.Status)
+                    .IsRequired()
+                    .HasMaxLength(45);
         }
     }
 }

@@ -45,9 +45,9 @@ namespace GdevApps.BLL.Domain
         {
             try
             {
-                var gradeBookModel = _mapper.Map<GdevApps.BLL.Models.GDevClassroomService.GradeBook>(model);
-                _gradeBookRepository.Create<GdevApps.BLL.Models.GDevClassroomService.GradeBook>(gradeBookModel);
-
+                var gradeBookModel = _mapper.Map<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>(model);
+                _gradeBookRepository.Create<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>(gradeBookModel);
+                _gradeBookRepository.Save();
                 return true;
             }
             catch (Exception exception)
@@ -55,9 +55,25 @@ namespace GdevApps.BLL.Domain
                 throw exception;
             }
         }
-        public Task<TaskResult<BoolResult, ICredential>> DeleteGradeBookAsync(string classroomId, string gradebookId)
+        public async Task<bool> DeleteGradeBookAsync(string classroomId, string gradebookId)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                var dataModelGradebook = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>(filter: f => f.GoogleUniqueId == gradebookId);
+                if (dataModelGradebook != null)
+                {
+                    _gradeBookRepository.Delete(dataModelGradebook);
+                    await _gradeBookRepository.SaveAsync();
+
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
         public Task<TaskResult<BoolResult, ICredential>> EditGradebookAsync(GradeBook model)
         {
@@ -68,11 +84,32 @@ namespace GdevApps.BLL.Domain
             ICredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
             return await GetAllClassesAsync(googleCredential, refreshToken, userId);
         }
-        public async Task<GdevApps.BLL.Models.GDevClassroomService.GradeBook> GetGradebookByIdAsync(string gradebookId)
+        public async Task<GdevApps.BLL.Models.GDevClassroomService.GradeBook> GetGradebookByUniqueIdAsync(string gradebookId)
         {
-           var dataModelGradebook = await _gradeBookRepository.GetByIdAsync<GdevApps.BLL.Models.GDevClassroomService.GradeBook>(gradebookId);
-           var gradebook = _mapper.Map<GdevApps.BLL.Models.GDevClassroomService.GradeBook>(dataModelGradebook);
-           return gradebook;
+            try
+            {
+                var dataModelGradebook = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>(filter: f=> f.GoogleUniqueId == gradebookId);
+                var gradebook = _mapper.Map<GdevApps.BLL.Models.GDevClassroomService.GradeBook>(dataModelGradebook);
+                return gradebook;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public GdevApps.BLL.Models.GDevClassroomService.GradeBook GetGradebookByIdAsync(int id)
+        {
+            try
+            {
+                var dataModelGradebook =  _gradeBookRepository.GetById<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>(id);
+                var gradebook = _mapper.Map<GdevApps.BLL.Models.GDevClassroomService.GradeBook>(dataModelGradebook);
+                return gradebook;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
         public Task<TaskResult<GoogleStudent, ICredential>> GetStudentByIdAsync(string studentId, string externalAccessToken, string refreshToken, string userId)
         {

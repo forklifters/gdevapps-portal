@@ -48,10 +48,12 @@ var Classes = (function () {
                     "defaultContent": "<button>Click!</button>"
                 }],
                 "ordering": true,
+                "processing": true,
                 "language": {
                     "info": "Showing _START_ to _END_ of _TOTAL_ classes",
                     "lengthMenu": "Show _MENU_ classes",
-                    "emptyTable": "There are no classes where you were assigned as a teacher"
+                    "emptyTable": "There are no classes where you were assigned as a teacher",
+                    "processing":'<div class="loader"><img src="../images/google-loader.gif" alt="ASP.NET" class="img-responsive" /></div>'
                 }
             });
             $classes.data('loaded', true);
@@ -79,14 +81,15 @@ var Classes = (function () {
             };
 
             function getSheetInfoCell(d) {
+                debugger;
                 var cell = "<div class='cols-xs-12'>";
                 d.classroomSheets.forEach(sheet => {
                     cell = cell + '<div class="col-xs-8 list-group"><center><a href=' + sheet.link + ' class="list-group-item list-group-item-action editGradebook" data-id="' + sheet.id + '" data-classroomid="' + sheet.classroomId + '" onclick="Classes.linkClick(this)">' +
                         '<div class="d-flex w-100 justify-content-between">' +
                         ' <h4 class="mb-1">' + sheet.name + '</h4>' +
                         '</div>' +
-                        '<p class="mb-1 wordwrap">' + sheet.GoogleUniqueId + '</p></a></center></div>' +
-                        '<div class="col-xs-2 list-group"><button type="button" class="btn btn-danger" data-id="' + sheet.id + '" data-classroomid="' + sheet.classroomId + '" onclick="Classes.removeGradebook(this)">REMOVE</button>' +
+                        '<p class="mb-1 wordwrap">' + sheet.googleUniqueId + '</p></a></center></div>' +
+                        '<div class="col-xs-2 list-group"><button type="button" class="btn btn-danger" data-unique-id="' + sheet.googleUniqueId + '" data-id="' + sheet.id + '" data-classroomid="' + sheet.classroomId + '" onclick="Classes.removeGradebook(this)">REMOVE</button>' +
                         '</div>'
                 });
                 cell = cell + "</div>";
@@ -154,7 +157,7 @@ var Classes = (function () {
 
     function removeGradebook(me) {
         var url = "/Teacher/RemoveGradebook";
-        var data = { classroomId: $(me).data("classroomid") , gradebookId: $(me).data("id")  }
+        var data = { classroomId: $(me).data("classroomid") , gradebookId: $(me).data("unique-id")  }
 
         $.ajax({
             method: "POST",

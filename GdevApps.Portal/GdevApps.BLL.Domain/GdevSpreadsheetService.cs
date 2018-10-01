@@ -575,7 +575,7 @@ namespace GdevApps.BLL.Domain
                     string parentGradebookName = "";
                     if (googleClassResult.Result == ResultType.SUCCESS && googleClassResult.ResultObject == null)
                     {
-                        var studentGradeBook = await _classroomService.GetGradebookByIdAsync(student.GradebookId);
+                        var studentGradeBook = await _classroomService.GetGradebookByUniqueIdAsync(student.GradebookId);
                         parentGradebookName = $"{studentGradeBook.Name}_{student.Email}";
                     }
                     else

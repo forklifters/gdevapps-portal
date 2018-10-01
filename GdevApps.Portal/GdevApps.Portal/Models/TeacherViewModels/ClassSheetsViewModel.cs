@@ -1,9 +1,10 @@
+using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 public class ClassSheetsViewModel
 {
-    
+
     public string Id { get; set; }
 
     [Required]
