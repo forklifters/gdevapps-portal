@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace GdevApps.BLL.Models.GDevClassroomService
+namespace GdevApps.BLL.Models.GDevSpreadSheetService
 {
     public class GradebookStudentSubmission
     {

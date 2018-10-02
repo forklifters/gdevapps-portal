@@ -6,11 +6,11 @@
 <script type="text/javascript">
     $(function() {
         Students.init();
-        var $ddlClasses = $('#ddlClasses');
-        var hasValues = $ddlClasses.has('option').length > 0;
-        if (hasValues) {
-            $ddlClasses.change();
-        }
+       // var $ddlClasses = $('#ddlClasses');
+       // var hasValues = $ddlClasses.has('option').length > 0;
+        // if (hasValues) {
+        //     $ddlClasses.change();
+        // }
     })
 </script>
 
@@ -21,12 +21,21 @@
 <div class="container">
 
     <div class="row">
-        <div class="col-xs-4">
+        <div class="col-xs-12 col-sm-4">
             <label for="ddlClasses" class="control-label">Select Class</label>
             <select id="ddlClasses" class="form-control select2" asp-items="@Model.Classes">
                 <!-- <option value="0">All</option> -->
             </select>
         </div>
+        <div class="col-xs-12 col-sm-4" id="divGradeBooks" style="display: none;">
+            <label for="ddlGradeBooks" class="control-label">Select GradeBook</label>
+            <select id="ddlGradeBooks" class="form-control select2">
+                <!-- <option value="0">All</option> -->
+            </select>
+        </div>
+         <!-- <div class="col-xs-12 col-sm-4">
+             <button type="submit"><i class="fa fa-search"></i></button>
+        </div> -->
     </div>
     <div class="row top-buffer">
         <div class="col-md-12">
@@ -40,7 +49,7 @@
                             <tr>
                                 <th class="googleHeader"></th>
                                 <th class="googleHeader">Student name</th>
-                                <th class="googleHeader">Id</th>
+                                <th class="googleHeader">Email</th>
                                 <th class="googleHeader">Is student in Classroom</th>
                             </tr>
                         </thead>

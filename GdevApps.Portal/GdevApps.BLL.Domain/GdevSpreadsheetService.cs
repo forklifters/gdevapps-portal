@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AutoMapper;
 using GdevApps.BLL.Contracts;
 using GdevApps.BLL.Models;
 using GdevApps.BLL.Models.GDevClassroomService;
+using GdevApps.BLL.Models.GDevSpreadSheetService;
+using GdevApps.DAL.Repositories.GradeBookRepository;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
 using Google.Apis.Services;
@@ -25,13 +28,18 @@ namespace GdevApps.BLL.Domain
         private readonly IGdevClassroomService _classroomService;
         private const string _studentsRange = "GradeBook";
         private const string _settingsCourseRange = "Settings!A48:A49";
+        private readonly IGradeBookRepository _gradeBookRepository;
+        private readonly IMapper _mapper;
+
 
         public GdevSpreadsheetService(
             IConfiguration configuration,
             ILogger<GdevClassroomService> logger,
             IAspNetUserService aspUserService,
             IGdevDriveService driveService,
-            IGdevClassroomService classroomService
+            IGdevClassroomService classroomService,
+            IGradeBookRepository gradeBookRepository,
+            IMapper mapper
             )
         {
             _logger = logger;
@@ -39,6 +47,8 @@ namespace GdevApps.BLL.Domain
             _aspUserService = aspUserService;
             _driveService = driveService;
             _classroomService = classroomService;
+            _gradeBookRepository = gradeBookRepository;
+            _mapper = mapper;
         }
 
         public async Task<TaskResult<GradebookStudent, ICredential>> GetStudentByEmailFromGradebookAsync(string studentEmail, string externalAccessToken, string gradebookId, string refreshToken, string userId)
@@ -245,43 +255,44 @@ namespace GdevApps.BLL.Domain
             var courseSettings = responseSettings.Values;
             if (courseSettings != null && courseSettings.Count > 0)
             {
-                className = courseSettings[0][0]?.ToString();
-                classId = courseSettings[1][0]?.ToString();
+                className = courseSettings[0][0]?.ToString() ?? "";
+                classId = courseSettings[1][0]?.ToString() ?? "";
             }
 
             values = response.Values;
             var subIndex = 13;
-
+            int maxRows = 207;
+            int maxCols = 313;
             try
             {
                 //Get course works
-                var allValues = new object[207][];
-                for (var a = 0; a < values.Count; a++)
+                var allValues = new object[maxRows][];
+                for (var a = 0; a < values.Count; a++)//MAX 207x313
                 {
-                    var newArrey = new object[213];
+                    var newArrey = new object[maxCols];
                     Array.Copy(values[a].ToArray(), newArrey, values[a].Count);
                     allValues[a] = newArrey;
                 }
 
                 var courseWorks = new HashSet<GradebookCourseWork>();
-                for (var c = subIndex; c < 213; c += 2)
+                for (var c = subIndex; c < maxCols; c += 2)
                 {
-                    string title = allValues[0][c]?.ToString();
+                    string title = allValues[0][c]?.ToString() ?? "";
                     if (allValues[0][c] == null || string.IsNullOrEmpty(title))
                     {
                         continue;
                     }
 
-                    string date = allValues[1][c]?.ToString();
+                    string date = allValues[1][c]?.ToString() ?? "";
                     string creationDate = date;
                     if (string.IsNullOrEmpty(date))
                     {
                         creationDate = DateTime.UtcNow.ToString();
                     }
-                    string maxPoints = allValues[2][c]?.ToString();
-                    string weight = allValues[3][c]?.ToString();
-                    string category = allValues[4][c]?.ToString();
-                    string term = allValues[4][c + 1]?.ToString();
+                    string maxPoints = allValues[2][c]?.ToString() ?? "";
+                    string weight = allValues[3][c]?.ToString() ?? "";
+                    string category = allValues[4][c]?.ToString() ?? "";
+                    string term = allValues[4][c + 1]?.ToString() ?? "";
 
                     courseWorks.Add(new GradebookCourseWork()
                     {
@@ -300,17 +311,17 @@ namespace GdevApps.BLL.Domain
                 //Get students
                 for (var r = studentIndex; r < values.Count; r++)
                 {
-                    var studentName = allValues[r][2]?.ToString();
+                    var studentName = allValues[r][2]?.ToString() ?? "";
                     if (string.IsNullOrEmpty(studentName))
                     {
                         continue;
                     }
 
-                    var email = allValues[r][5].ToString();
-                    var comment = allValues[r][9].ToString();
-                    var finalGrade = allValues[r][3].ToString();
-                    var photo = allValues[r][1].ToString();
-                    var parentEmail = allValues[r][7].ToString();
+                    var email = allValues[r][5]?.ToString() ?? "";
+                    var comment = allValues[r][9]?.ToString() ?? "";
+                    var finalGrade = allValues[r][3]?.ToString() ?? "";
+                    var photo = allValues[r][1]?.ToString() ?? "";
+                    var parentEmail = allValues[r][7]?.ToString() ?? "";
                     var studentSubmissions = new List<GradebookStudentSubmission>();
                     //Get sunmissions
                     for (var c = subIndex; c < values[r].Count; c += 2)
@@ -319,7 +330,7 @@ namespace GdevApps.BLL.Domain
                         studentSubmissions.Add(new GradebookStudentSubmission()
                         {
                             ClassId = classId,
-                            Grade = grade != null ? grade.ToString() : "",
+                            Grade = allValues[r][c]?.ToString() ?? "",
                             CourseWorkId = c.ToString(),
                             StudentId = studentName,
                             Email = email
@@ -332,9 +343,12 @@ namespace GdevApps.BLL.Domain
                         Email = email,
                         Comment = comment,
                         FinalGrade = finalGrade,
-                        Id = allValues[r][5]?.ToString(), //email as Id
+                        Id = allValues[r][5]?.ToString() ?? "", //email as Id
                         Photo = photo,
-                        ParentEmails = parentEmail.Split(',').ToList<string>(),
+                        Parents = parentEmail.Split(',').Select(p => new GradebookParent
+                        {
+                            Email = p
+                        }).ToList(),
                         Name = studentName,
                         ClassId = classId,
                         ClassName = className,
@@ -524,7 +538,10 @@ namespace GdevApps.BLL.Domain
                             FinalGrade = finalGrade,
                             Id = allValues[r][5]?.ToString(), //email as Id
                             Photo = photo,
-                            ParentEmails = parentEmail.Split(',').ToList<string>(),
+                            Parents = parentEmail.Split(',').Select(p => new GradebookParent
+                            {
+                                Email = p
+                            }).ToList(),
                             Name = studentName,
                             ClassId = classId,
                             ClassName = className,
@@ -575,7 +592,7 @@ namespace GdevApps.BLL.Domain
                     string parentGradebookName = "";
                     if (googleClassResult.Result == ResultType.SUCCESS && googleClassResult.ResultObject == null)
                     {
-                        var studentGradeBook = await _classroomService.GetGradebookByUniqueIdAsync(student.GradebookId);
+                        var studentGradeBook = await GetGradebookByUniqueIdAsync(student.GradebookId);
                         parentGradebookName = $"{studentGradeBook.Name}_{student.Email}";
                     }
                     else
@@ -688,6 +705,81 @@ namespace GdevApps.BLL.Domain
 
             throw new NotFiniteNumberException();
         }
+        public bool AddGradebook(GdevApps.BLL.Models.GDevClassroomService.GradeBook model)
+        {
+            try
+            {
+                var gradeBookModel = _mapper.Map<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>(model);
+                _gradeBookRepository.Create<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>(gradeBookModel);
+                _gradeBookRepository.Save();
+                return true;
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
+        }
+        public async Task<bool> DeleteGradeBookAsync(string classroomId, string gradebookId)
+        {
+            try
+            {
+                var dataModelGradebook = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>(filter: f => f.GoogleUniqueId == gradebookId);
+                if (dataModelGradebook != null)
+                {
+                    _gradeBookRepository.Delete(dataModelGradebook);
+                    await _gradeBookRepository.SaveAsync();
+
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public Task<TaskResult<BoolResult, ICredential>> EditGradebookAsync(GradeBook model)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public async Task<GdevApps.BLL.Models.GDevClassroomService.GradeBook> GetGradebookByUniqueIdAsync(string gradebookId)
+        {
+            try
+            {
+                var dataModelGradebook = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>(filter: f => f.GoogleUniqueId == gradebookId);
+                var gradebook = _mapper.Map<GdevApps.BLL.Models.GDevClassroomService.GradeBook>(dataModelGradebook);
+                return gradebook;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public GdevApps.BLL.Models.GDevClassroomService.GradeBook GetGradebookByIdAsync(int id)
+        {
+            try
+            {
+                var dataModelGradebook = _gradeBookRepository.GetById<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>(id);
+                var gradebook = _mapper.Map<GdevApps.BLL.Models.GDevClassroomService.GradeBook>(dataModelGradebook);
+                return gradebook;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<IEnumerable<GradeBook>> GetGradeBooksByClassId(string classId)
+        {
+            var dataGradeBooks = await _gradeBookRepository.GetAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>(filter: f => f.ClassroomId == classId);
+            var gradeBooks = _mapper.Map<IEnumerable<GdevApps.BLL.Models.GDevClassroomService.GradeBook>>(dataGradeBooks);
+
+            return gradeBooks;
+        }
+
 
         #region Private methods
         private async Task UpdateAllTokens(string userId, UserCredential credentials)

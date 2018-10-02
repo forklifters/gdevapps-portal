@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
-namespace Identity.Views.Manage
+namespace GdevApps.Portal.Views.Manage
 {
     public static class ManageNavPages
     {

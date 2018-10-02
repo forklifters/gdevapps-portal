@@ -6,20 +6,14 @@ using System.Threading.Tasks;
 
 namespace GdevApps.Portal.Models.TeacherViewModels
 {
-    public class StudentsViewModel
+    public class ParentViewModel
     {
         [Required]
         public string Name { get; set; }
 
         [Required]
-        public string Id { get; set; }
-
-        [Required]
         public string Email { get; set; }
 
-        public bool IsInClassroom {get; set;}
-
-        public List<ParentViewModel> Parents { get; set; }
-        public string ClassId { get; set; }
+        public bool HasAccount {get; set;}
     }
 }

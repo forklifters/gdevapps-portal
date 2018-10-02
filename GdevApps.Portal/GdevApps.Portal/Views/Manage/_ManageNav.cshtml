@@ -1,5 +1,5 @@
 ﻿@using GdevApps.Portal.Views.Manage
-@inject SignInManager<ApplicationUser> SignInManager
+@inject SignInManager<GdevApps.Portal.Data.ApplicationUser> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }

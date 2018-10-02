@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using GdevApps.BLL.Models;
 using GdevApps.BLL.Models.GDevClassroomService;
+using GdevApps.BLL.Models.GDevSpreadSheetService;
 using Google.Apis.Auth.OAuth2;
 
 namespace GdevApps.BLL.Contracts
@@ -16,5 +17,11 @@ namespace GdevApps.BLL.Contracts
         Task<TaskResult<GradebookStudent, ICredential>> GetStudentByEmailFromGradebookAsync(string studentEmail, ICredential googleCredential, string gradebookId, string refreshToken, string userId);
         Task<TaskResult<BoolResult, ICredential>> SaveStudentIntoParentGradebookAsync(GradebookStudent student, string parentGradebookId, string externalAccessToken, string refreshToken, string userId);
         Task<TaskResult<BoolResult, ICredential>> SaveStudentIntoParentGradebookAsync(GradebookStudent student, string parentGradebookId, ICredential googleCredential, string refreshToken, string userId);
+        bool AddGradebook(GradeBook model);
+        Task<TaskResult<BoolResult, ICredential>> EditGradebookAsync(GradeBook model);
+        Task<GradeBook> GetGradebookByUniqueIdAsync(string gradebookId);
+        GradeBook GetGradebookByIdAsync(int id);
+        Task<bool> DeleteGradeBookAsync(string classroomId, string gradebookId); 
+        Task<IEnumerable<GradeBook>> GetGradeBooksByClassId(string classId);
     }
 }

@@ -131,25 +131,38 @@ namespace GdevApps.Portal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GetStudents(string classId)
+        public async Task<IActionResult> GetStudents(string classId, string gradeBookId)
         {
             try
             {
                 var userId = _userManager.GetUserId(User);
-                var googleClassroomStudentResult = await _classroomService.GetStudentsByClassIdAndGradebookIdAsync(await GetAccessTokenAsync(),
+                var googleClassroomStudentResult = await _classroomService.GetStudentsByClassIdAsync(await GetAccessTokenAsync(),
                                                                                     classId,
-                                                                                    "1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg",
                                                                                     await GetRefreshTokenAsync(),
                                                                                     userId);
                 var googleStudents = googleClassroomStudentResult.ResultObject.ToList();
                 //Get students from Gradebook
-                if (!string.IsNullOrEmpty(classId))
+                if (!string.IsNullOrEmpty(gradeBookId))
                 {
                     var studentsTaskResult = await _spreadSheetService.GetStudentsFromGradebookAsync(googleClassroomStudentResult.Credentials,
-                     classId,
+                     gradeBookId,
                       await GetRefreshTokenAsync(),
                        userId);
                     var gradebookStudents = _mapper.Map<IEnumerable<GoogleStudent>>(studentsTaskResult.ResultObject);
+
+                    foreach(var student in gradebookStudents){
+                        var parents = student.Parents;
+                        foreach(var p in parents){
+                            var parentAccount = await _userManager.FindByEmailAsync(p.Email);
+                            if(parentAccount != null){
+                                p.HasAccount = true;
+                                p.Name = parentAccount.UserName;
+                            }else{
+                                p.HasAccount = false;
+                            }
+                        }
+                    }
+
                     var gradebookStudentsEmails = gradebookStudents.Select(s => s.Email).ToList();
                     foreach (var student in googleStudents.Where(s => gradebookStudents.Select(g => g.Email).Contains(s.Email)).ToList())
                     {
@@ -168,6 +181,24 @@ namespace GdevApps.Portal.Controllers
                  return BadRequest(ex);
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> GetGradeBooks(string classId)
+        {
+            try
+            {
+                var gradebooks = await _spreadSheetService.GetGradeBooksByClassId(classId);
+                return Json(gradebooks.Select(g=> new {
+                    UniqueId = g.GoogleUniqueId,
+                    Text = g.Name
+                }));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+
 
         [HttpGet]
         public async Task<IActionResult> GetClassesForStudents()
@@ -208,7 +239,7 @@ namespace GdevApps.Portal.Controllers
                 }
 
 
-                var sheet = await _classroomService.GetGradebookByUniqueIdAsync(model.GoogleUniqueId);
+                var sheet = await _spreadSheetService.GetGradebookByUniqueIdAsync(model.GoogleUniqueId);
                 if (sheet != null)
                 {
                     ModelState.AddModelError("Id", $"Gradebook with suck id already exists");
@@ -227,7 +258,7 @@ namespace GdevApps.Portal.Controllers
                     IsDeleted = false
                 };
 
-                var result = _classroomService.AddGradebookAsync(gradeBookModel);
+                var result = _spreadSheetService.AddGradebook(gradeBookModel);
 
                 return PartialView("_AddGradebook", model);
             }
@@ -291,7 +322,7 @@ namespace GdevApps.Portal.Controllers
             {
                 if (!string.IsNullOrEmpty(classroomId) && !string.IsNullOrEmpty(gradebookId))
                 {
-                    var result = await _classroomService.DeleteGradeBookAsync(classroomId, gradebookId);
+                    var result = await _spreadSheetService.DeleteGradeBookAsync(classroomId, gradebookId);
                     if (result)
                     {
                         return Ok();

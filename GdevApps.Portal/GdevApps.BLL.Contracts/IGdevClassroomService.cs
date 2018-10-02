@@ -12,14 +12,9 @@ namespace GdevApps.BLL.Contracts
         Task<TaskResult<IEnumerable<GoogleClass>, ICredential>> GetAllClassesAsync(ICredential googleCredential, string refreshToken, string userId);
         Task<TaskResult<GoogleClass, ICredential>> GetClassByIdAsync(string classroomId, string externalAccessToken, string refreshToken, string userId);
         Task<TaskResult<GoogleClass, ICredential>> GetClassByIdAsync(string classroomId, ICredential googleCredential, string refreshToken, string userId);
-        Task<TaskResult<IEnumerable<GoogleStudent>, ICredential>> GetStudentsByClassIdAndGradebookIdAsync(string externalAccessToken, string classId, string gradebookId, string refreshToken, string userId);
-        Task<TaskResult<IEnumerable<GoogleStudent>, ICredential>> GetStudentsByClassIdAndGradebookIdAsync(ICredential googleCredential, string classId, string gradebookId, string refreshToken, string userId);
+        Task<TaskResult<IEnumerable<GoogleStudent>, ICredential>> GetStudentsByClassIdAsync(string externalAccessToken, string classId, string refreshToken, string userId);
+        Task<TaskResult<IEnumerable<GoogleStudent>, ICredential>> GetStudentsByClassIdAsync(ICredential googleCredential, string classId, string refreshToken, string userId);
         Task<TaskResult<GoogleStudent, ICredential>> GetStudentByIdAsync(string studentId, string externalAccessToken, string refreshToken, string userId);
         Task<TaskResult<GoogleStudent, ICredential>> GetStudentByIdAsync(string studentId, ICredential googleCredential, string refreshToken, string userId);
-        bool AddGradebookAsync(GdevApps.BLL.Models.GDevClassroomService.GradeBook model);
-        Task<TaskResult<BoolResult, ICredential>> EditGradebookAsync(GdevApps.BLL.Models.GDevClassroomService.GradeBook model);
-        Task<GdevApps.BLL.Models.GDevClassroomService.GradeBook> GetGradebookByUniqueIdAsync(string gradebookId);
-        GdevApps.BLL.Models.GDevClassroomService.GradeBook GetGradebookByIdAsync(int id);
-        Task<bool> DeleteGradeBookAsync(string classroomId, string gradebookId); 
     }
 }

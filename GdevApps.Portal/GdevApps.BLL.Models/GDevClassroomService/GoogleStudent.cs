@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using GdevApps.BLL.Models.GDevSpreadSheetService;
 
 namespace GdevApps.BLL.Models.GDevClassroomService
 {
@@ -7,10 +8,9 @@ namespace GdevApps.BLL.Models.GDevClassroomService
         public string Name { get; set; }
         public string Id { get; set; }
         public string Email { get; set; }
-        public string ParentEmail { get; set; }
         public string Comment { get; set; }
         public string Photo { get; set; }
-        public List<string> ParentEmails { get; set; }
+        public List<GradebookParent> Parents { get; set; }
         public string ClassId { get; set; }
         public string ClassName { get; set; }
         public string FinalGrade{get;set;}

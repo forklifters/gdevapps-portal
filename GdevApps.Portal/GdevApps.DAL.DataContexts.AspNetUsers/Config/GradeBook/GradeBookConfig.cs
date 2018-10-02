@@ -11,16 +11,8 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.AspNetUser
     {
         public void Configure(EntityTypeBuilder<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook> entity)
         {
-           entity.HasIndex(e => e.ClassroomId)
-                    .HasName("classroom_id_UNIQUE")
-                    .IsUnique();
-
-                entity.HasIndex(e => e.CreatedBy)
+          entity.HasIndex(e => e.CreatedBy)
                     .HasName("aspnet_user_id_idx");
-
-                entity.HasIndex(e => e.GoogleUniqueId)
-                    .HasName("google_unique_id_UNIQUE")
-                    .IsUnique();
 
                 entity.HasIndex(e => e.Id)
                     .HasName("id_UNIQUE")
