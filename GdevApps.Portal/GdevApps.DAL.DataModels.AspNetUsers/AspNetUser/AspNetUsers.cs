@@ -5,7 +5,7 @@ using GdevApps.DAL.DataModels.AspNetUsers.GradeBook;
 
 namespace GdevApps.DAL.DataModels.AspNetUsers.AspNetUser
 {
-    public partial class AspNetUsers
+     public partial class AspNetUsers
     {
         public AspNetUsers()
         {
@@ -14,6 +14,7 @@ namespace GdevApps.DAL.DataModels.AspNetUsers.AspNetUser
             AspNetUserRoles = new HashSet<AspNetUserRoles>();
             Folder = new HashSet<Folder>();
             GradeBook = new HashSet<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>();
+            Parent = new HashSet<Parent>();
             ParentGradeBook = new HashSet<ParentGradeBook>();
             ParentSharedGradeBookAspnetUser = new HashSet<ParentSharedGradeBook>();
             ParentSharedGradeBookParent = new HashSet<ParentSharedGradeBook>();
@@ -41,6 +42,7 @@ namespace GdevApps.DAL.DataModels.AspNetUsers.AspNetUser
         public ICollection<AspNetUserRoles> AspNetUserRoles { get; set; }
         public ICollection<Folder> Folder { get; set; }
         public ICollection<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook> GradeBook { get; set; }
+        public ICollection<Parent> Parent { get; set; }
         public ICollection<ParentGradeBook> ParentGradeBook { get; set; }
         public ICollection<ParentSharedGradeBook> ParentSharedGradeBookAspnetUser { get; set; }
         public ICollection<ParentSharedGradeBook> ParentSharedGradeBookParent { get; set; }

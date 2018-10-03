@@ -15,6 +15,8 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using GdevApps.BLL.Models.AspNetUsers;
+using GdevApps.BLL.Contracts;
 
 namespace GdevApps.Portal.Controllers
 {
@@ -25,6 +27,7 @@ namespace GdevApps.Portal.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
+        private readonly IAspNetUserService _aspNetUserService;
 
         private const string _defaultAvatar = "https://www.dropbox.com/s/5r1f49l2zx5e2yv/quokka_lg.png?raw=1";
 
@@ -35,13 +38,15 @@ namespace GdevApps.Portal.Controllers
             SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender,
             ILogger<AccountController> logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IAspNetUserService aspNetUserService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
             _configuration = configuration;
+            _aspNetUserService = aspNetUserService;
         }
 
         [TempData]
@@ -537,6 +542,44 @@ namespace GdevApps.Portal.Controllers
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        [HttpGet]
+        public ActionResult AddTeacher()
+        {
+            return PartialView("_AddTeacher", new UserViewModel() { Role = UserRoles.Parent });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> AddTeacher(UserViewModel userModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var dbUser = await _userManager.FindByEmailAsync(userModel.Email);
+                if(dbUser != null){
+                     ModelState.AddModelError("Email", $"User with email {userModel.Email} already exists");
+                    return PartialView("_AddTeacher", userModel);
+                }
+
+                var parentModel = new Parent()
+                {
+                    Avatar = _defaultAvatar,
+                    Email = userModel.Email,
+                    Name = userModel.Name
+                };
+
+                var result = _aspNetUserService.AddParent(parentModel);
+                if (result)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest(userModel.Email);
+                }
+            }
+
+            return PartialView("_AddTeacher", userModel);
         }
 
         #region Helpers

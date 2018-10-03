@@ -21,6 +21,7 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers
         public virtual DbSet<DataModels.AspNetUsers.AspNetUser.AspNetUserClaims> AspNetUserClaims { get; set; }
         public virtual DbSet<DataModels.AspNetUsers.AspNetUser.AspNetUserLogins> AspNetUserLogins { get; set; }
         public virtual DbSet<DataModels.AspNetUsers.AspNetUser.AspNetUserTokens> AspNetUserTokens { get; set; }
+        public virtual DbSet<DataModels.AspNetUsers.AspNetUser.Parent> Parent { get; set; }
 
          public virtual DbSet<DataModels.AspNetUsers.GradeBook.Folder> Folder { get; set; }
         public virtual DbSet<DataModels.AspNetUsers.GradeBook.FolderType> FolderType { get; set; }
@@ -28,6 +29,7 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers
         public virtual DbSet<DataModels.AspNetUsers.GradeBook.ParentGradeBook> ParentGradeBook { get; set; }
         public virtual DbSet<DataModels.AspNetUsers.GradeBook.ParentSharedGradeBook> ParentSharedGradeBook { get; set; }
         public virtual DbSet<DataModels.AspNetUsers.GradeBook.SharedStatus> SharedStatus { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

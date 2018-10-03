@@ -2,6 +2,7 @@ var Students = (function () {
     var table;
     function init() {
         intiDdls();
+        initAddButtons();
     }
 
     function intiDdls() {
@@ -48,23 +49,12 @@ var Students = (function () {
     }
 
     function getParentsCell(d) {
-        // debugger;
-        // var cell = "<div class='col-xs-4'><ul class='pricing-plans__features ng-scope'>";
-        // d.parents.forEach(parent => {
-        //     //cell = cell + '<li class="list"><a target="_blank" href="https://mail.google.com/mail/?view=cm&fs=1&to=' + email + '">' + email + '</li>'
-        //     cell = cell + '<li class="pricing-plans__feature feature-icon icon--gmail ">'+parent.name+' <a target="_blank" href="https://mail.google.com/mail/?view=cm&fs=1&to=' + parent.email + '">' + parent.email + '</a></li>'
-        // });
-        // cell = cell + "</ul></div>";
-        // return cell;
-
-
-        debugger;
         var row = '';
         d.parents.forEach(parent => {
             //cell = cell + '<li class="list"><a target="_blank" href="https://mail.google.com/mail/?view=cm&fs=1&to=' + email + '">' + email + '</li>'
-            var btn = '<button type="button" class="btn btn-primary" data-toggle="ajax-modal" >ADD USER</button>';
+            var btn = '<button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-toggle="ajax-modal" onclick="Students.getTeacherInfo(this)">ADD USER</button>';
             if(parent.hasAccount){
-                btn = '<button type="button" class="btn btn-primary" data-toggle="ajax-modal" >SHARE GRADEBOOK</button>';
+                btn = '<button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-toggle="ajax-modal" >SHARE GRADEBOOK</button>';
             }
             
             row = row + '<tr><td class="pricing-plans__features ng-scope">'
@@ -161,8 +151,48 @@ var Students = (function () {
             });
         }
     }
- 
+
+    function initAddButtons() {
+        var placeholderElement = $('#modal-placeholder-students');
+        $('button[data-toggle="ajax-modal"]').click(function (event) {
+            var url = $(this).data('url');
+            debugger;
+            $.get(url).done(function (data) {
+                placeholderElement.html(data);
+                placeholderElement.find('.modal').modal('show');
+            });
+        });
+
+        placeholderElement.on('click', '[data-save="modal"]', function (event) {
+            event.preventDefault();
+            var form = $(this).parents('.modal').find('form');
+            var actionUrl = form.attr('action');
+            var dataToSend = form.serialize();
+            $.post(actionUrl, dataToSend).done(function (data) {
+                var newBody = $('.modal-body', data);
+                placeholderElement.find('.modal-body').replaceWith(newBody);
+
+                // find IsValid input field and check it's value
+                // if it's valid then hide modal window
+                var isValid = newBody.find('[name="IsValid"]').val() == 'True';
+                if (isValid) {
+                    placeholderElement.find('.modal').modal('hide');
+                    location.reload();
+                }
+            });
+        });
+    }
+
+    function getTeacherInfo(me) {
+        var placeholderElement = $('#modal-placeholder-students');
+        var url = "/Account/AddTeacher";
+        $.get(url).done(function (result) {
+            placeholderElement.html(result);
+            placeholderElement.find('.modal').modal('show');
+        });
+    }
     return {
-        init: init
+        init: init,
+        getTeacherInfo: getTeacherInfo
     }
 })(jQuery)

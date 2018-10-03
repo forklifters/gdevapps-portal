@@ -49,5 +49,20 @@ namespace GdevApps.BLL.Domain
             var models = _aspNetUserRepository.GetAsync<DAL.DataModels.AspNetUsers.AspNetUser.AspNetUserTokens>(filter: (u => u.UserId == userId));
             return _mapper.Map<Task<IEnumerable<AspNetUserToken>>>(models);
         }
+
+        public bool AddParent(Parent parent)
+        {
+             try
+            {
+                var model = _mapper.Map<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Parent>(parent);
+                _aspNetUserRepository.Create<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Parent>(model);
+                _aspNetUserRepository.Save();
+                return true;
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
+        }
     }
 }
