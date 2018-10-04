@@ -5,7 +5,7 @@
 @using GdevApps.Portal.Data 
 @model GdevApps.Portal.Models.AccountViewModels.LoginViewModel 
 @inject Microsoft.AspNetCore.Identity.SignInManager<GdevApps.Portal.Data.ApplicationUser> SignInManager 
-    @{ ViewData["Title"] = "Welcome to Gdevapps Portal!"; } 
+    @{ ViewData["Title"] = "Welcome to Gdev apps Portal"; } 
     @{ Layout = "/Views/Shared/_LoginLayout.cshtml"; }
     
     <script src="~/js/Login/login.js" asp-append-version="true"></script>
@@ -14,26 +14,55 @@
                 Login.init();
             });
     </script>
-    <h2 class="col-centered">@ViewData["Title"]</h2>
+    <div class="row">
+        <div class="col-md-4">
+            <img alt="Gdev apps" class="lockup--logo mainLogo" src="../images/mainLogo.png">
+        </div>
+        <div class="col-md-8">
+            <h2>@ViewData["Title"]</h2>
+        </div>
+    </div>
     <hr />
     <div class="container">
         <div class="row">
             <div class="Absolute-Center is-Responsive col-centered">
                 <div id="logo-container"></div>
-                <div class="col-xs-5">
+                <div class="col-xs-12 col-md-6 col-md-offset-2">
+                    <form asp-action="ExternalLogin" id="formExternalLogin" returnurl="@ViewData[" ReturnUrl "]" method="post" class="form-horizontal">
+                        @Html.AntiForgeryToken()
+                        <div class="col-md-8">
+                            @{
+                                    var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();  
+                                    if (loginProviders.Count == 0)
+                                    {
+                                        <div>
+                                            <p>
+                                                There are no authentication services configured. 
+                                            </p>
+                                        </div>
+                                    }else{
+                                        @foreach (var provider in loginProviders) {
+                                           
+                                        <button 
+                                        type="submit" 
+                                            id="btnLoginGoogle"
+                                            name="provider" 
+                                            value="@provider.Name" 
+                                            title="Log in using your @provider.DisplayName account"
+                                            class="btn btn-block btn-social btn-google">
+                                        <span class="fa fa-google">
+                                                <svg viewBox="0 0 366 372" xmlns="http://www.w3.org/2000/svg"><path d="M125.9 10.2c40.2-13.9 85.3-13.6 125.3 1.1 22.2 8.2 42.5 21 59.9 37.1-5.8 6.3-12.1 12.2-18.1 18.3l-34.2 34.2c-11.3-10.8-25.1-19-40.1-23.6-17.6-5.3-36.6-6.1-54.6-2.2-21 4.5-40.5 15.5-55.6 30.9-12.2 12.3-21.4 27.5-27 43.9-20.3-15.8-40.6-31.5-61-47.3 21.5-43 60.1-76.9 105.4-92.4z" id="Shape" fill="#EA4335"/><path d="M20.6 102.4c20.3 15.8 40.6 31.5 61 47.3-8 23.3-8 49.2 0 72.4-20.3 15.8-40.6 31.6-60.9 47.3C1.9 232.7-3.8 189.6 4.4 149.2c3.3-16.2 8.7-32 16.2-46.8z" id="Shape" fill="#FBBC05"/><path d="M361.7 151.1c5.8 32.7 4.5 66.8-4.7 98.8-8.5 29.3-24.6 56.5-47.1 77.2l-59.1-45.9c19.5-13.1 33.3-34.3 37.2-57.5H186.6c.1-24.2.1-48.4.1-72.6h175z" id="Shape" fill="#4285F4"/><path d="M81.4 222.2c7.8 22.9 22.8 43.2 42.6 57.1 12.4 8.7 26.6 14.9 41.4 17.9 14.6 3 29.7 2.6 44.4.1 14.6-2.6 28.7-7.9 41-16.2l59.1 45.9c-21.3 19.7-48 33.1-76.2 39.6-31.2 7.1-64.2 7.3-95.2-1-24.6-6.5-47.7-18.2-67.6-34.1-20.9-16.6-38.3-38-50.4-62 20.3-15.7 40.6-31.5 60.9-47.3z" fill="#34A853"/></svg>
+                                            </span>
+                                        Sign in with @provider.Name
+                                        </button>
+                                        }      
+                                    }
+                            }
+                            
+                        </div>
+                    </form>
                     <div asp-validation-summary="All" class="text-danger"></div>
-                    <form returnurl="@ViewData["ReturnUrl"]" method="post">
-                        <div class="form-group input-group">
-                            <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-                            <input id="txtEmail" asp-for="Email" class="form-control" type="text" name='Email' placeholder="Email" />
-                            <span asp-validation-for="Email" class="text-danger"></span>
-                        </div>
-                        <div class="form-group input-group">
-                            <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
-                            <input asp-for="Password" class="form-control" type="password" name='Password' placeholder="Password" />
-                            <span asp-validation-for="Password" class="text-danger"></span>
-                        </div>
-                        <div class="form-group input-group">
+                    <div class="form-group input-group col-md-8">
                                 <div class="checkbox" id="divChbxAgreeWithTerms">
                                         <label>
                                         <input asp-for="AgreeWithTerms" id="chbxAgreeWithTerms"> I agree to the <a href="#">Terms and Conditions</a>
@@ -41,51 +70,6 @@
                                         </label>
                                     </div>
                         </div>
-                        <div class="form-group">
-                            <div class="checkbox">
-                                <label asp-for="RememberMe">
-                            <input asp-for="RememberMe" />
-                            @Html.DisplayNameFor(m => m.RememberMe)
-                        </label>
-                            </div>
-                        </div>
-                        <div class="form-group text-center">
-                                <a asp-action="ForgotPassword">Forgot your password?</a>&nbsp;|&nbsp;<a href="#">Support</a>
-                        </div>
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-def btn-block">Login</button>
-                        </div>
-                        <div class="form-group text-center">
-                            OR
-                        </div>
-                </form>
-                    <form asp-action="ExternalLogin" id="formExternalLogin" returnurl="@ViewData[" ReturnUrl "]" method="post" class="form-horizontal">
-                        @Html.AntiForgeryToken()
-                        <div>
-                            <p>@{
-                                    var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();  
-                                    if (loginProviders.Count == 0)
-                                    {
-                                        <div>
-                                            <p>
-                                                There are no external authentication services configured. See <a href="https://go.microsoft.com/fwlink/?LinkID=532715">this article</a>
-                                                for details on setting up this ASP.NET application to support logging in via external services.
-                                            </p>
-                                        </div>
-                                    }else{
-                                        @foreach (var provider in loginProviders) {
-                                            <button type="submit" 
-                                            id="btnLoginGoogle"
-                                            class="btn btn-def btn-block" 
-                                            name="provider" 
-                                            value="@provider.Name" 
-                                            title="Log in using your @provider.DisplayName account">Login with @provider.Name</button> 
-                                        }      
-                                    }
-                            }
-                            </p>
-                        </div>
-                    </form>
                 </div>
             </div>
         </div>

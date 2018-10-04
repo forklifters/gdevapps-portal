@@ -8,6 +8,7 @@
       "wwwroot/css/site.css",
       "wwwroot/css/Login/login.css",
       "wwwroot/css/bootstrap-dialog.min.css",
+      "wwwroot/css/bootstrap-social.css",
       "wwwroot/lib/bootstrap/dist/css/bootstrap.css"
     ]
   },

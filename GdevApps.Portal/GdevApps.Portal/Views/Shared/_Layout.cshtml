@@ -11,7 +11,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Identity</title>
+    <title>
+        @ViewData["Title"] - Gdev apps Portal
+    </title>
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="~/css/site.css" />
@@ -60,7 +62,7 @@
         <div class="header--wrap">
             <a class="header--logo">
                 <div class="lockup">
-                    <img alt="Gdev apps" class="lockup--logo" src="https://www.dropbox.com/s/s8do90nf2uv4ey2/image1.png?raw=1">
+                    <img alt="Gdev apps" class="lockup--logo" src="../images/mainLogo.png">
                     @if (SignInManager.IsSignedIn(User))
                     {
                         <span class="gb_9a pull-right">
