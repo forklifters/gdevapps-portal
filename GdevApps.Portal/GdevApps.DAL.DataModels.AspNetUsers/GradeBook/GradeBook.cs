@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using GdevApps.DAL.DataModels.AspNetUsers.AspNetUser;
 
 namespace GdevApps.DAL.DataModels.AspNetUsers.GradeBook
 {
@@ -7,7 +8,8 @@ namespace GdevApps.DAL.DataModels.AspNetUsers.GradeBook
     {
         public GradeBook()
         {
-            ParentGradeBook = new HashSet<ParentGradeBook>();
+            ParentGradeBook = new HashSet<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentGradeBook>();
+            ParentStudent = new HashSet<ParentStudent>();
         }
 
         public int Id { get; set; }
@@ -20,6 +22,7 @@ namespace GdevApps.DAL.DataModels.AspNetUsers.GradeBook
         public DateTime CreatedDate { get; set; }
 
         public GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.AspNetUsers CreatedByNavigation { get; set; }
-        public ICollection<ParentGradeBook> ParentGradeBook { get; set; }
+        public ICollection<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentGradeBook> ParentGradeBook { get; set; }
+        public ICollection<ParentStudent> ParentStudent { get; set; }
     }
 }

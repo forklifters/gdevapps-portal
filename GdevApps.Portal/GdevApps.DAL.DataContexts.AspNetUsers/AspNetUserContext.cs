@@ -3,6 +3,7 @@ using GdevApps.DAL.DataModels.AspNetUsers;
 using GdevApps.DAL.DataContexts.AspNetUsers.Config;
 using GdevApps.DAL.DataContexts.AspNetUsers.Config.AspNetUser;
 using GdevApps.DAL.DataContexts.AspNetUsers.Config.GradeBook;
+using GdevApps.DAL.DataModels.AspNetUsers.AspNetUser;
 
 namespace GdevApps.DAL.DataContexts.AspNetUsers
 {
@@ -22,8 +23,9 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers
         public virtual DbSet<DataModels.AspNetUsers.AspNetUser.AspNetUserLogins> AspNetUserLogins { get; set; }
         public virtual DbSet<DataModels.AspNetUsers.AspNetUser.AspNetUserTokens> AspNetUserTokens { get; set; }
         public virtual DbSet<DataModels.AspNetUsers.AspNetUser.Parent> Parent { get; set; }
+        public virtual DbSet<ParentStudent> ParentStudent { get; set; }
 
-         public virtual DbSet<DataModels.AspNetUsers.GradeBook.Folder> Folder { get; set; }
+        public virtual DbSet<DataModels.AspNetUsers.GradeBook.Folder> Folder { get; set; }
         public virtual DbSet<DataModels.AspNetUsers.GradeBook.FolderType> FolderType { get; set; }
         public virtual DbSet<DataModels.AspNetUsers.GradeBook.GradeBook> GradeBook { get; set; }
         public virtual DbSet<DataModels.AspNetUsers.GradeBook.ParentGradeBook> ParentGradeBook { get; set; }

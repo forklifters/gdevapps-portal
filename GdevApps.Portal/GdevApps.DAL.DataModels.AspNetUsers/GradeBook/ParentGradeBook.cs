@@ -5,7 +5,7 @@ namespace GdevApps.DAL.DataModels.AspNetUsers.GradeBook
 {
      public partial class ParentGradeBook
     {
-        public ParentGradeBook()
+         public ParentGradeBook()
         {
             ParentSharedGradeBook = new HashSet<ParentSharedGradeBook>();
         }
