@@ -51,7 +51,10 @@ namespace GdevApps.Portal.Configuration
 
         public static void AddAspNetIdentity(this IServiceCollection services)
         {
-            services.AddIdentity<ApplicationUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>(options => {
+                options.User.RequireUniqueEmail = true;
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ ";
+            })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
@@ -78,6 +81,15 @@ namespace GdevApps.Portal.Configuration
             // services.AddSingleton(Log.Logger);
         }
 
+        public static void AddApplicationSession(this IServiceCollection services)
+        {
+            services.AddDistributedMemoryCache();
+            services.AddSession(options =>
+            {
+                //options.IdleTimeout = TimeSpan.FromMinutes(60);//You can set Time   
+            });
+        }
+
         public static void AddGoogleAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddAuthentication()
@@ -86,8 +98,8 @@ namespace GdevApps.Portal.Configuration
                   })
               .AddGoogle(googleOptions =>
               {
-                  googleOptions.ClientId = configuration["installed:client_id"];//"898218061018-1mvqrmk07v8206bhsdmf8cs3kkd7rni9.apps.googleusercontent.com";
-                  googleOptions.ClientSecret = configuration["installed:client_secret"];//"5eE60z31j9J7y2vQvYQx68kK";
+                  googleOptions.ClientId = configuration["installed:client_id"];
+                  googleOptions.ClientSecret = configuration["installed:client_secret"];
                   googleOptions.Scope.Add("https://www.googleapis.com/auth/classroom.courses");
                   googleOptions.Scope.Add("https://www.googleapis.com/auth/classroom.coursework.students");
                   googleOptions.Scope.Add("https://www.googleapis.com/auth/classroom.profile.emails");

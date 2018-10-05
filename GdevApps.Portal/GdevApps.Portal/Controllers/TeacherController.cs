@@ -345,14 +345,12 @@ namespace GdevApps.Portal.Controllers
             try
             {
                 var serviceClassesRespnse = await _classroomService.GetAllClassesAsync(await GetAccessTokenAsync(), await GetRefreshTokenAsync(), _userManager.GetUserId(User));
-                if(serviceClassesRespnse.Result == ResultType.SUCCESS){
+                if(serviceClassesRespnse.Result == ResultType.SUCCESS || serviceClassesRespnse.Result == ResultType.EMPTY){
                     var classes = _mapper.Map<List<ClassesViewModel>>(serviceClassesRespnse.ResultObject);
-
                     return classes;
                 }else{
                     throw new Exception(string.Join(",", serviceClassesRespnse.Errors));
                 }
-                
             }
             catch (Exception ex)
             {

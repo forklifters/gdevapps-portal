@@ -7,6 +7,7 @@ using GdevApps.Portal.Data;
 using GdevApps.Portal.Models;
 using GdevApps.Portal.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,7 @@ namespace GdevApps.Portal.Controllers
     {
         public IActionResult Index()
         {
+            var userCurrentRole = HttpContext.Session.GetString("UserCurrentRole");  
             return View();
         }
 

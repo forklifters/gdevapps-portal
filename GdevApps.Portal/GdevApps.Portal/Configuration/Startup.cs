@@ -51,6 +51,7 @@ namespace GdevApps.Portal
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddApplicationSession();
             services.AddMvc(config => {
                 var policy = new AuthorizationPolicyBuilder()
                                 .RequireAuthenticatedUser()
@@ -105,6 +106,7 @@ namespace GdevApps.Portal
             app.UseStaticFiles();
             app.UseAuthentication();
             IdentityInitializer.SeedData(userManager, roleManager);
+            app.UseSession();  
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

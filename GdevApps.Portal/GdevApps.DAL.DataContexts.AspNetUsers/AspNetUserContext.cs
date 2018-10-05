@@ -32,24 +32,34 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers
         public virtual DbSet<DataModels.AspNetUsers.GradeBook.ParentSharedGradeBook> ParentSharedGradeBook { get; set; }
         public virtual DbSet<DataModels.AspNetUsers.GradeBook.SharedStatus> SharedStatus { get; set; }
 
+        public virtual DbSet<GdevApps.DAL.DataModels.AspNetUsers.LicensedUser.Account> Account { get; set; }
+        public virtual DbSet<GdevApps.DAL.DataModels.AspNetUsers.LicensedUser.Licenses> Licenses { get; set; }
+        public virtual DbSet<GdevApps.DAL.DataModels.AspNetUsers.LicensedUser.Products> Products { get; set; }
+        public virtual DbSet<GdevApps.DAL.DataModels.AspNetUsers.LicensedUser.Roles> Roles { get; set; }
+        public virtual DbSet<GdevApps.DAL.DataModels.AspNetUsers.LicensedUser.Users> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-           builder.ApplyConfiguration(new AspNetRoleClaimsConfig());
-           builder.ApplyConfiguration(new AspNetRolesConfig());
-           builder.ApplyConfiguration(new AspNetUserClaimsConfig());
-           builder.ApplyConfiguration(new AspNetUserConfig());
-           builder.ApplyConfiguration(new AspNetUserLoginsConfig());
-           builder.ApplyConfiguration(new AspNetUserRolesConfig());
-           builder.ApplyConfiguration(new AspNetUserTokensConfig());
+            builder.ApplyConfiguration(new AspNetRoleClaimsConfig());
+            builder.ApplyConfiguration(new AspNetRolesConfig());
+            builder.ApplyConfiguration(new AspNetUserClaimsConfig());
+            builder.ApplyConfiguration(new AspNetUserConfig());
+            builder.ApplyConfiguration(new AspNetUserLoginsConfig());
+            builder.ApplyConfiguration(new AspNetUserRolesConfig());
+            builder.ApplyConfiguration(new AspNetUserTokensConfig());
 
             builder.ApplyConfiguration(new FolderConfig());
-           builder.ApplyConfiguration(new FolderTypeConfig());
-           builder.ApplyConfiguration(new GradeBookConfig());
-           builder.ApplyConfiguration(new ParentGradeBookConfig());
-           builder.ApplyConfiguration(new ParentSharedGradeBookConfig());
-           builder.ApplyConfiguration(new SharedStatusConfig());
+            builder.ApplyConfiguration(new FolderTypeConfig());
+            builder.ApplyConfiguration(new GradeBookConfig());
+            builder.ApplyConfiguration(new ParentGradeBookConfig());
+            builder.ApplyConfiguration(new ParentSharedGradeBookConfig());
+            builder.ApplyConfiguration(new SharedStatusConfig());
 
+            builder.ApplyConfiguration(new UsersConfig());
+            builder.ApplyConfiguration(new RolesConfig());
+            builder.ApplyConfiguration(new ProductsConfig());
+            builder.ApplyConfiguration(new LicensesConfig());
+            builder.ApplyConfiguration(new AccountConfig());
         }
     }
 }

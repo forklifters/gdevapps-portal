@@ -78,6 +78,7 @@ namespace GdevApps.BLL.Domain
             {
                 request = service.Courses.List();
                 request.PageSize = 100;
+                request.TeacherId = "me";
                 response = await request.ExecuteAsync();
             }
             catch (Google.GoogleApiException ex)
@@ -119,10 +120,13 @@ namespace GdevApps.BLL.Domain
                 _logger.LogError(ex, "Error occurred while retrieving classes");
                 throw ex;
             }
+            var errorList = new List<string>();
+            if(response.Courses == null){
+                return new TaskResult<IEnumerable<GoogleClass>, ICredential>(ResultType.EMPTY, new List<GoogleClass>(), googleCredential, errorList);
+            }
 
             courses.AddRange(response.Courses);
             request.PageToken = response.NextPageToken;
-            var errorList = new List<string>();
             while (!String.IsNullOrEmpty(request.PageToken))
             {
                 try

@@ -17,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using GdevApps.BLL.Models.AspNetUsers;
 using GdevApps.BLL.Contracts;
+using Microsoft.AspNetCore.Http;
 
 namespace GdevApps.Portal.Controllers
 {
@@ -286,6 +287,8 @@ namespace GdevApps.Portal.Controllers
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
+            //clear session
+            HttpContext.Session.Clear();  
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
 
@@ -376,24 +379,11 @@ namespace GdevApps.Portal.Controllers
                 return RedirectToAction(nameof(Login));
             }
 
-            // var accessToken = info.AuthenticationTokens.Single(f => f.Name == "access_token").Value;
-            // var tokenType = info.AuthenticationTokens.Single(f => f.Name == "token_type").Value;
-            // var expiryDate = info.AuthenticationTokens.Single(f => f.Name == "expires_at").Value;
-
             // Get user profile picture 
             var picture = info.Principal.FindFirstValue("image");
             // Sign in the user with this external login provider if the user already has a login.
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             //save access_token token_type, expires_at
-
-           // var httpContextResult = await HttpContext.AuthenticateAsync(IdentityConstants.ExternalScheme);
-            var token = await HttpContext.GetTokenAsync(IdentityConstants.ExternalScheme, "access_token");
-            var token2 = await HttpContext.GetTokenAsync(CookieAuthenticationDefaults.AuthenticationScheme, "access_token");
-            var token3 = await HttpContext.GetTokenAsync("access_token");
-
-             var refrestoken = await HttpContext.GetTokenAsync(IdentityConstants.ExternalScheme, "refresh_token");
-
-            
             if (result.Succeeded)
             {
                 //Include the access token in the properties
@@ -409,7 +399,101 @@ namespace GdevApps.Portal.Controllers
                 await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
 
                 _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
-                return RedirectToLocal(returnUrl);
+                //return RedirectToLocal(returnUrl);
+                return RedirectToAction(nameof(MultipleSignIn), new { user.Email, returnUrl });
+            }else{
+                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                var teacher = await _aspNetUserService.GetTeacherByEmailAsync(email);
+                if (teacher != null)
+                {
+                    var applicationUser = new ApplicationUser
+                    {
+                        UserName = teacher.Name,
+                        Email = email,
+                        Avatar = teacher.Avatar
+                    };
+                    var userCreationResult = await _userManager.CreateAsync(applicationUser);
+                    var createLogin = await _userManager.AddLoginAsync(applicationUser, info);
+
+                    //REMOVE THIS CODE
+                    if (userCreationResult.Succeeded && createLogin.Succeeded)
+                    {
+                        _logger.LogInformation("User created a new account with password.");
+                        // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
+                        //await _signInManager.SignInAsync(user, isPersistent: false);
+                        //add user logins
+                        // var createdUser = await _userManager.FindByEmailAsync(email);
+                        // var addLoginResult = _aspNetUserService.AddUserLogin(new AspNetUserLogin{
+                        //     LoginProvider = info.LoginProvider,
+
+
+                        // })
+
+                        //Include the access token in the properties
+                        var user = await this._userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+                        var props = new AuthenticationProperties();
+                        props.IsPersistent = true;
+                        props.ExpiresUtc = DateTime.UtcNow.AddDays(5);
+                        props.StoreTokens(info.AuthenticationTokens);
+                        await _signInManager.SignInAsync(user, props, info.LoginProvider);
+
+                        // Add this to add token to datastore
+                        // Update the token
+                        await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
+
+                        _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
+                        //return RedirectToLocal(returnUrl);
+                        return RedirectToAction(nameof(MultipleSignIn), new { user.Email, returnUrl });
+
+
+
+
+                        _logger.LogInformation("User created a new account with password.");
+                        return RedirectToLocal("/");
+                    }
+                }
+
+                var parent = await _aspNetUserService.GetParentByEmailAsync(email);
+                if (parent != null)
+                {
+                    var applicationUser = new ApplicationUser
+                    {
+                        UserName = parent.Name,
+                        Email = email,
+                        Avatar = parent.Avatar
+                    };
+
+                    var userCreationResult = await _userManager.CreateAsync(applicationUser);
+                    var createLogin = await _userManager.AddLoginAsync(applicationUser, info);
+
+                    //REMOVE THIS CODE
+                    if (userCreationResult.Succeeded && createLogin.Succeeded)
+                    {
+                        _logger.LogInformation("User created a new account with password.");
+                        // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
+                        //Include the access token in the properties
+                        var user = await this._userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+                        if(user == null){
+                            user = await _userManager.FindByEmailAsync(email);
+                        }
+                        var props = new AuthenticationProperties();
+                        props.IsPersistent = true;
+                        props.ExpiresUtc = DateTime.UtcNow.AddDays(5);
+                        props.StoreTokens(info.AuthenticationTokens);
+                        await _signInManager.SignInAsync(user, props, info.LoginProvider);
+
+                        // Add this to add token to datastore
+                        // Update the token
+                        await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
+
+                        _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
+                        //return RedirectToLocal(returnUrl);
+                        return RedirectToAction(nameof(MultipleSignIn), new { user.Email, returnUrl });
+
+
+                        return RedirectToLocal("/");
+                    }
+                }
             }
             if (result.IsLockedOut)
             {
@@ -429,6 +513,44 @@ namespace GdevApps.Portal.Controllers
                 });
             }
         }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SignInAsTeacher(string email)
+        {
+            HttpContext.Session.SetString("UserCurrentRole", UserRoles.Teacher);  
+            return RedirectToAction(nameof(HomeController.Index), "Home");
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SignInAsParent(string email)
+        {
+            HttpContext.Session.SetString("UserCurrentRole", UserRoles.Parent);  
+            return RedirectToAction(nameof(HomeController.Index), "Home");
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> MultipleSignIn(string email, string returnUrl)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            //do stuff
+            //check if user is in USers table (teacher)
+            var parent = await _aspNetUserService.GetParentByEmailAsync(email);
+            var loginInfo = new AccountLoginInfo
+            {
+                isParent = parent != null,
+                isTeacher = true
+            };
+
+            return View("MultipleSignInModel", loginInfo);
+        }
+
+
+
 
         [HttpPost]
         [AllowAnonymous]

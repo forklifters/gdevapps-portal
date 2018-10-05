@@ -279,6 +279,7 @@ a.navigation--item:hover {
 
 span.fa.fa-google {
     background: white;
+    padding: 3px;
 }
 
 .btn-google:hover {
@@ -293,6 +294,18 @@ span.fa.fa-google {
 
 .btn-google:focus{
     color:white !important;
+    background-color: #4071d9 !important;
+}
+
+span.input-group-addon{
+    border-radius: 0px !important;
+}
+
+.no-padding{
+    padding: 0px !important;
+}
+
+img.lightblue{
     background-color: #4071d9 !important;
 }
 

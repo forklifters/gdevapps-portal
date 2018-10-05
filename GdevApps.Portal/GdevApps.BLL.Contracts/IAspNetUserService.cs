@@ -1,4 +1,5 @@
 ﻿using GdevApps.BLL.Models.AspNetUsers;
+using GdevApps.BLL.Models.LicensedUser;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -15,5 +16,13 @@ namespace GdevApps.BLL.Contracts
         Task<IEnumerable<AspNetUserToken>> GetAllTokensByUserIdAsync(string userId);
 
         bool AddParent(Parent parent);
+
+        Task<Parent> GetParentByEmailAsync(string email);
+
+        Task<Teacher> GetTeacherByEmailAsync(string email);
+
+        Task<Users> GetLicensedUserByEmailAsync(string email);
+
+        bool AddUserLogin(AspNetUserLogin userLogin);
     }
 }

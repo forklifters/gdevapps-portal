@@ -1,15 +1,13 @@
-﻿using System;
 using System.Collections.Generic;
 
-namespace GdevApps.DAL.DataContexts.GradebookLicense.Model
+namespace GdevApps.BLL.Models.LicensedUser
 {
-    public partial class AspNetUserLogins
+    public class Users
     {
         public string LoginProvider { get; set; }
         public string ProviderKey { get; set; }
         public string ProviderDisplayName { get; set; }
         public string UserId { get; set; }
-
-        public AspNetUsers User { get; set; }
+        
     }
 }

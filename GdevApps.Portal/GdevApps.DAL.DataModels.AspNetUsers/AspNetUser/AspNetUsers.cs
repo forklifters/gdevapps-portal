@@ -18,6 +18,7 @@ namespace GdevApps.DAL.DataModels.AspNetUsers.AspNetUser
             ParentGradeBook = new HashSet<ParentGradeBook>();
             ParentSharedGradeBook = new HashSet<ParentSharedGradeBook>();
             ParentStudent = new HashSet<ParentStudent>();
+            Teacher = new HashSet<Teacher>();
         }
 
         public string Id { get; set; }
@@ -46,5 +47,6 @@ namespace GdevApps.DAL.DataModels.AspNetUsers.AspNetUser
         public ICollection<ParentGradeBook> ParentGradeBook { get; set; }
         public ICollection<ParentSharedGradeBook> ParentSharedGradeBook { get; set; }
         public ICollection<ParentStudent> ParentStudent { get; set; }
+        public ICollection<Teacher> Teacher { get; set; }
     }
 }

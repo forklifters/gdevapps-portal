@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using GdevApps.DAL.DataModels.AspNetUsers.GradeBook;
 
-namespace GdevApps.DAL.DataContexts.GradebookLicense.Model
+namespace GdevApps.DAL.DataModels.AspNetUsers.LicensedUser
 {
-    public partial class Licenses
+     public partial class Licenses
     {
         public int Id { get; set; }
         public DateTime ExpirationDate { get; set; }
