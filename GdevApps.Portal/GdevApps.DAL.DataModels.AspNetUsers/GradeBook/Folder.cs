@@ -16,6 +16,7 @@ namespace GdevApps.DAL.DataModels.AspNetUsers.GradeBook
         public DateTime CreatedDate { get; set; }
         public int FolderType { get; set; }
         public bool IsDeleted { get; set; }
+        public string GoogleFileId { get; set; }
         public GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.AspNetUsers CreatedByNavigation { get; set; }
         public FolderType FolderTypeNavigation { get; set; }
         public ICollection<ParentSharedGradeBook> ParentSharedGradeBook { get; set; }

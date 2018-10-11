@@ -14,6 +14,7 @@ using System.IO;
 using File = Google.Apis.Drive.v3.Data.File;
 using GdevApps.BLL.Models;
 using GdevApps.DAL.Repositories.GradeBookRepository;
+using GdevApps.DAL.DataModels.AspNetUsers.GradeBook;
 
 namespace GdevApps.BLL.Domain
 {
@@ -49,11 +50,12 @@ namespace GdevApps.BLL.Domain
         public async Task<TaskResult<string, ICredential>> GetRootFolderIdAsync(string externalAccessToken, string refreshToken, string userId)
         {
             //find folder id using repository
-            var rootFolderId = "";//_driveRepository.GetFolderRoot<Folder>(filter: x=>x.Type == "Root") 
-            if (string.IsNullOrEmpty(rootFolderId))
+            var rootFolder = await _gradeBookRepository.GetOneAsync<Folder>(filter: f=> f.CreatedBy == userId && f.FolderType == (int)FolderType.ROOT);
+            if (rootFolder == null || string.IsNullOrEmpty(rootFolder.GoogleFileId))
             {
                 return await CreateRootFolderAsync(externalAccessToken, refreshToken, userId);
             }
+            var rootFolderId = rootFolder.GoogleFileId;
 
             return new TaskResult<string, ICredential>(ResultType.SUCCESS, rootFolderId, GoogleCredential.FromAccessToken(externalAccessToken));
         }
@@ -83,7 +85,16 @@ namespace GdevApps.BLL.Domain
                 request = driveService.Files.Create(fileMetadata);
                 file = await request.ExecuteAsync();
                 //save folder Id and name into the database
-
+                var rootFolder = new Folder(){
+                    FolderName = _mainFolderName,
+                    GoogleFileId = file.Id,
+                    FolderType = (int)FolderType.ROOT,
+                    CreatedBy = userId,
+                    CreatedDate = DateTime.UtcNow,
+                    IsDeleted = false
+                };
+                _gradeBookRepository.Create<Folder>(rootFolder);
+                _gradeBookRepository.Save();
 
                 return new TaskResult<string, ICredential>(ResultType.SUCCESS, file.Id, googleCredential);
             }
@@ -179,7 +190,17 @@ namespace GdevApps.BLL.Domain
             {
                 FilesResource.CreateRequest request = driveService.Files.Create(fileMetadata);
                 file = await request.ExecuteAsync();
-                //TODO: save id to db
+                var innerFolder = new Folder()
+                {
+                    FolderName = _mainFolderName,
+                    GoogleFileId = file.Id,
+                    FolderType = (int)FolderType.INNER,
+                    CreatedBy = userId,
+                    CreatedDate = DateTime.UtcNow,
+                    IsDeleted = false
+                };
+                _gradeBookRepository.Create<Folder>(innerFolder);
+                _gradeBookRepository.Save();
             }
 
             return new TaskResult<string, ICredential>(ResultType.SUCCESS, file.Id, googleCredential);

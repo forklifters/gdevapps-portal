@@ -16,6 +16,8 @@ namespace GdevApps.BLL.Contracts
         Task<TaskResult<GradebookStudent, ICredential>> GetStudentByEmailFromGradebookAsync(string studentEmail, string externalAccessToken, string gradebookId, string refreshToken, string userId);
         Task<TaskResult<GradebookStudent, ICredential>> GetStudentByEmailFromGradebookAsync(string studentEmail, ICredential googleCredential, string gradebookId, string refreshToken, string userId);
         Task<TaskResult<BoolResult, ICredential>> SaveStudentIntoParentGradebookAsync(GradebookStudent student, string parentGradebookId, string externalAccessToken, string refreshToken, string userId);
+        
+        //TODO: Add one more parameter parentEmail and add item into the ParentGradebook for a single parent at the end. Return parentGradebookId
         Task<TaskResult<BoolResult, ICredential>> SaveStudentIntoParentGradebookAsync(GradebookStudent student, string parentGradebookId, ICredential googleCredential, string refreshToken, string userId);
         bool AddGradebook(GradeBook model);
         Task<TaskResult<BoolResult, ICredential>> EditGradebookAsync(GradeBook model);
@@ -23,5 +25,7 @@ namespace GdevApps.BLL.Contracts
         GradeBook GetGradebookByIdAsync(int id);
         Task<bool> DeleteGradeBookAsync(string classroomId, string gradebookId); 
         Task<IEnumerable<GradeBook>> GetGradeBooksByClassId(string classId);
+
+        
     }
 }

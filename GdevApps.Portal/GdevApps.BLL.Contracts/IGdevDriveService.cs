@@ -19,5 +19,7 @@ namespace GdevApps.BLL.Contracts
         Task<TaskResult<string, ICredential>> GetRootFolderIdAsync(ICredential googleCredential, string refreshToken, string userId);
         Task<TaskResult<BoolResult, ICredential>> MoveFileToFolderAsync(string fileId, string folderId, string externalAccessToken, string refreshToken, string userId);
         Task<TaskResult<BoolResult, ICredential>> MoveFileToFolderAsync(string fileId, string folderId, ICredential googleCredential, string refreshToken, string userId);
+
+        //TODO: Create method GetInnerFolderAsync which will return the inner folder or create a new one if not exists
     }
 }

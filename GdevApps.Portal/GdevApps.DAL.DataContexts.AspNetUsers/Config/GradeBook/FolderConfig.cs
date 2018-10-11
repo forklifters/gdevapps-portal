@@ -11,7 +11,7 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.GradeBook
     {
         public void Configure(EntityTypeBuilder<Folder> entity)
         {
-              entity.HasIndex(e => e.CreatedBy)
+               entity.HasIndex(e => e.CreatedBy)
                     .HasName("folder_user_id_idx");
 
                 entity.HasIndex(e => e.FolderType)
@@ -36,6 +36,10 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.GradeBook
                     .HasMaxLength(150);
 
                 entity.Property(e => e.FolderType).HasColumnType("int(11)");
+
+                entity.Property(e => e.GoogleFileId)
+                    .IsRequired()
+                    .HasMaxLength(256);
 
                 entity.Property(e => e.IsDeleted).HasColumnType("bit(1)");
 
