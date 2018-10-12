@@ -131,12 +131,13 @@ namespace GdevApps.BLL.Domain
         }
         public async Task<TaskResult<string, ICredential>> CreateInnerFolderAsync(string rootFolderId, string folderName, ICredential googleCredential, string refreshToken, string userId)
         {
-            
             var driveService = new DriveService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = googleCredential,
                 ApplicationName = _configuration["ApplicationName"],
             });
+
+            var parentFolder = await _gradeBookRepository.GetOneAsync<Folder>(filter: f=> f.GoogleFileId == rootFolderId);
 
             FilesResource.GetRequest getRootFolderRequest;
             Google.Apis.Drive.v3.Data.File rootFolder;
@@ -197,7 +198,8 @@ namespace GdevApps.BLL.Domain
                     FolderType = (int)FolderType.INNER,
                     CreatedBy = userId,
                     CreatedDate = DateTime.UtcNow,
-                    IsDeleted = false
+                    IsDeleted = false,
+                    PrentFolderId = parentFolder.Id
                 };
                 _gradeBookRepository.Create<Folder>(innerFolder);
                 _gradeBookRepository.Save();
@@ -409,6 +411,23 @@ namespace GdevApps.BLL.Domain
                 var tokenUpdatedTimeRecord = userLoginTokens.Where(t => t.Name == "token_updated_time").First();
                 tokenUpdatedTimeRecord.Value = DateTime.UtcNow.ToString();
                 await _aspUserService.UpdateUserTokensAsync(tokenUpdatedRecord);
+            }
+        }
+
+        public async Task<TaskResult<string, ICredential>> GetInnerFolderIdAsync(string externalAccessToken, string refreshToken, string userId, string rootFolderId, string folderName)
+        {
+             ICredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
+             return await GetInnerFolderIdAsync(googleCredential, refreshToken, userId, rootFolderId, folderName);
+        }
+
+        public async Task<TaskResult<string, ICredential>> GetInnerFolderIdAsync(ICredential googleCredential, string refreshToken, string userId, string rootFolderId, string folderName)
+        {
+            var parentFolder = await _gradeBookRepository.GetOneAsync<Folder>(filter: f=> f.GoogleFileId == rootFolderId);
+            var innerFolder = await _gradeBookRepository.GetOneAsync<Folder>(filter: f=>f.PrentFolderId == parentFolder.Id);
+            if(innerFolder != null){
+                return new TaskResult<string, ICredential>(ResultType.SUCCESS, innerFolder.GoogleFileId, googleCredential);;
+            }else{
+                return await CreateInnerFolderAsync(rootFolderId, folderName, googleCredential, refreshToken, userId);
             }
         }
         #endregion

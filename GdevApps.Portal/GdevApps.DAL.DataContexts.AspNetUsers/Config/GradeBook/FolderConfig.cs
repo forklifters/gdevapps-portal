@@ -11,7 +11,7 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.GradeBook
     {
         public void Configure(EntityTypeBuilder<Folder> entity)
         {
-               entity.HasIndex(e => e.CreatedBy)
+              entity.HasIndex(e => e.CreatedBy)
                     .HasName("folder_user_id_idx");
 
                 entity.HasIndex(e => e.FolderType)
@@ -20,6 +20,9 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.GradeBook
                 entity.HasIndex(e => e.Id)
                     .HasName("id_UNIQUE")
                     .IsUnique();
+
+                entity.HasIndex(e => e.PrentFolderId)
+                    .HasName("parentfolder_folder_id_idx");
 
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
@@ -43,6 +46,8 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.GradeBook
 
                 entity.Property(e => e.IsDeleted).HasColumnType("bit(1)");
 
+                entity.Property(e => e.PrentFolderId).HasColumnType("int(11)");
+
                 entity.HasOne(d => d.CreatedByNavigation)
                     .WithMany(p => p.Folder)
                     .HasForeignKey(d => d.CreatedBy)
@@ -54,6 +59,12 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.GradeBook
                     .HasForeignKey(d => d.FolderType)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("folder_type_id");
+
+                entity.HasOne(d => d.PrentFolder)
+                    .WithMany(p => p.InversePrentFolder)
+                    .HasForeignKey(d => d.PrentFolderId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("parentfolder_folder_id");
         }
     }
 }

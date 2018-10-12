@@ -8,7 +8,6 @@ namespace GdevApps.BLL.Contracts
 {
     public interface IGdevDriveService
     {
-        //returns folder Id
         Task<TaskResult<string, ICredential>> CreateRootFolderAsync(string externalAccessToken, string refreshToken, string userId);
         Task<TaskResult<string, ICredential>> CreateRootFolderAsync(ICredential googleCredential, string refreshToken, string userId);
         Task<TaskResult<string, ICredential>> CreateInnerFolderAsync(string rootFolderId, string folderName, string externalAccessToken, string refreshToken, string userId);
@@ -19,7 +18,7 @@ namespace GdevApps.BLL.Contracts
         Task<TaskResult<string, ICredential>> GetRootFolderIdAsync(ICredential googleCredential, string refreshToken, string userId);
         Task<TaskResult<BoolResult, ICredential>> MoveFileToFolderAsync(string fileId, string folderId, string externalAccessToken, string refreshToken, string userId);
         Task<TaskResult<BoolResult, ICredential>> MoveFileToFolderAsync(string fileId, string folderId, ICredential googleCredential, string refreshToken, string userId);
-
-        //TODO: Create method GetInnerFolderAsync which will return the inner folder or create a new one if not exists
+        Task<TaskResult<string, ICredential>> GetInnerFolderIdAsync(string externalAccessToken, string refreshToken, string userId, string rootFolderId, string folderName);
+        Task<TaskResult<string, ICredential>> GetInnerFolderIdAsync(ICredential googleCredential, string refreshToken, string userId, string rootFolderId, string folderName);
     }
 }

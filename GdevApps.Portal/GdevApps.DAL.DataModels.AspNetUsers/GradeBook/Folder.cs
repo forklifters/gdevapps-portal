@@ -17,8 +17,11 @@ namespace GdevApps.DAL.DataModels.AspNetUsers.GradeBook
         public int FolderType { get; set; }
         public bool IsDeleted { get; set; }
         public string GoogleFileId { get; set; }
+        public int? PrentFolderId { get; set; }
         public GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.AspNetUsers CreatedByNavigation { get; set; }
         public FolderType FolderTypeNavigation { get; set; }
+        public Folder PrentFolder { get; set; }
+        public ICollection<Folder> InversePrentFolder { get; set; }
         public ICollection<ParentSharedGradeBook> ParentSharedGradeBook { get; set; }
     }
 }
