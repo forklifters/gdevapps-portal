@@ -13,3 +13,150 @@
     border: 1px solid;
     border-radius: 4px;
 }
+.top-buffer { margin-top:20px !important; }
+
+/* basic css */
+input[type=checkbox]   { display:none; }
+#lblTerms, p         { padding-left:50px; }
+#divChbxAgreeWithTerms         { position:relative; }
+
+/* checkbox css */
+#lblTerms                  { cursor:pointer; }
+#lblTerms span             { display:block; position:absolute; left:0; 
+  -webkit-transition-duration:0.3s; -moz-transition-duration:0.3s; transition-duration:0.3s;
+}
+#lblTerms .circle          {
+  background:#FFF;
+  left:-30px;
+  top:-30px;
+  height:80px;
+  width:80px;
+  z-index:-1;
+  border-radius:50%; -moz-border-radius:50%; -webkit-border-radius:50%;
+}
+#lblTerms .box     {
+  border:2px solid #000;
+  height:20px; 
+  width:20px;
+  z-index:888;
+  -webkit-transition-delay:0.2s; -moz-transition-delay:0.2s; transition-delay:0.2s;
+}
+#lblTerms .check         {
+  top: -7px;
+  left: 6px;
+  width: 12px;
+  height: 24px;
+  border:4px solid #008744;  
+  border-top: none;
+  border-left: none;
+  opacity:0; 
+  z-index:888;
+  -webkit-transform:rotate(180deg); -moz-transform:rotate(180deg); transform:rotate(180deg);
+  -webkit-transition-delay:0.3s; -moz-transition-delay:0.3s; transition-delay:0.3s;
+}
+#lblTerms{
+    font-weight: 300 !important;
+}
+
+/* handling click events */
+
+/* when checkbox is checked */
+#lblTerms .circle {
+  -webkit-animation   :growCircle 0.3s ease;
+  -moz-animation      :growCircle 0.3s ease;
+  animation           :growCircle 0.3s ease;
+}
+input[type=checkbox]:checked ~ #lblTerms .box { 
+  opacity:0;
+  -webkit-transform   :scale(0) rotate(-180deg);
+  -moz-transform 		:scale(0) rotate(-180deg);
+  transform 				:scale(0) rotate(-180deg);
+}
+input[type=checkbox]:checked ~ #lblTerms .check {
+  opacity:1; 
+  -webkit-transform   :scale(1) rotate(45deg);
+  -moz-transform      :scale(1) rotate(45deg);
+  transform           :scale(1) rotate(45deg);
+}
+
+/* bubble animation */
+
+@-webkit-keyframes growCircle {
+  0%, 100%   { -webkit-transform:scale(0); }
+  70%        { background:#DDD; -webkit-transform:scale(1.25); }
+}
+@-moz-keyframes growCircle {
+  0%, 100%   { -moz-transform:scale(0); }
+  70%        { background:#DDD; -moz-transform:scale(1.25); }
+}
+@keyframes growCircle {
+  0%, 100%   { transform:scale(0); }
+  70%        { background:#DDD; transform:scale(1.25); }
+}
+
+
+
+/*Login form*/
+
+* {
+    box-sizing: border-box;
+  }
+  
+  body {
+    background-color: #eeeeee;
+  }
+  
+  .formImg {
+    display: block;
+    width: 300px;
+    margin: 30px auto;
+    box-shadow: 0 5px 10px -7px #333333;
+  }
+  
+  .formLogin {
+    background-color: #ffffff;
+    width: 500px;
+    margin: 50px auto 10px auto;
+    padding: 30px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px -3px #333;
+    text-align: center;
+  }
+  
+  input {
+    border-radius: 100px;
+    padding: 10px 15px;
+    width: 50%;
+    border: 1px solid #D9D9D9;
+    outline: none;
+    display: block;
+    margin: 20px auto 20px auto;
+  }
+  
+  /* button {
+    border-radius: 100px;
+    border: none;
+    background: #719BE6;
+    width: 50%;
+    padding: 10px;
+    color: #FFFFFF;
+    margin-top: 25px;
+    box-shadow: 0 2px 10px -3px #719BE6;
+    display: block;
+    margin: 55px auto 10px auto;
+  }
+  
+  a {
+    text-align: center;
+    margin-top: 30px;
+    color: #719BE6;
+    text-decoration: none;
+    padding: 5px;
+    display: inline-block;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  } */
+  

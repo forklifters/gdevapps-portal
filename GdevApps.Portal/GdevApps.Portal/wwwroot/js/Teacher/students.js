@@ -50,11 +50,13 @@ var Students = (function () {
 
     function getParentsCell(d) {
         var row = '';
+        var studentEmail = d.email;
+        var classId = d.classId;
         d.parents.forEach(parent => {
             //cell = cell + '<li class="list"><a target="_blank" href="https://mail.google.com/mail/?view=cm&fs=1&to=' + email + '">' + email + '</li>'
             var btn = '<button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-toggle="ajax-modal" onclick="Students.getTeacherInfo(this)">ADD USER</button>';
             if(parent.hasAccount){
-                btn = '<button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-toggle="ajax-modal" >SHARE GRADEBOOK</button>';
+                btn = '<button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-student-email="' + studentEmail + '" data-class-id="' + classId + '" data-toggle="ajax-modal" onclick="Students.share(this)" >SHARE GRADEBOOK</button>';
             }
             
             row = row + '<tr><td class="pricing-plans__features ng-scope">'
@@ -190,9 +192,34 @@ var Students = (function () {
             placeholderElement.html(result);
             placeholderElement.find('.modal').modal('show');
         });
-    }
+    };
+
+    function shareGradeBook(me){
+        var url = "/Teacher/ShareGradeBook";
+        var classId = $(me).data("class-id"); 
+        var studentEmail = $(me).data("student-email"); 
+        var parentEmail = $(me).data("email"); 
+        var parentName = $(me).data("name"); 
+        var data = {
+            classId: classId,
+            parentEmail: parentEmail,
+            studentEmail: studentEmail,
+            parentName: parentName
+        };
+
+        $.ajax({
+            method: "POST",
+            url: url,
+            data: data,
+            headers: {
+                RequestVerificationToken: $('input[name="__RequestVerificationToken"').val()
+            }
+        })
+    };
+
     return {
         init: init,
-        getTeacherInfo: getTeacherInfo
+        getTeacherInfo: getTeacherInfo,
+        share: shareGradeBook
     }
 })(jQuery)

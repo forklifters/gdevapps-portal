@@ -25,11 +25,13 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using GdevApps.BLL.Models.GDevClassroomService;
 using System.Text.RegularExpressions;
 using GdevApps.BLL.Models;
+using GdevApps.Portal.Models.AccountViewModels;
+using GdevApps.Portal.Attributes;
 
 namespace GdevApps.Portal.Controllers
 {
-    [Authorize]
-    //[AllowAnonymous]
+    [Authorize(Roles = UserRoles.Teacher)]
+    [VerifyUserRole(UserRoles.Teacher)]
     public class TeacherController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -98,11 +100,11 @@ namespace GdevApps.Portal.Controllers
                 gradebookId,
                 await GetRefreshTokenAsync(),
                 _userManager.GetUserId(User));
-                var result = await _spreadSheetService.SaveStudentIntoParentGradebookAsync(student.ResultObject,
-                 "",
-                await GetAccessTokenAsync(),
-                 await GetRefreshTokenAsync(),
-                _userManager.GetUserId(User));
+                // var result = await _spreadSheetService.SaveStudentIntoParentGradebookAsync(student.ResultObject,
+                //  "",
+                // await GetAccessTokenAsync(),
+                //  await GetRefreshTokenAsync(),
+                // _userManager.GetUserId(User));
                 return Ok(student);
             }
             catch (Exception ex)
@@ -179,6 +181,20 @@ namespace GdevApps.Portal.Controllers
             catch (Exception ex)
             {
                  return BadRequest(ex);
+            }
+        }
+
+
+        [HttpPost]
+        public async Task<IAsyncResult> ShareGradeBook(string classId, string parentEmail, string studentEmail, string parentName)
+        {
+            try
+            {
+                throw new NotImplementedException();
+            }
+            catch (Exception err)
+            {
+                throw new NotImplementedException();
             }
         }
 
@@ -340,6 +356,8 @@ namespace GdevApps.Portal.Controllers
             }
         }
 
+        #region "Private"
+
         private async Task<List<ClassesViewModel>> GetClassesAsync()
         {
             try
@@ -453,6 +471,7 @@ namespace GdevApps.Portal.Controllers
                 return "";
             }
         }
+        #endregion
     }
 
     internal sealed class Singleton

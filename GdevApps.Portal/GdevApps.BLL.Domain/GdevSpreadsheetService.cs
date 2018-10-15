@@ -66,10 +66,10 @@ namespace GdevApps.BLL.Domain
             ICredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
             return await IsGradeBookAsync(gradebookId, googleCredential, refreshToken, userId, gradebookId);
         }
-        public async Task<TaskResult<BoolResult, ICredential>> SaveStudentIntoParentGradebookAsync(GradebookStudent student, string parentGradebookId, string externalAccessToken, string refreshToken, string userId)
+        public async Task<TaskResult<string, ICredential>> SaveStudentIntoParentGradebookAsync(GradebookStudent student, string externalAccessToken, string refreshToken, string userId)
         {
             ICredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
-            return await SaveStudentIntoParentGradebookAsync(student, parentGradebookId, googleCredential, refreshToken, userId);
+            return await SaveStudentIntoParentGradebookAsync(student, googleCredential, refreshToken, userId);
         }
         public async Task<TaskResult<BoolResult, ICredential>> IsGradeBookAsync(string gradebookId, ICredential googleCredential, string refreshToken, string userId, string gradeBookLink = "")
         {
@@ -563,25 +563,21 @@ namespace GdevApps.BLL.Domain
                 Credentials = googleCredential
             };
         }
-        public async Task<TaskResult<BoolResult, ICredential>> SaveStudentIntoParentGradebookAsync(GradebookStudent student, string parentGradebookId, ICredential googleCredential, string refreshToken, string userId)
+        public async Task<TaskResult<string, ICredential>> SaveStudentIntoParentGradebookAsync(GradebookStudent student, ICredential googleCredential, string refreshToken, string userId)
         {
             if (student == null)
-                return new TaskResult<BoolResult, ICredential>
-                {
-                    Result = ResultType.EMPTY,
-                    ResultObject = new BoolResult(false)
-                };
+                throw new ArgumentNullException("Student is null");
+
             try
             {
-
                 var rootFolderIdResult = await _driveService.GetRootFolderIdAsync(googleCredential, refreshToken, userId);
                 googleCredential = rootFolderIdResult.Credentials;
-                var isFileExistsResult = await _driveService.IsFileExistsAsync(parentGradebookId, googleCredential, refreshToken, userId);
+                var isFileExistsResult = await _driveService.IsFileExistsAsync(student.GradebookId, googleCredential, refreshToken, userId);
                 googleCredential = isFileExistsResult.Credentials;
 
                 if (isFileExistsResult.Result == ResultType.SUCCESS && isFileExistsResult.ResultObject.Result)
                 {
-                    //TOSO: Update the existing file
+                    //TODO: Update the existing file
 
                 }
                 else
@@ -697,7 +693,7 @@ namespace GdevApps.BLL.Domain
                     var moveResult = await _driveService.MoveFileToFolderAsync(newSpreadSheet.SpreadsheetId, innerFolderIdResult.ResultObject, googleCredential, refreshToken, userId);
 
                     //TODO: Add item into the ParentGradebook for a single parent at the end. Return parentGradebookId
-                    return moveResult;
+                    return new TaskResult<string, ICredential>(ResultType.SUCCESS, newSpreadSheet.SpreadsheetId, googleCredential);
                 }
             }
             catch (Exception exception)
@@ -835,7 +831,7 @@ namespace GdevApps.BLL.Domain
                 else
                 {
                     var rootFolderResult = await _driveService.CreateRootFolderAsync(googleCredential, refreshToken, userId);
-                     googleCredential = rootFolderResult.Credentials;
+                    googleCredential = rootFolderResult.Credentials;
                     rootFolderId = rootFolderResult.ResultObject;
                 }
 
@@ -852,21 +848,24 @@ namespace GdevApps.BLL.Domain
 
                     var gradeBookStudentResult = await GetStudentByEmailFromGradebookAsync(studentEmail, googleCredential, gradeBookId, refreshToken, userId);
                     googleCredential = gradeBookStudentResult.Credentials;
-                    if(gradeBookStudentResult.Result == ResultType.SUCCESS){
+                    if (gradeBookStudentResult.Result == ResultType.SUCCESS)
+                    {
                         gradeBookStudent = gradeBookStudentResult.ResultObject;
-                    //TODO: Use SaveStudentIntoParentGradebookAsync to get the parentGradebookId
-                    //TODO: Get the parent id by email
-                    //TODO: Get the inner folderId
-                    //TODO: Add item into the ParentSharedGradeBook table and set the shared status to shared
+                        //TODO: Use SaveStudentIntoParentGradebookAsync to get the parentGradebookId
+                        //TODO: Get the parent id by email
+                        //TODO: Get the inner folderId
+                        //TODO: Add item into the ParentSharedGradeBook table and set the shared status to shared
 
-                    }else{
+                    }
+                    else
+                    {
                         gradeBookStudent = null;
                     }
 
                 }
                 else
                 {
-                    
+
                 }
 
                 throw new NotImplementedException();

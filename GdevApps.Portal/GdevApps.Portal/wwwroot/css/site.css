@@ -309,5 +309,40 @@ img.lightblue{
     background-color: #4071d9 !important;
 }
 
+/*Bootstrap modal*/
+.bootstrap-dialog.type-warning .modal-header{
+    background-color: #FFA700 !important;
+}
 
+.bootstrap-dialog .modal-header {
+     border-top-left-radius: 0px !important; 
+     border-top-right-radius: 0px !important; 
+}
+
+.modal-content {
+    border-radius: 0px !important;
+}
+
+.text-danger {
+    color: #d62d20 !important;
+}
+
+
+/*Loader - Spinner*/
+
+#loader {
+    position:fixed;
+    width:100%;
+    left:0;right:0;top:0;bottom:0;
+    background-color: rgba(255,255,255,0.7);
+    z-index:9999;
+}
+
+.loader-spin {
+    content:'';
+    display:block;
+    position:absolute;
+    left:48%;top:40%;
+    width:40px;height:40px;
+}
 

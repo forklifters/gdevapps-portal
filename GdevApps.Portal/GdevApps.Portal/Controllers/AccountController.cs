@@ -292,6 +292,17 @@ namespace GdevApps.Portal.Controllers
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
 
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> LogoutFromAttr()
+        {
+            await _signInManager.SignOutAsync();
+            _logger.LogInformation("User logged out.");
+            //clear session
+            HttpContext.Session.Clear();  
+            return RedirectToAction(nameof(HomeController.Index), "Home");
+        }
+
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -404,6 +415,7 @@ namespace GdevApps.Portal.Controllers
             }else{
                 var email = info.Principal.FindFirstValue(ClaimTypes.Email);
                 var teacher = await _aspNetUserService.GetTeacherByEmailAsync(email);
+                var parent = await _aspNetUserService.GetParentByEmailAsync(email);
                 if (teacher != null)
                 {
                     var applicationUser = new ApplicationUser
@@ -419,15 +431,6 @@ namespace GdevApps.Portal.Controllers
                     if (userCreationResult.Succeeded && createLogin.Succeeded)
                     {
                         _logger.LogInformation("User created a new account with password.");
-                        // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
-                        //await _signInManager.SignInAsync(user, isPersistent: false);
-                        //add user logins
-                        // var createdUser = await _userManager.FindByEmailAsync(email);
-                        // var addLoginResult = _aspNetUserService.AddUserLogin(new AspNetUserLogin{
-                        //     LoginProvider = info.LoginProvider,
-
-
-                        // })
 
                         //Include the access token in the properties
                         var user = await this._userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
@@ -445,16 +448,11 @@ namespace GdevApps.Portal.Controllers
                         //return RedirectToLocal(returnUrl);
                         return RedirectToAction(nameof(MultipleSignIn), new { user.Email, returnUrl });
 
-
-
-
                         _logger.LogInformation("User created a new account with password.");
                         return RedirectToLocal("/");
                     }
                 }
-
-                var parent = await _aspNetUserService.GetParentByEmailAsync(email);
-                if (parent != null)
+                else if (parent != null)
                 {
                     var applicationUser = new ApplicationUser
                     {
@@ -473,7 +471,8 @@ namespace GdevApps.Portal.Controllers
                         // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
                         //Include the access token in the properties
                         var user = await this._userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
-                        if(user == null){
+                        if (user == null)
+                        {
                             user = await _userManager.FindByEmailAsync(email);
                         }
                         var props = new AuthenticationProperties();
@@ -520,7 +519,7 @@ namespace GdevApps.Portal.Controllers
         public async Task<IActionResult> SignInAsTeacher(string email)
         {
             HttpContext.Session.SetString("UserCurrentRole", UserRoles.Teacher);  
-            return RedirectToAction(nameof(HomeController.Index), "Home");
+            return RedirectToAction(nameof(TeacherController.ClassesAsync), "Teacher");
         }
 
         [HttpPost]

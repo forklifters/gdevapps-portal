@@ -53,7 +53,13 @@ var Classes = (function () {
                     "info": "Showing _START_ to _END_ of _TOTAL_ classes",
                     "lengthMenu": "Show _MENU_ classes",
                     "emptyTable": "There are no classes where you were assigned as a teacher",
-                    "processing":'<div class="loader"><img src="../images/google-loader.gif" alt="ASP.NET" class="img-responsive" /></div>'
+                    "processing":'<div id="loader"><img src="../images/google/google-loader.gif" alt="ASP.NET" class="loader-spin" /></div>'
+                },
+                "complete": function(){
+                    var spinner = $('#loader-spin');
+                    if(spinner){
+                        spinner.hide();
+                    }
                 }
             });
             $classes.data('loaded', true);
