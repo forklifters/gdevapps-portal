@@ -31,7 +31,7 @@ using GdevApps.Portal.Attributes;
 namespace GdevApps.Portal.Controllers
 {
     [Authorize(Roles = UserRoles.Teacher)]
-    [VerifyUserRole(UserRoles.Teacher)]
+    //[VerifyUserRole(UserRoles.Teacher)]
     public class TeacherController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -186,15 +186,27 @@ namespace GdevApps.Portal.Controllers
 
 
         [HttpPost]
-        public async Task<IAsyncResult> ShareGradeBook(string classId, string parentEmail, string studentEmail, string parentName)
+        public async Task<IActionResult> ShareGradeBook(string className, string parentEmail, string studentEmail, string parentName, string mainGradeBookId)
         {
             try
             {
-                throw new NotImplementedException();
+                var userId = _userManager.GetUserId(User);
+                var result = await _spreadSheetService.ShareGradeBook(
+                    await GetAccessTokenAsync(),
+                    await GetRefreshTokenAsync(),
+                    userId,
+                    parentEmail,
+                    studentEmail,
+                    className,
+                    "",
+                    mainGradeBookId
+                );
+
+                return Ok(result);
             }
             catch (Exception err)
             {
-                throw new NotImplementedException();
+                return BadRequest(err);
             }
         }
 

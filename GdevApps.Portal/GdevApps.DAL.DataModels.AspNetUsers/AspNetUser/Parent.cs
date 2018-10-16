@@ -17,6 +17,8 @@ namespace GdevApps.DAL.DataModels.AspNetUsers.AspNetUser
         public string Name { get; set; }
         public string Avatar { get; set; }
         public string AspUserId { get; set; }
+
+        
         public AspNetUsers AspUser { get; set; }
         public ICollection<ParentSharedGradeBook> ParentSharedGradeBook { get; set; }
         public ICollection<ParentStudent> ParentStudent { get; set; }

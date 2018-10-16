@@ -24,5 +24,7 @@ namespace GdevApps.BLL.Contracts
         Task<Users> GetLicensedUserByEmailAsync(string email);
 
         bool AddUserLogin(AspNetUserLogin userLogin);
+
+        Task<bool> SetParentAspUserId(int parentId, string aspUserId);
     }
 }

@@ -52,18 +52,21 @@ var Students = (function () {
         var row = '';
         var studentEmail = d.email;
         var classId = d.classId;
-        d.parents.forEach(parent => {
-            //cell = cell + '<li class="list"><a target="_blank" href="https://mail.google.com/mail/?view=cm&fs=1&to=' + email + '">' + email + '</li>'
-            var btn = '<button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-toggle="ajax-modal" onclick="Students.getTeacherInfo(this)">ADD USER</button>';
-            if(parent.hasAccount){
-                btn = '<button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-student-email="' + studentEmail + '" data-class-id="' + classId + '" data-toggle="ajax-modal" onclick="Students.share(this)" >SHARE GRADEBOOK</button>';
-            }
-            
-            row = row + '<tr><td class="pricing-plans__features ng-scope">'
-            + (parent.name ? parent.name : "") +'</td><td> <a target="_blank" class="pricing-plans__feature feature-icon icon--gmail " href="https://mail.google.com/mail/?view=cm&fs=1&to=' 
-            + parent.email + '">' + parent.email + '</a></td> <td>'+btn+'</td></tr>'
-        });
-        return row;
+        var $ddlGradeBooks = $('#ddlGradeBooks');
+        if ($ddlGradeBooks.css("display") != 'none') {
+            d.parents.forEach(parent => {
+                //cell = cell + '<li class="list"><a target="_blank" href="https://mail.google.com/mail/?view=cm&fs=1&to=' + email + '">' + email + '</li>'
+                var btn = '<button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-toggle="ajax-modal" onclick="Students.getTeacherInfo(this)">ADD USER</button>';
+                if (parent.hasAccount) {
+                    btn = '<button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-student-email="' + studentEmail + '" data-class-id="' + classId + '" data-toggle="ajax-modal" onclick="Students.share(this)" >SHARE GRADEBOOK</button>';
+                }
+
+                row = row + '<tr><td class="pricing-plans__features ng-scope">'
+                    + (parent.name ? parent.name : "") + '</td><td> <a target="_blank" class="pricing-plans__feature feature-icon icon--gmail " href="https://mail.google.com/mail/?view=cm&fs=1&to='
+                    + parent.email + '">' + parent.email + '</a></td> <td>' + btn + '</td></tr>'
+            });
+            return row;
+        }
     }
 
     function formatParent(d) {
@@ -194,27 +197,33 @@ var Students = (function () {
         });
     };
 
-    function shareGradeBook(me){
-        var url = "/Teacher/ShareGradeBook";
-        var classId = $(me).data("class-id"); 
-        var studentEmail = $(me).data("student-email"); 
-        var parentEmail = $(me).data("email"); 
-        var parentName = $(me).data("name"); 
-        var data = {
-            classId: classId,
-            parentEmail: parentEmail,
-            studentEmail: studentEmail,
-            parentName: parentName
-        };
+    function shareGradeBook(me) {
+        var $ddlGradeBooks = $('#ddlGradeBooks');
+        if ($ddlGradeBooks.css("display") != 'none') {
+            var mainGradeBookId = $ddlGradeBooks.val();
+            var url = "/Teacher/ShareGradeBook";
+            var classId = $(me).data("class-id");
+            var studentEmail = $(me).data("student-email");
+            var parentEmail = $(me).data("email");
+            var parentName = $(me).data("name");
+            var className = $('#ddlClasses').val();
+            var data = {
+                className: className,
+                parentEmail: parentEmail,
+                studentEmail: studentEmail,
+                parentName: parentName,
+                mainGradeBookId: mainGradeBookId
+            };
 
-        $.ajax({
-            method: "POST",
-            url: url,
-            data: data,
-            headers: {
-                RequestVerificationToken: $('input[name="__RequestVerificationToken"').val()
-            }
-        })
+            $.ajax({
+                method: "POST",
+                url: url,
+                data: data,
+                headers: {
+                    RequestVerificationToken: $('input[name="__RequestVerificationToken"').val()
+                }
+            })
+        }
     };
 
     return {

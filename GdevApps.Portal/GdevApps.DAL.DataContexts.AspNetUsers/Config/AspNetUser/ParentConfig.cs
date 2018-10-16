@@ -12,7 +12,7 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.AspNetUser
         public void Configure(EntityTypeBuilder<Parent> entity)
         {
             entity.HasIndex(e => e.AspUserId)
-                   .HasName("aspnetuser_parent_id_idx");
+                    .HasName("aspnetuser_parent_id_idx");
             entity.HasIndex(e => e.Email)
                 .HasName("Email_UNIQUE")
                 .IsUnique();
@@ -30,7 +30,7 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.AspNetUser
             entity.HasOne(d => d.AspUser)
                 .WithMany(p => p.Parent)
                 .HasForeignKey(d => d.AspUserId)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("aspnetuser_parent_id");
         }
     }

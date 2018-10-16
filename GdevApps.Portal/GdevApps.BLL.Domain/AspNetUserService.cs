@@ -118,5 +118,21 @@ namespace GdevApps.BLL.Domain
                 throw exception;
             }
         }
+
+        public async Task<bool> SetParentAspUserId(int parentId, string aspUserId)
+        {
+            try
+            {
+                var parentModel = await _aspNetUserRepository.GetFirstAsync<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Parent>(filter: f => f.Id == parentId);
+                parentModel.AspUserId = aspUserId;
+                _aspNetUserRepository.Update<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Parent>(parentModel);
+                _aspNetUserRepository.Save();
+                return true;
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
+        }
     }
 }

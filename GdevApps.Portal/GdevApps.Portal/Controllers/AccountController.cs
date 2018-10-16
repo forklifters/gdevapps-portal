@@ -427,9 +427,9 @@ namespace GdevApps.Portal.Controllers
                     var userCreationResult = await _userManager.CreateAsync(applicationUser);
                     var createLogin = await _userManager.AddLoginAsync(applicationUser, info);
 
-                    //REMOVE THIS CODE
                     if (userCreationResult.Succeeded && createLogin.Succeeded)
                     {
+                        //TODO: Update teacher same as parent asp user id
                         _logger.LogInformation("User created a new account with password.");
 
                         //Include the access token in the properties
@@ -464,7 +464,6 @@ namespace GdevApps.Portal.Controllers
                     var userCreationResult = await _userManager.CreateAsync(applicationUser);
                     var createLogin = await _userManager.AddLoginAsync(applicationUser, info);
 
-                    //REMOVE THIS CODE
                     if (userCreationResult.Succeeded && createLogin.Succeeded)
                     {
                         _logger.LogInformation("User created a new account with password.");
@@ -475,6 +474,10 @@ namespace GdevApps.Portal.Controllers
                         {
                             user = await _userManager.FindByEmailAsync(email);
                         }
+
+                        //Update parent
+                        await _aspNetUserService.SetParentAspUserId(parent.Id, user.Id);
+
                         var props = new AuthenticationProperties();
                         props.IsPersistent = true;
                         props.ExpiresUtc = DateTime.UtcNow.AddDays(5);
@@ -539,6 +542,7 @@ namespace GdevApps.Portal.Controllers
             //do stuff
             //check if user is in USers table (teacher)
             var parent = await _aspNetUserService.GetParentByEmailAsync(email);
+            //TODO: Get teacher
             var loginInfo = new AccountLoginInfo
             {
                 isParent = parent != null,
