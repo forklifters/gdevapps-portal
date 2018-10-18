@@ -58,7 +58,7 @@ namespace GdevApps.BLL.Contracts
             string parentEmail, 
             string parentGradebookName);
         bool AddGradebook(GradeBook model);
-        Task<TaskResult<BoolResult, ICredential>> EditGradebookAsync(GradeBook model);
+        Task<bool> EditGradebookAsync(GradeBook model);
         Task<GradeBook> GetGradebookByUniqueIdAsync(string gradebookId);
         GradeBook GetGradebookByIdAsync(int id);
         Task<bool> DeleteGradeBookAsync(string classroomId, string gradebookId); 
@@ -83,5 +83,24 @@ namespace GdevApps.BLL.Contracts
             string className,
             string gradeBookId,
             string mainGradeBookId);
+
+        Task<TaskResult<BoolResult, ICredential>> UnShareGradeBook(
+            string externalAccessToken,
+            string refreshToken,
+            string userId,
+            string parentEmail,
+            string gradeBookId,
+            string mainGradeBookId
+        );
+
+        
+        Task<TaskResult<BoolResult, ICredential>> UnShareGradeBook(
+            ICredential googleCredential,
+            string refreshToken,
+            string userId,
+            string parentEmail,
+            string gradeBookId,
+            string mainGradeBookId
+        );
     }
 }

@@ -58,7 +58,11 @@ namespace GdevApps.BLL.Domain
         public async Task<TaskResult<string, ICredential>> GetRootFolderIdAsync(string externalAccessToken, string refreshToken, string userId)
         {
             //find folder id using repository
-            var rootFolder = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(filter: f => f.CreatedBy == userId && f.FolderType == (int)FolderType.ROOT);
+            var rootFolder = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(
+                filter: f => f.CreatedBy == userId && 
+                f.FolderType == (int)FolderType.ROOT && 
+                f.PrentFolderId == null &&
+                !f.IsDeleted);
             if (rootFolder == null || string.IsNullOrEmpty(rootFolder.GoogleFileId))
             {
                 return await CreateRootFolderAsync(externalAccessToken, refreshToken, userId);
@@ -217,6 +221,8 @@ namespace GdevApps.BLL.Domain
             var innderFodlerBll = _mapper.Map<GdevApps.BLL.Models.GDevDriveService.Folder>(innerFolder);
             return new TaskResult<GdevApps.BLL.Models.GDevDriveService.Folder, ICredential>(ResultType.SUCCESS, innderFodlerBll, googleCredential);
         }
+
+        //TODO: Return new result TRASHED
         public async Task<TaskResult<BoolResult, ICredential>> IsFileExistsAsync(string fileId, ICredential googleCredential, string refreshToken, string userId)
         {
             FilesResource.GetRequest request;
@@ -230,8 +236,10 @@ namespace GdevApps.BLL.Domain
             try
             {
                 request = driveService.Files.Get(fileId);
+                request.Fields = "trashed";
                 file = await request.ExecuteAsync();
-                return new TaskResult<BoolResult, ICredential>(ResultType.SUCCESS, new BoolResult(file.Id != null), googleCredential);
+                bool exists = !(file?.Trashed ?? false) && file.Id != null;
+                return new TaskResult<BoolResult, ICredential>(ResultType.SUCCESS, new BoolResult(exists), googleCredential);
             }
             catch (Google.GoogleApiException exception)
             {
@@ -258,9 +266,11 @@ namespace GdevApps.BLL.Domain
                         });
 
                         request = driveService.Files.Get(fileId);
+                        request.Fields = "trashed";
                         file = await request.ExecuteAsync();
                         await UpdateAllTokens(userId, googleCredential as UserCredential);
-                        return new TaskResult<BoolResult, ICredential>(ResultType.SUCCESS, new BoolResult(file.Id != null), googleCredential);
+                        bool exists = (file?.Trashed ?? false) && file.Id != null;
+                        return new TaskResult<BoolResult, ICredential>(ResultType.SUCCESS, new BoolResult(exists), googleCredential);
 
                     default:
                         return new TaskResult<BoolResult, ICredential>(ResultType.ERROR, new BoolResult(false), googleCredential);
@@ -330,14 +340,21 @@ namespace GdevApps.BLL.Domain
                 throw ex;
             }
 
-            var previousParents = string.Join(",", file.Parents);
-            var updateRequest = driveService.Files.Update(new File(), fileId);
-            updateRequest.Fields = "id, parents";
-            updateRequest.AddParents = folderId;
-            updateRequest.RemoveParents = previousParents;
-            file = await updateRequest.ExecuteAsync();
+            try
+            {
+                var previousParents = string.Join(",", file.Parents);
+                var updateRequest = driveService.Files.Update(new File(), fileId);
+                updateRequest.Fields = "id, parents";
+                updateRequest.AddParents = folderId;
+                updateRequest.RemoveParents = previousParents;
+                file = await updateRequest.ExecuteAsync();
 
-            return new TaskResult<BoolResult, ICredential>(ResultType.SUCCESS, new BoolResult(!string.IsNullOrEmpty(file.Id)), googleCredential);
+                return new TaskResult<BoolResult, ICredential>(ResultType.SUCCESS, new BoolResult(!string.IsNullOrEmpty(file.Id)), googleCredential);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public async Task<TaskResult<string, ICredential>> GetInnerFolderIdAsync(string externalAccessToken, string refreshToken, string userId, string rootFolderId, string folderName)
@@ -376,8 +393,14 @@ namespace GdevApps.BLL.Domain
 
         public async Task<TaskResult<GdevApps.BLL.Models.GDevDriveService.Folder, ICredential>> GetInnerFolderAsync(ICredential googleCredential, string refreshToken, string userId, string rootFolderId, string folderName)
         {
-            var parentFolder = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(filter: f => f.GoogleFileId == rootFolderId);
-            var innerFolder = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(filter: f => f.PrentFolderId == parentFolder.Id && f.FolderName == folderName);
+            var parentFolder = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(filter: f => f.GoogleFileId == rootFolderId && !f.IsDeleted);
+            var innerFolder = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(
+                filter: f => f.PrentFolderId == parentFolder.Id && 
+                                f.FolderName == folderName && 
+                                f.FolderType == (int)FolderType.INNER && 
+                                f.PrentFolderId != null &&
+                                !f.IsDeleted
+                );
             var innerFolderBll = _mapper.Map<GdevApps.BLL.Models.GDevDriveService.Folder>(innerFolder);
             if (innerFolder != null)
             {
@@ -457,13 +480,13 @@ namespace GdevApps.BLL.Domain
         }
 
 
-        public async Task<TaskResult<BoolResult, ICredential>> DeletePermission(string externalAccessToken, string refreshToken, string userId, string fileId, string permissionType = "", string role = "")
+        public async Task<TaskResult<BoolResult, ICredential>> DeletePermissionAsync(string externalAccessToken, string refreshToken, string userId, string fileId, string permissionType = "", string role = "")
         {
             ICredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
-            return await DeletePermission(googleCredential, refreshToken, userId, fileId, permissionType, role);
+            return await DeletePermissionAsync(googleCredential, refreshToken, userId, fileId, permissionType, role);
         }
 
-        public async Task<TaskResult<BoolResult, ICredential>> DeletePermission(ICredential googleCredential, string refreshToken, string userId, string fileId, string permissionType = "", string role = "")
+        public async Task<TaskResult<BoolResult, ICredential>> DeletePermissionAsync(ICredential googleCredential, string refreshToken, string userId, string fileId, string permissionType = "", string role = "")
         {
             PermissionsResource.ListRequest requestList;
             PermissionList permissionsResult;
@@ -551,6 +574,57 @@ namespace GdevApps.BLL.Domain
             }
 
             return new TaskResult<BoolResult, ICredential>(ResultType.SUCCESS, new BoolResult(true), googleCredential);
+        }
+
+        
+        public async Task<bool> DeleteRootFolderAsync(string googleFolderId)
+        {
+            if (string.IsNullOrWhiteSpace(googleFolderId))
+                throw new ArgumentNullException("googleFolderId");
+
+            var rootFolder = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(
+                filter: f => f.GoogleFileId == googleFolderId && f.FolderType == (int)FolderType.ROOT && f.PrentFolderId == null && !f.IsDeleted
+                );
+
+            //set isDeleted to true
+            rootFolder.IsDeleted = true;
+            _gradeBookRepository.Update<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(rootFolder);
+            var allInnerFolders = await _gradeBookRepository.GetAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(
+                filter: f => f.PrentFolderId == rootFolder.Id
+                );
+
+            if(allInnerFolders.Any()){
+                foreach(var folder in allInnerFolders){
+                    folder.IsDeleted = true;
+                    _gradeBookRepository.Update<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(folder);
+                }
+            }
+
+            await _gradeBookRepository.SaveAsync();
+
+            return true;
+
+            //actually delete it
+            //TODO: Check if all inner folders will be deleted as well
+            _gradeBookRepository.Delete<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(rootFolder);
+        }
+
+        public async Task<bool> DeleteInnerFolderAsync(string googleFolderId)
+        {
+            if (string.IsNullOrWhiteSpace(googleFolderId))
+                throw new ArgumentNullException("googleFolderId");
+
+            var innerFolder = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(
+                filter: f => f.GoogleFileId == googleFolderId && f.FolderType == (int)FolderType.INNER && f.PrentFolderId != null && !f.IsDeleted
+                );
+            //set isDeleted to true
+            innerFolder.IsDeleted = true;
+            _gradeBookRepository.Update<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(innerFolder);
+            await _gradeBookRepository.SaveAsync();
+
+            return true;
+            //delete item
+            _gradeBookRepository.Delete<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(innerFolder);
         }
 
         #region Private methods

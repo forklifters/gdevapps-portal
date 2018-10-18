@@ -20,17 +20,23 @@ var Students = (function () {
                 }
             })
                 .done(function (response) {
-                    debugger;
                     var $ddlGradeBooks = $('#ddlGradeBooks');
                     $ddlGradeBooks.empty();
                     $.each(response, function (index, item) {
-                        $ddlGradeBooks.append($('<option></option>').text(item.text).val(item.uniqueId));
+                        if(item && item.text && item.uniqueId){
+                            $ddlGradeBooks.append($('<option></option>').text(item.text).val(item.uniqueId));
+                        }
                     });
                     var gradeBookId = '';
                     var classId = $('#ddlClasses').val();
-                    if($ddlGradeBooks.length > 0 || ($('#divGradeBooks').css("display") != 'none' && $ddlGradeBooks.length === 0)){
-                        $('#divGradeBooks').toggle( "slide" );
+                    var hasValue = !!$('#ddlGradeBooks option').filter(function() { return !this.disabled; }).length; 
+                    debugger;
+                    var duration = 'slow';
+                    if(hasValue){
+                        $('#divGradeBooks').show('slide', { direction: 'left' });
                         gradeBookId = $ddlGradeBooks.val();
+                    }else{
+                        $('#divGradeBooks').hide('slide', { direction: 'left' });
                     }
 
                     var $grdStudents = $("#grdStudents");
@@ -58,12 +64,13 @@ var Students = (function () {
                 //cell = cell + '<li class="list"><a target="_blank" href="https://mail.google.com/mail/?view=cm&fs=1&to=' + email + '">' + email + '</li>'
                 var btn = '<button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-toggle="ajax-modal" onclick="Students.getTeacherInfo(this)">ADD USER</button>';
                 if (parent.hasAccount) {
-                    btn = '<button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-student-email="' + studentEmail + '" data-class-id="' + classId + '" data-toggle="ajax-modal" onclick="Students.share(this)" >SHARE GRADEBOOK</button>';
+                    btn = '<div class="col-xs-6"><button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-student-email="' + studentEmail + '" data-class-id="' + classId + '" data-toggle="ajax-modal" onclick="Students.share(this)" >SHARE GRADEBOOK</button></div>';
+                    btn += '<div class="col-xs-6"><button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-student-email="' + studentEmail + '" data-class-id="' + classId + '" data-toggle="ajax-modal" onclick="Students.unshare(this)" >UNSHARE GRADEBOOK</button></div>';
                 }
 
                 row = row + '<tr><td class="pricing-plans__features ng-scope">'
                     + (parent.name ? parent.name : "") + '</td><td> <a target="_blank" class="pricing-plans__feature feature-icon icon--gmail " href="https://mail.google.com/mail/?view=cm&fs=1&to='
-                    + parent.email + '">' + parent.email + '</a></td> <td>' + btn + '</td></tr>'
+                    + parent.email + '">' + parent.email + '</a></td> <td class="col-xs-5">' + btn + '</td></tr>'
             });
             return row;
         }
@@ -84,13 +91,12 @@ var Students = (function () {
                 gradeBookId:gradeBookId
             };
             table = $grdStudents.DataTable({
-                "processing": false,
                 "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
                 "lengthMenu": [
-                    [3, 10, 25, -1],
-                    [3, 10, 25, "All"]
+                    [10, 25, -1],
+                    [10, 25, "All"]
                 ],
                 "ajax": {
                     "url": "/Teacher/GetStudents",
@@ -130,12 +136,20 @@ var Students = (function () {
                 }
                 ],
                 "ordering": true,
+                "processing": true,
                 "language": {
                     "info": "Showing _START_ to _END_ of _TOTAL_ students",
                     "lengthMenu": "Show _MENU_ students",
                     "emptyTable": "There are no students in this class",
                     "search": "<i class='fa fa-search'></i>",
-                    "searchPlaceholder": "Search"
+                    "searchPlaceholder": "Search",
+                    "processing":'<div id="loader"><img src="../images/google/google-loader.gif" alt="ASP.NET" class="loader-spin" /></div>'
+                },
+                "complete": function(){
+                    var spinner = $('#loader');
+                    if(spinner){
+                        spinner.hide();
+                    }
                 }
             });
             $grdStudents.data('loaded', true);
@@ -197,6 +211,29 @@ var Students = (function () {
         });
     };
 
+    function unshareGradeBook(me){
+        var $ddlGradeBooks = $('#ddlGradeBooks');
+        if ($ddlGradeBooks.css("display") != 'none') {
+            var mainGradeBookId = $ddlGradeBooks.val();
+            var url = "/Teacher/UnshareGradeBook";
+            var parentEmail = $(me).data("email");
+            var data = {
+                parentEmail: parentEmail,
+                mainGradeBookId: mainGradeBookId
+            };
+
+            $.ajax({
+                method: "POST",
+                url: url,
+                data: data,
+                headers: {
+                    RequestVerificationToken: $('input[name="__RequestVerificationToken"').val()
+                }
+            })
+        }
+
+    }
+
     function shareGradeBook(me) {
         var $ddlGradeBooks = $('#ddlGradeBooks');
         if ($ddlGradeBooks.css("display") != 'none') {
@@ -211,7 +248,6 @@ var Students = (function () {
                 className: className,
                 parentEmail: parentEmail,
                 studentEmail: studentEmail,
-                parentName: parentName,
                 mainGradeBookId: mainGradeBookId
             };
 
@@ -229,6 +265,7 @@ var Students = (function () {
     return {
         init: init,
         getTeacherInfo: getTeacherInfo,
-        share: shareGradeBook
+        share: shareGradeBook,
+        unshare: unshareGradeBook
     }
 })(jQuery)

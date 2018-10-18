@@ -10,11 +10,10 @@ var Classes = (function () {
         $classes = $('#classes');
         if (!$classes.data('loaded')) {
             table = $classes.DataTable({
-                "processing": false,
                 "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                "lengthMenu": [[5, 10, 25, -1], [5, 10, 25, "All"]],
+                "lengthMenu": [[10, 25, -1], [10, 25, "All"]],
                 "ajax": {
                     "url": "/Teacher/GetClasses",
                     "method": "GET",
@@ -56,7 +55,7 @@ var Classes = (function () {
                     "processing":'<div id="loader"><img src="../images/google/google-loader.gif" alt="ASP.NET" class="loader-spin" /></div>'
                 },
                 "complete": function(){
-                    var spinner = $('#loader-spin');
+                    var spinner = $('#loader');
                     if(spinner){
                         spinner.hide();
                     }
@@ -87,15 +86,14 @@ var Classes = (function () {
             };
 
             function getSheetInfoCell(d) {
-                debugger;
                 var cell = "<div class='cols-xs-12'>";
                 d.classroomSheets.forEach(sheet => {
-                    cell = cell + '<div class="col-xs-8 list-group"><center><a href=' + sheet.link + ' class="list-group-item list-group-item-action editGradebook" data-id="' + sheet.id + '" data-classroomid="' + sheet.classroomId + '" onclick="Classes.linkClick(this)">' +
+                    cell = cell + '<div class="col-xs-8 list-group"><center><a href=' + sheet.link + ' class="list-group-item list-group-item-action editGradebook" data-unique-id="' + sheet.googleUniqueId + '" data-id="' + sheet.id + '" data-classroom-id="' + sheet.classroomId + '" onclick="Classes.linkClick(this)">' +
                         '<div class="d-flex w-100 justify-content-between">' +
                         ' <h4 class="mb-1">' + sheet.name + '</h4>' +
                         '</div>' +
-                        '<p class="mb-1 wordwrap">' + sheet.googleUniqueId + '</p></a></center></div>' +
-                        '<div class="col-xs-2 list-group"><button type="button" class="btn btn-danger" data-unique-id="' + sheet.googleUniqueId + '" data-id="' + sheet.id + '" data-classroomid="' + sheet.classroomId + '" onclick="Classes.removeGradebook(this)">REMOVE</button>' +
+                        '<h6 class="mb-1 wordwrap">' + sheet.googleUniqueId + '</h6></a></center></div>' +
+                        '<div class="col-xs-2 list-group"><button type="button" class="btn btn-danger" data-unique-id="' + sheet.googleUniqueId + '" data-id="' + sheet.id + '" data-classroom-id="' + sheet.classroomId + '" onclick="Classes.removeGradebook(this)">REMOVE</button>' +
                         '</div>'
                 });
                 cell = cell + "</div>";
@@ -124,7 +122,6 @@ var Classes = (function () {
         var placeholderElement = $('#modal-placeholder');
         $('button[data-toggle="ajax-modal"]').click(function (event) {
             var url = $(this).data('url');
-            debugger;
             $.get(url).done(function (data) {
                 placeholderElement.html(data);
                 placeholderElement.find('.modal').modal('show');
@@ -163,7 +160,7 @@ var Classes = (function () {
 
     function removeGradebook(me) {
         var url = "/Teacher/RemoveGradebook";
-        var data = { classroomId: $(me).data("classroomid") , gradebookId: $(me).data("unique-id")  }
+        var data = { classroomId: $(me).data("classroom-id") , gradebookId: $(me).data("unique-id")  }
 
         $.ajax({
             method: "POST",
@@ -186,7 +183,7 @@ var Classes = (function () {
         event.preventDefault();
         var placeholderElement = $('#modal-placeholder');
         var url = "/Teacher/GetGradebookById";
-        var data = { classroomId: $(me).data("classroomid") , gradebookId: $(me).data("id")  }
+        var data = { classroomId: $(me).data("classroom-id") , gradebookId: $(me).data("unique-id")  }
         $.get(url, data).done(function (result) {
             placeholderElement.html(result);
             placeholderElement.find('.modal').modal('show');

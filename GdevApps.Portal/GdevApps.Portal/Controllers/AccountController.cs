@@ -370,7 +370,6 @@ namespace GdevApps.Portal.Controllers
             }
             else
             {
-               
                 return View();
             }
         }
@@ -429,11 +428,13 @@ namespace GdevApps.Portal.Controllers
 
                     if (userCreationResult.Succeeded && createLogin.Succeeded)
                     {
-                        //TODO: Update teacher same as parent asp user id
                         _logger.LogInformation("User created a new account with password.");
 
                         //Include the access token in the properties
                         var user = await this._userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+                        //Update teacher
+                        await _aspNetUserService.SetTeacherAspUserId(teacher.Id, user.Id);
+
                         var props = new AuthenticationProperties();
                         props.IsPersistent = true;
                         props.ExpiresUtc = DateTime.UtcNow.AddDays(5);
@@ -447,9 +448,6 @@ namespace GdevApps.Portal.Controllers
                         _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
                         //return RedirectToLocal(returnUrl);
                         return RedirectToAction(nameof(MultipleSignIn), new { user.Email, returnUrl });
-
-                        _logger.LogInformation("User created a new account with password.");
-                        return RedirectToLocal("/");
                     }
                 }
                 else if (parent != null)
@@ -491,9 +489,6 @@ namespace GdevApps.Portal.Controllers
                         _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
                         //return RedirectToLocal(returnUrl);
                         return RedirectToAction(nameof(MultipleSignIn), new { user.Email, returnUrl });
-
-
-                        return RedirectToLocal("/");
                     }
                 }
             }
@@ -542,18 +537,16 @@ namespace GdevApps.Portal.Controllers
             //do stuff
             //check if user is in USers table (teacher)
             var parent = await _aspNetUserService.GetParentByEmailAsync(email);
+            var teacher = await _aspNetUserService.GetTeacherByEmailAsync(email);
             //TODO: Get teacher
             var loginInfo = new AccountLoginInfo
             {
                 isParent = parent != null,
-                isTeacher = true
+                isTeacher = true //teacher!=null;
             };
 
             return View("MultipleSignInModel", loginInfo);
         }
-
-
-
 
         [HttpPost]
         [AllowAnonymous]

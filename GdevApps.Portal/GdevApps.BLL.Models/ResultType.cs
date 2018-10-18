@@ -6,6 +6,7 @@ namespace GdevApps.BLL.Models
     {
         ERROR,
         SUCCESS,
+        WARNING,
         EMPTY
     }
 }

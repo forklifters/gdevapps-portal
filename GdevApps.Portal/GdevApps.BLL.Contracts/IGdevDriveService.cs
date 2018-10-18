@@ -28,7 +28,9 @@ namespace GdevApps.BLL.Contracts
         
         //Permissions can not be deleted by email in v3 https://stackoverflow.com/questions/14148021/any-way-to-get-email-address-from-google-drive-api-permissions-so-i-can-differen
         //https://developers.google.com/drive/api/v3/migration
-        Task<TaskResult<BoolResult, ICredential>> DeletePermission(string externalAccessToken, string refreshToken, string userId, string fileId, string permissionType, string role);
-        Task<TaskResult<BoolResult, ICredential>> DeletePermission(ICredential googleCredential, string refreshToken, string userId, string fileId, string permissionType, string role);
+        Task<TaskResult<BoolResult, ICredential>> DeletePermissionAsync(string externalAccessToken, string refreshToken, string userId, string fileId, string permissionType, string role);
+        Task<TaskResult<BoolResult, ICredential>> DeletePermissionAsync(ICredential googleCredential, string refreshToken, string userId, string fileId, string permissionType, string role);
+        Task<bool> DeleteRootFolderAsync(string googleFolderId);
+        Task<bool> DeleteInnerFolderAsync(string googleFolderId);
     }
 }

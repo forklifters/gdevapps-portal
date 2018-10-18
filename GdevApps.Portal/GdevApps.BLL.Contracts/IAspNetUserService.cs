@@ -26,5 +26,7 @@ namespace GdevApps.BLL.Contracts
         bool AddUserLogin(AspNetUserLogin userLogin);
 
         Task<bool> SetParentAspUserId(int parentId, string aspUserId);
+
+        Task<bool> SetTeacherAspUserId(int teacherId, string aspUserId);
     }
 }

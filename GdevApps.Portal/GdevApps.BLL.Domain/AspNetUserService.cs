@@ -134,5 +134,21 @@ namespace GdevApps.BLL.Domain
                 throw exception;
             }
         }
+
+        public async Task<bool> SetTeacherAspUserId(int teacherId, string aspUserId)
+        {
+            try
+            {
+                var teacherModel = await _aspNetUserRepository.GetFirstAsync<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Teacher>(filter: f => f.Id == teacherId);
+                teacherModel.AspNetUserId = aspUserId;
+                _aspNetUserRepository.Update<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Teacher>(teacherModel);
+                _aspNetUserRepository.Save();
+                return true;
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
+        }
     }
 }

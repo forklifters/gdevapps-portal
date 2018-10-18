@@ -95,7 +95,7 @@ namespace GdevApps.Portal.Controllers
                 // );
 
 
-                var student = await _spreadSheetService.GetStudentByEmailFromGradebookAsync("paulivankbs@gmail.com", 
+                var student = await _spreadSheetService.GetStudentByEmailFromGradebookAsync("paulivankbs@gmail.com",
                 await GetAccessTokenAsync(),
                 gradebookId,
                 await GetRefreshTokenAsync(),
@@ -123,8 +123,8 @@ namespace GdevApps.Portal.Controllers
         {
             try
             {
-                 List<ClassesViewModel> classes = await GetClassesAsync();
-                return Ok(new {data = classes});
+                List<ClassesViewModel> classes = await GetClassesAsync();
+                return Ok(new { data = classes });
             }
             catch (Exception ex)
             {
@@ -152,14 +152,19 @@ namespace GdevApps.Portal.Controllers
                        userId);
                     var gradebookStudents = _mapper.Map<IEnumerable<GoogleStudent>>(studentsTaskResult.ResultObject);
 
-                    foreach(var student in gradebookStudents){
+                    foreach (var student in gradebookStudents)
+                    {
                         var parents = student.Parents;
-                        foreach(var p in parents){
+                        foreach (var p in parents)
+                        {
                             var parentAccount = await _userManager.FindByEmailAsync(p.Email);
-                            if(parentAccount != null){
+                            if (parentAccount != null)
+                            {
                                 p.HasAccount = true;
                                 p.Name = parentAccount.UserName;
-                            }else{
+                            }
+                            else
+                            {
                                 p.HasAccount = false;
                             }
                         }
@@ -180,13 +185,12 @@ namespace GdevApps.Portal.Controllers
             }
             catch (Exception ex)
             {
-                 return BadRequest(ex);
+                return BadRequest(ex);
             }
         }
 
-
         [HttpPost]
-        public async Task<IActionResult> ShareGradeBook(string className, string parentEmail, string studentEmail, string parentName, string mainGradeBookId)
+        public async Task<IActionResult> ShareGradeBook(string className, string parentEmail, string studentEmail, string mainGradeBookId)
         {
             try
             {
@@ -211,12 +215,36 @@ namespace GdevApps.Portal.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> UnshareGradeBook(string parentEmail, string mainGradeBookId)
+        {
+            try
+            {
+                var userId = _userManager.GetUserId(User);
+                var result = await _spreadSheetService.UnShareGradeBook(
+                    await GetAccessTokenAsync(),
+                    await GetRefreshTokenAsync(),
+                    userId,
+                    parentEmail,
+                    "",
+                    mainGradeBookId
+                );
+
+                return Ok(result);
+            }
+            catch (Exception err)
+            {
+                return BadRequest(err);
+            }
+        }
+
+        [HttpPost]
         public async Task<IActionResult> GetGradeBooks(string classId)
         {
             try
             {
                 var gradebooks = await _spreadSheetService.GetGradeBooksByClassId(classId);
-                return Json(gradebooks.Select(g=> new {
+                return Json(gradebooks.Select(g => new
+                {
                     UniqueId = g.GoogleUniqueId,
                     Text = g.Name
                 }));
@@ -236,7 +264,7 @@ namespace GdevApps.Portal.Controllers
                 var classes = await GetClassesAsync();
                 var classesList = new SelectList(classes, "Id", "Name");
 
-                return View("ClassesForStudents",new ClassesForStudentsViewModel{Classes = classesList});
+                return View("ClassesForStudents", new ClassesForStudentsViewModel { Classes = classesList });
             }
             catch (Exception ex)
             {
@@ -247,7 +275,8 @@ namespace GdevApps.Portal.Controllers
         [HttpGet]
         public ActionResult AddGradebook(string classroomId)
         {
-            if(!string.IsNullOrEmpty(classroomId)){
+            if (!string.IsNullOrEmpty(classroomId))
+            {
                 return PartialView("_AddGradebook", new ClassSheetsViewModel() { ClassroomId = classroomId });
             }
 
@@ -266,11 +295,10 @@ namespace GdevApps.Portal.Controllers
                     return PartialView("_AddGradebook", model);
                 }
 
-
                 var sheet = await _spreadSheetService.GetGradebookByUniqueIdAsync(model.GoogleUniqueId);
                 if (sheet != null)
                 {
-                    ModelState.AddModelError("Id", $"Gradebook with suck id already exists");
+                    ModelState.AddModelError("Id", $"Gradebook with such id already exists");
                     return PartialView("_AddGradebook", model);
                 }
 
@@ -299,39 +327,45 @@ namespace GdevApps.Portal.Controllers
         {
             if (ModelState.IsValid)
             {
-                var sheet = Singleton.Instance.Sheets.Where(s => s.Id == model.Id).FirstOrDefault();
-                if (sheet != null)
+                var isValidLink = await CheckLink(model.Link);
+                if (!isValidLink)
                 {
-                    var isValidLink = await CheckLink(model.Link);
-                    if(!isValidLink){
-                        ModelState.AddModelError("Link", $"Link is not valid. Provide a valid link");
-                        return PartialView("_EditGradebook", model);
-                    }
+                    ModelState.AddModelError("Link", $"Link is not valid. Provide a valid link");
+                    return PartialView("_EditGradebook", model);
+                }
 
-                    sheet.Id = model.Id;
-                    sheet.Link = model.Link;
-                    sheet.Name = model.Name;
-                    return Ok();
+                var sheet = await _spreadSheetService.GetGradebookByUniqueIdAsync(model.GoogleUniqueId);
+                if (sheet == null)
+                {
+                    ModelState.AddModelError("Id", $"Error occurred during the Gradebook update");
+                    return PartialView("_EditGradebook", model);
+                }
+
+                GradeBook gradeBookModel = _mapper.Map<GradeBook>(model);
+                var result = await _spreadSheetService.EditGradebookAsync(gradeBookModel);
+                if (result)
+                {
+                    return PartialView("_EditGradebook", model);
                 }
                 else
                 {
-                    return BadRequest($"Gradebook with id {model.Id} was not found");
+                    return BadRequest("Error occurred during the Gradebook update");
                 }
-
             }
 
             return PartialView("_EditGradebook", model);
         }
 
         [HttpGet]
-        public ActionResult GetGradebookById(string classroomId, string gradebookId)
+        public async Task<ActionResult> GetGradebookById(string classroomId, string gradebookId)
         {
             try
             {
-                var sheet = Singleton.Instance.Sheets.Where(s => s.ClassroomId == classroomId && s.Id == gradebookId).FirstOrDefault();
-                if (sheet != null)
+                var gradeBookModel = await _spreadSheetService.GetGradebookByUniqueIdAsync(gradebookId);
+                var gradeBook = _mapper.Map<ClassSheetsViewModel>(gradeBookModel);
+                if (gradeBook != null)
                 {
-                    return PartialView("_EditGradebook", sheet);
+                    return PartialView("_EditGradebook", gradeBook);
                 }
                 else
                 {
@@ -345,7 +379,8 @@ namespace GdevApps.Portal.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> RemoveGradebook(string classroomId, string gradebookId){
+        public async Task<ActionResult> RemoveGradebook(string classroomId, string gradebookId)
+        {
             try
             {
                 if (!string.IsNullOrEmpty(classroomId) && !string.IsNullOrEmpty(gradebookId))
@@ -375,10 +410,13 @@ namespace GdevApps.Portal.Controllers
             try
             {
                 var serviceClassesRespnse = await _classroomService.GetAllClassesAsync(await GetAccessTokenAsync(), await GetRefreshTokenAsync(), _userManager.GetUserId(User));
-                if(serviceClassesRespnse.Result == ResultType.SUCCESS || serviceClassesRespnse.Result == ResultType.EMPTY){
+                if (serviceClassesRespnse.Result == ResultType.SUCCESS || serviceClassesRespnse.Result == ResultType.EMPTY)
+                {
                     var classes = _mapper.Map<List<ClassesViewModel>>(serviceClassesRespnse.ResultObject);
                     return classes;
-                }else{
+                }
+                else
+                {
                     throw new Exception(string.Join(",", serviceClassesRespnse.Errors));
                 }
             }
@@ -406,7 +444,7 @@ namespace GdevApps.Portal.Controllers
             var tokensInfo = await GetTokensInfoAsync();
             if (string.IsNullOrEmpty(accessToken) || tokensInfo.IsUpdated)
             {
-                return tokensInfo.Tokens.Where(t=>t.Name == "access_token").Select(t=>t.Value).FirstOrDefault() ;
+                return tokensInfo.Tokens.Where(t => t.Name == "access_token").Select(t => t.Value).FirstOrDefault();
             }
 
             return accessToken;
@@ -419,7 +457,7 @@ namespace GdevApps.Portal.Controllers
             var tokensInfo = await GetTokensInfoAsync();
             if (string.IsNullOrEmpty(refreshToken) || tokensInfo.IsUpdated)
             {
-                return tokensInfo.Tokens.Where(t=>t.Name == "refresh_token").Select(t=>t.Value).FirstOrDefault() ;
+                return tokensInfo.Tokens.Where(t => t.Name == "refresh_token").Select(t => t.Value).FirstOrDefault();
             }
 
             return refreshToken;
@@ -432,7 +470,7 @@ namespace GdevApps.Portal.Controllers
             var tokensInfo = await GetTokensInfoAsync();
             if (string.IsNullOrEmpty(tockenUpdatedTime) || tokensInfo.IsUpdated)
             {
-                return tokensInfo.Tokens.Where(t=>t.Name == "token_updated_time").Select(t=>t.Value).FirstOrDefault() ;
+                return tokensInfo.Tokens.Where(t => t.Name == "token_updated_time").Select(t => t.Value).FirstOrDefault();
             }
 
             return tockenUpdatedTime;
@@ -442,7 +480,7 @@ namespace GdevApps.Portal.Controllers
         {
             if (User.Identity.IsAuthenticated)
             {
-               return  await _aspUserService.GetAllTokensByUserIdAsync(_userManager.GetUserId(User));
+                return await _aspUserService.GetAllTokensByUserIdAsync(_userManager.GetUserId(User));
             }
 
             return new List<GdevApps.BLL.Models.AspNetUsers.AspNetUserToken>();
@@ -451,7 +489,7 @@ namespace GdevApps.Portal.Controllers
         private async Task<TokenResponse> GetTokensInfoAsync()
         {
             var allTokens = await GetAllUserTokens();
-            var isUpdated = allTokens.Where(t=>t.Name == "token_updated").Select(t=>t.Value).FirstOrDefault();
+            var isUpdated = allTokens.Where(t => t.Name == "token_updated").Select(t => t.Value).FirstOrDefault();
             bool isUpdatedParsed;
             Boolean.TryParse(isUpdated, out isUpdatedParsed);
             if (!string.IsNullOrEmpty(isUpdated) && isUpdatedParsed)
@@ -524,5 +562,5 @@ namespace GdevApps.Portal.Controllers
         public bool IsUpdated { get; set; }
 
         public IEnumerable<GdevApps.BLL.Models.AspNetUsers.AspNetUserToken> Tokens { get; set; }
-    } 
+    }
 }

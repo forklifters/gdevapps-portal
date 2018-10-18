@@ -346,3 +346,8 @@ img.lightblue{
     width:40px;height:40px;
 }
 
+ /*GSUITE*/
+
+ .card{
+    background: none !important;
+ }
