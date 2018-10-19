@@ -30,7 +30,6 @@ var Students = (function () {
                     var gradeBookId = '';
                     var classId = $('#ddlClasses').val();
                     var hasValue = !!$('#ddlGradeBooks option').filter(function() { return !this.disabled; }).length; 
-                    debugger;
                     var duration = 'slow';
                     if(hasValue){
                         $('#divGradeBooks').show('slide', { direction: 'left' });
@@ -58,8 +57,8 @@ var Students = (function () {
         var row = '';
         var studentEmail = d.email;
         var classId = d.classId;
-        var $ddlGradeBooks = $('#ddlGradeBooks');
-        if ($ddlGradeBooks.css("display") != 'none') {
+        var $divGradeBooks = $('#divGradeBooks');
+        if ($divGradeBooks.css("display") != 'none') {
             d.parents.forEach(parent => {
                 //cell = cell + '<li class="list"><a target="_blank" href="https://mail.google.com/mail/?view=cm&fs=1&to=' + email + '">' + email + '</li>'
                 var btn = '<button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-toggle="ajax-modal" onclick="Students.getTeacherInfo(this)">ADD USER</button>';
@@ -72,7 +71,9 @@ var Students = (function () {
                     + (parent.name ? parent.name : "") + '</td><td> <a target="_blank" class="pricing-plans__feature feature-icon icon--gmail " href="https://mail.google.com/mail/?view=cm&fs=1&to='
                     + parent.email + '">' + parent.email + '</a></td> <td class="col-xs-5">' + btn + '</td></tr>'
             });
-            return row;
+            return row ? row : "<tr><td>No parents were found for this student</td></tr>";
+        }else{
+            return "<tr><td>GradeBook was not found to retrieve parents</td></tr>"
         }
     }
 
@@ -154,7 +155,7 @@ var Students = (function () {
             });
             $grdStudents.data('loaded', true);
 
-            $('#grdStudents tbody').on('click', 'td.details-control', function() {
+            $('#grdStudents tbody').off('click').on('click', 'td.details-control', function() {
                 var tr = $(this).closest('tr');
                 var row = table.row(tr);
     
@@ -175,7 +176,6 @@ var Students = (function () {
         var placeholderElement = $('#modal-placeholder-students');
         $('button[data-toggle="ajax-modal"]').click(function (event) {
             var url = $(this).data('url');
-            debugger;
             $.get(url).done(function (data) {
                 placeholderElement.html(data);
                 placeholderElement.find('.modal').modal('show');
@@ -222,6 +222,11 @@ var Students = (function () {
                 mainGradeBookId: mainGradeBookId
             };
 
+            var $grdStudents_processing = $("#grdStudents_processing");
+            if($grdStudents_processing){
+                $grdStudents_processing.css("display","block");
+            };
+
             $.ajax({
                 method: "POST",
                 url: url,
@@ -229,6 +234,27 @@ var Students = (function () {
                 headers: {
                     RequestVerificationToken: $('input[name="__RequestVerificationToken"').val()
                 }
+            }).done(function(response){
+                if($grdStudents_processing){
+                    $grdStudents_processing.css("display","none");
+                };
+
+                BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_SUCCESS,
+                    title: 'Unshare GradeBook',
+                    message: 'The GradeBook was successfully unshared!',
+                })
+            })
+            .fail(function(response){
+                if($grdStudents_processing){
+                    $grdStudents_processing.css("display","none");
+                };
+
+                BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_DANGER,
+                    title: 'Unshare GradeBook',
+                    message: 'An error occurred while unsharing this GradeBook!',
+                })
             })
         }
 
@@ -243,7 +269,7 @@ var Students = (function () {
             var studentEmail = $(me).data("student-email");
             var parentEmail = $(me).data("email");
             var parentName = $(me).data("name");
-            var className = $('#ddlClasses').val();
+            var className = $('#ddlClasses option:selected').text();
             var data = {
                 className: className,
                 parentEmail: parentEmail,
@@ -251,6 +277,10 @@ var Students = (function () {
                 mainGradeBookId: mainGradeBookId
             };
 
+           var $grdStudents_processing = $("#grdStudents_processing");
+            if($grdStudents_processing){
+                $grdStudents_processing.css("display","block");
+            };
             $.ajax({
                 method: "POST",
                 url: url,
@@ -258,6 +288,27 @@ var Students = (function () {
                 headers: {
                     RequestVerificationToken: $('input[name="__RequestVerificationToken"').val()
                 }
+            }).done(function(response){
+                if($grdStudents_processing){
+                    $grdStudents_processing.css("display","none");
+                };
+
+                BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_SUCCESS,
+                    title: 'Share GradeBook',
+                    message: 'The GradeBook was successfully shared!',
+                })
+            })
+            .fail(function(response){
+                if($grdStudents_processing){
+                    $grdStudents_processing.css("display","none");
+                };
+
+                BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_DANGER,
+                    title: 'Share GradeBook',
+                    message: 'An error occurred while sharing this GradeBook!',
+                })
             })
         }
     };

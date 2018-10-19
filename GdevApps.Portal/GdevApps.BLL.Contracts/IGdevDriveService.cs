@@ -13,8 +13,8 @@ namespace GdevApps.BLL.Contracts
         Task<TaskResult<string, ICredential>> CreateRootFolderAsync(ICredential googleCredential, string refreshToken, string userId);
         Task<TaskResult<Folder, ICredential>> CreateInnerFolderAsync(string rootFolderId, string folderName, string externalAccessToken, string refreshToken, string userId);
         Task<TaskResult<Folder, ICredential>> CreateInnerFolderAsync(string rootFolderId, string folderName, ICredential googleCredential, string refreshToken, string userId);
-        Task<TaskResult<BoolResult, ICredential>> IsFileExistsAsync(string fileId, string externalAccessToken, string refreshToken, string userId);
-        Task<TaskResult<BoolResult, ICredential>> IsFileExistsAsync(string fileId, ICredential googleCredential, string refreshToken, string userId);
+        Task<TaskResult<FileStateResult, ICredential>> IsFileExistsAsync(string fileId, string externalAccessToken, string refreshToken, string userId);
+        Task<TaskResult<FileStateResult, ICredential>> IsFileExistsAsync(string fileId, ICredential googleCredential, string refreshToken, string userId);
         Task<TaskResult<string, ICredential>> GetRootFolderIdAsync(string externalAccessToken, string refreshToken, string userId);
         Task<TaskResult<string, ICredential>> GetRootFolderIdAsync(ICredential googleCredential, string refreshToken, string userId);
         Task<TaskResult<BoolResult, ICredential>> MoveFileToFolderAsync(string fileId, string folderId, string externalAccessToken, string refreshToken, string userId);

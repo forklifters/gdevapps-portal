@@ -583,7 +583,7 @@ namespace GdevApps.BLL.Domain
 
                 //check if root folder still exists
                 var isRootFolderStillExists = await _driveService.IsFileExistsAsync(rootFolderIdResult.ResultObject, googleCredential, refreshToken, userId);
-                if (isRootFolderStillExists.Result != ResultType.SUCCESS)
+                if (isRootFolderStillExists.ResultObject.Result == FileState.TRASHED)
                 {
                     //Root folder exists in the Db but it was deleted from google drive. 
                     //Delete the root folder from the db with all inner folders
@@ -592,7 +592,7 @@ namespace GdevApps.BLL.Domain
                 }
 
                 var oldParentGradeBook = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentGradeBook>(filter: f => f.Name == parentGradebookName);
-                var isFileExistsResult = await _driveService.IsFileExistsAsync(oldParentGradeBook?.Name ?? "", googleCredential, refreshToken, userId);
+                var isFileExistsResult = await _driveService.IsFileExistsAsync(oldParentGradeBook?.GoogleUniqueId ?? "", googleCredential, refreshToken, userId);
                 googleCredential = isFileExistsResult.Credentials;
 
                  var service = new SheetsService(new BaseClientService.Initializer()
@@ -601,7 +601,7 @@ namespace GdevApps.BLL.Domain
                         ApplicationName = _configuration["ApplicationName"]
                     });
 
-                if (isFileExistsResult.Result == ResultType.SUCCESS && isFileExistsResult.ResultObject.Result)
+                if (isFileExistsResult.Result == ResultType.SUCCESS && isFileExistsResult.ResultObject.Result == FileState.EXISTS)
                 {
                     var getSpreadSheetRequest = service.Spreadsheets.Get(oldParentGradeBook.GoogleUniqueId);
                     var spreadSheet = await getSpreadSheetRequest.ExecuteAsync();
@@ -621,12 +621,16 @@ namespace GdevApps.BLL.Domain
                     {
                         var isFolderExists = await _driveService.IsFileExistsAsync(innerFolderIdResult.ResultObject.GoogleFileId, googleCredential, refreshToken, userId);
                         googleCredential = isFolderExists.Credentials;
-                        if (isFolderExists.Result != ResultType.SUCCESS)
+                        if (isFolderExists.ResultObject.Result == FileState.TRASHED)
                         {
                             //Inner folder exists in the Db but it was deleted from google drive. 
                             //Delete inner folder from db
                             await _driveService.DeleteInnerFolderAsync(innerFolderIdResult.ResultObject.GoogleFileId);
                             innerFolderIdResult = await _driveService.CreateInnerFolderAsync(rootFolderIdResult.ResultObject, student.Email, googleCredential, refreshToken, userId);
+                            googleCredential = innerFolderIdResult.Credentials;
+                        }else if(isFolderExists.ResultObject.Result == FileState.NOTEXIST){
+                            innerFolderIdResult = await _driveService.CreateInnerFolderAsync(rootFolderIdResult.ResultObject, student.Email, googleCredential, refreshToken, userId);
+                            googleCredential = innerFolderIdResult.Credentials;
                         }
                     }
 
@@ -658,8 +662,9 @@ namespace GdevApps.BLL.Domain
                     };
                     await service.Spreadsheets.BatchUpdate(updateSpreadsheetRequest, newSpreadSheet.SpreadsheetId).ExecuteAsync();
                     var updateResult = await UpdateParentGradebookForStudentAsync(student, googleCredential, newSpreadSheet, true);
-                    var moveResult = await _driveService.MoveFileToFolderAsync(newSpreadSheet.SpreadsheetId, innerFolderIdResult.ResultObject.GoogleFileId, googleCredential, refreshToken, userId);
-                    googleCredential = moveResult.Credentials;
+                   //TODO: uncomment
+                   // var moveResult = await _driveService.MoveFileToFolderAsync(newSpreadSheet.SpreadsheetId, innerFolderIdResult.ResultObject.GoogleFileId, googleCredential, refreshToken, userId);
+                   // googleCredential = moveResult.Credentials;
 
                     var parentGradeBook = new GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentGradeBook
                     {
@@ -877,26 +882,20 @@ namespace GdevApps.BLL.Domain
             try
             {
                 //Check the folder
-                var folder = _gradeBookRepository.GetFirst<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(filter: f => f.FolderType == (int)FolderType.ROOT && f.CreatedBy == userId);
-                var rootFolderId = "";
-                if (folder != null)
-                {
-                    var isFileExistsResult = await _driveService.IsFileExistsAsync(folder.GoogleFileId, googleCredential, refreshToken, userId);
-                    googleCredential = isFileExistsResult.Credentials;
+                var folderIdResult = await _driveService.GetRootFolderIdAsync(googleCredential, refreshToken, userId);
+                var rootFolderId = folderIdResult.ResultObject;
 
-                    if (!isFileExistsResult.ResultObject.Result)
-                    {
-                        var rootFolderResult = await _driveService.CreateRootFolderAsync(googleCredential, refreshToken, userId);
-                        googleCredential = rootFolderResult.Credentials;
-                        rootFolderId = rootFolderResult.ResultObject;
-                    }
-                    else
-                    {
-                        rootFolderId = folder.GoogleFileId;
-                    }
-                }
-                else
+                var isFileExistsResult = await _driveService.IsFileExistsAsync(rootFolderId, googleCredential, refreshToken, userId);
+                googleCredential = isFileExistsResult.Credentials;
+                if (isFileExistsResult.ResultObject.Result == FileState.NOTEXIST)
                 {
+                    var rootFolderResult = await _driveService.CreateRootFolderAsync(googleCredential, refreshToken, userId);
+                    googleCredential = rootFolderResult.Credentials;
+                    rootFolderId = rootFolderResult.ResultObject;
+                }
+                else if (isFileExistsResult.ResultObject.Result == FileState.TRASHED)
+                {
+                    var deleteResult = await _driveService.DeleteRootFolderAsync(rootFolderId);
                     var rootFolderResult = await _driveService.CreateRootFolderAsync(googleCredential, refreshToken, userId);
                     googleCredential = rootFolderResult.Credentials;
                     rootFolderId = rootFolderResult.ResultObject;
@@ -908,16 +907,42 @@ namespace GdevApps.BLL.Domain
                 if (parent == null)
                     throw new Exception($"Parent with email {parentEmail} was not found");
 
-                var parentFolderResult = await _driveService.GetInnerFolderAsync(googleCredential, refreshToken, userId, rootFolderId, innerFolderName);
+                var innerFolderResult = await _driveService.GetInnerFolderAsync(googleCredential, refreshToken, userId, rootFolderId, innerFolderName);
                 //if inner folder does not exist create a new one
-                if (parentFolderResult.Result != ResultType.SUCCESS || parentFolderResult.ResultObject == null)
+                if (innerFolderResult.Result != ResultType.SUCCESS || innerFolderResult.ResultObject == null)
                 {
-                    parentFolderResult = await _driveService.CreateInnerFolderAsync(rootFolderId, innerFolderName, googleCredential, refreshToken, userId);
+                    innerFolderResult = await _driveService.CreateInnerFolderAsync(rootFolderId, innerFolderName, googleCredential, refreshToken, userId);
                 }
-                googleCredential = parentFolderResult.Credentials;
+                else
+                {
+                    var innerFolderId = innerFolderResult.ResultObject.GoogleFileId;
+                    //check if inner folder exists or trashed
+                    var isInnerFolderExistsResult = await _driveService.IsFileExistsAsync(innerFolderId, googleCredential, refreshToken, userId);
+                    googleCredential = isInnerFolderExistsResult.Credentials;
+                    if (isInnerFolderExistsResult.ResultObject.Result == FileState.NOTEXIST)
+                    {
+                        innerFolderResult = await _driveService.CreateInnerFolderAsync(rootFolderId, innerFolderName, googleCredential, refreshToken, userId);
+                    }
+                    else if (isInnerFolderExistsResult.ResultObject.Result == FileState.TRASHED)
+                    {
+                        await _driveService.DeleteInnerFolderAsync(innerFolderId);
+                        innerFolderResult = await _driveService.CreateInnerFolderAsync(rootFolderId, innerFolderName, googleCredential, refreshToken, userId);
+                    }
+                }
 
-                //Get parent gradebook by gradebook id
-                var parentGradeBook = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentGradeBook>(filter: f => f.GoogleUniqueId == gradeBookId);
+                googleCredential = innerFolderResult.Credentials;
+                GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentGradeBook parentGradeBook;
+                if (!string.IsNullOrWhiteSpace(gradeBookId))
+                {
+                    //Get parent gradebook by gradebook id
+                    parentGradeBook = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentGradeBook>(filter: f => f.GoogleUniqueId == gradeBookId);
+                }
+                else
+                {
+                    //get parentGradebook by name and main gradebook id
+                    parentGradeBook = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentGradeBook>(filter: f => f.Name == parentGradeBookName && f.MainGradeBook.GoogleUniqueId == mainGradeBookId);
+                }
+
                 // no parent gradebook
                 // a new one should be created
                 if (parentGradeBook == null)
@@ -939,7 +964,7 @@ namespace GdevApps.BLL.Domain
                             ParentGradeBookId = newParentGradebook.Id,
                             ParentAspId = parent.AspUserId,
                             TeacherAspId = userId,
-                            FolderId = parentFolderResult.ResultObject.Id,
+                            FolderId = innerFolderResult.ResultObject.Id,
                             SharedStatus = (int)FolderSharedStatus.SHARED,
                             ParentId = parent.Id
                         };
@@ -989,7 +1014,7 @@ namespace GdevApps.BLL.Domain
                             ParentGradeBookId = parentGradeBook.Id,
                             ParentAspId = parent.AspUserId,
                             TeacherAspId = userId,
-                            FolderId = parentFolderResult.ResultObject.Id,
+                            FolderId = innerFolderResult.ResultObject.Id,
                             SharedStatus = (int)FolderSharedStatus.SHARED,
                             ParentId = parent.Id
                         };

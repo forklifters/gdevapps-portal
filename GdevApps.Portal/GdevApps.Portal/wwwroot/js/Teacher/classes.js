@@ -100,7 +100,7 @@ var Classes = (function () {
                 return cell;
             }
 
-            $('#classes tbody').on('click', 'td.details-control', function () {
+            $('#classes tbody').off('click').on('click', 'td.details-control', function () {
                 var tr = $(this).closest('tr');
                 var row = table.row(tr);
 

@@ -52,6 +52,8 @@ namespace GdevApps.Portal.Controllers
 
         private readonly IGdevSpreadsheetService _spreadSheetService;
 
+        private readonly IGdevDriveService _driveService;
+
         public TeacherController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
@@ -63,7 +65,8 @@ namespace GdevApps.Portal.Controllers
             IHttpContextAccessor httpContext,
             IAspNetUserService aspUserService,
             IHttpContextAccessor contextAccessor,
-            IGdevSpreadsheetService spreadSheetService)
+            IGdevSpreadsheetService spreadSheetService,
+            IGdevDriveService driveService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -76,6 +79,7 @@ namespace GdevApps.Portal.Controllers
             _aspUserService = aspUserService;
             _contextAccessor = contextAccessor;
             _spreadSheetService = spreadSheetService;
+            _driveService = driveService;
         }
 
         [HttpGet]
@@ -86,26 +90,13 @@ namespace GdevApps.Portal.Controllers
                 var gradeBookLink = "https://docs.google.com/spreadsheets/d/1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg/edit?usp=drive_web&ouid=106890447120707259670";
                 var gradebookId = "1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg";
                 //var gradebookId = "";
+                var fileId = "1JYB-P0mcfYhJeKqG4_U22JaHj2L4MJURair1qkbe1sI";
+                var folderId = "1QJY6E4Yww5y238DZgZ9drrSoJH0fgj2h";
                 var userId = _userManager.GetUserId(User);
-                // var students = await _spreadSheetService.GetStudentsFromGradebookAsync(
-                //     await GetAccessTokenAsync(),
-                //     gradebookId,
-                //     await GetRefreshTokenAsync(),
-                //     userId
-                // );
+                
+                var resul = await _driveService.MoveFileToFolderAsync(fileId, folderId, await GetAccessTokenAsync(), await GetRefreshTokenAsync(), userId);
 
-
-                var student = await _spreadSheetService.GetStudentByEmailFromGradebookAsync("paulivankbs@gmail.com",
-                await GetAccessTokenAsync(),
-                gradebookId,
-                await GetRefreshTokenAsync(),
-                _userManager.GetUserId(User));
-                // var result = await _spreadSheetService.SaveStudentIntoParentGradebookAsync(student.ResultObject,
-                //  "",
-                // await GetAccessTokenAsync(),
-                //  await GetRefreshTokenAsync(),
-                // _userManager.GetUserId(User));
-                return Ok(student);
+                return Ok();
             }
             catch (Exception ex)
             {
