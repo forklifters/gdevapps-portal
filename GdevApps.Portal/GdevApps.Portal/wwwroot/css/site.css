@@ -1,6 +1,6 @@
 body {
     padding-top: 50px;
-    padding-bottom: 20px;
+    padding-bottom: 0px !important;
     font-family: 'Roboto',arial,sans-serif !important;
     font-size:16px !important;
 }
@@ -153,6 +153,7 @@ table.dataTable thead th.sorting_desc:after {
     background: #4285f4 !important;
     color: #fff !important;
     border-color:  #4285f4 !important;
+    border: 1px white solid !important;
 }
 
 .btn.btn-primary:hover, .btn.btn-primary:focus {
@@ -180,9 +181,9 @@ table.dataTable thead th.sorting_desc:after {
 
 .navigation--item {
     font-weight: 400 !important;
-    line-height: 16px !important;
+    line-height: 32px !important;
     padding: 7px !important;
-    font-size: 16px !important;
+    font-size: 18px !important;
 }
 
 a.navigation--item:hover {
@@ -352,6 +353,10 @@ img.lightblue{
     background: none !important;
  }
 
+.main {
+    padding-top: 65px !important;
+}
+
  /*FOOTER*/
 
 footer ul
@@ -411,4 +416,35 @@ footer ul li,.taber
 a.footer--link {
     color: #bdbdbd !important;
     transition: color .2s ease-out !important;
+}
+
+/*MENU*/
+.icon-bar{
+    background-color: #ddd !important;
+}
+
+.navbar {
+     border-radius: 0px !important; 
+     width: 100% !important;
+     position: fixed !important;
+     margin-top:43px !important;
+}
+
+.navbar-default {
+    background-color: #fafafa !important;
+    border-color: #e7e7e7;
+    top: 13px !important;
+    transition: none !important;
+    z-index: 9 !important;
+    width: 100% !important;
+    box-shadow: 0 3px 5px 0.3px rgba(0,0,0,.24) !important;
+}
+
+.navbar-form{
+    margin-bottom: 0px !important;
+    margin-top: 4px !important;
+}
+
+.navbar-default .navbar-nav>li>a:hover{
+    color: #4071d9 !important;
 }
