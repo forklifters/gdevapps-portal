@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GdevApps.Portal.Data;
 using GdevApps.Portal.Models;
+using GdevApps.Portal.Models.AccountViewModels;
 using GdevApps.Portal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -18,8 +19,25 @@ namespace GdevApps.Portal.Controllers
     {
         public IActionResult Index()
         {
-            var userCurrentRole = HttpContext.Session.GetString("UserCurrentRole");  
             return View();
+
+            var userCurrentRole = HttpContext.Session.GetString("UserCurrentRole");
+            if (!string.IsNullOrWhiteSpace(userCurrentRole))
+            {
+                switch (userCurrentRole)
+                {
+                    case UserRoles.Student:
+                        break;
+                    case UserRoles.Parent:
+                        return RedirectToAction("Index", "Parent");
+                    case UserRoles.Teacher:
+                        return RedirectToAction("Index", "Teacher");
+                    default:
+                        return RedirectToAction("logoutFromAttr", "Account");
+                }
+            }
+
+            return RedirectToAction("LogoutFromAttr", "Account");
         }
 
         [Authorize(Roles = "Admin")]

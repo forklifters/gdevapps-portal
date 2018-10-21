@@ -100,8 +100,10 @@ namespace GdevApps.Portal
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Error");
             }
+
+            app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
 
             app.UseStaticFiles();
             app.UseAuthentication();

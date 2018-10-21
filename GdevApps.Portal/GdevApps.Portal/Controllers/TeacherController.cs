@@ -85,23 +85,21 @@ namespace GdevApps.Portal.Controllers
         [HttpGet]
         public async Task<IActionResult> Test()
         {
-            try
-            {
-                var gradeBookLink = "https://docs.google.com/spreadsheets/d/1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg/edit?usp=drive_web&ouid=106890447120707259670";
-                var gradebookId = "1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg";
-                //var gradebookId = "";
-                var fileId = "1JYB-P0mcfYhJeKqG4_U22JaHj2L4MJURair1qkbe1sI";
-                var folderId = "1QJY6E4Yww5y238DZgZ9drrSoJH0fgj2h";
-                var userId = _userManager.GetUserId(User);
-                
-                var resul = await _driveService.MoveFileToFolderAsync(fileId, folderId, await GetAccessTokenAsync(), await GetRefreshTokenAsync(), userId);
+            var gradeBookLink = "https://docs.google.com/spreadsheets/d/1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg/edit?usp=drive_web&ouid=106890447120707259670";
+            var gradebookId = "1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg";
+            //var gradebookId = "";
+            var fileId = "1JYB-P0mcfYhJeKqG4_U22JaHj2L4MJURair1qkbe1sI";
+            var folderId = "1QJY6E4Yww5y238DZgZ9drrSoJH0fgj2h";
+            var userId = _userManager.GetUserId(User);
 
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
-            }
+            var resul = await _driveService.MoveFileToFolderAsync(fileId, folderId, await GetAccessTokenAsync(), await GetRefreshTokenAsync(), userId);
+
+            return Ok();
+        }
+
+        public IActionResult Index()
+        {
+            return RedirectToAction("ClassesAsync");
         }
 
         public IActionResult ClassesAsync()
@@ -112,155 +110,113 @@ namespace GdevApps.Portal.Controllers
         [HttpGet]
         public async Task<IActionResult> GetClasses()
         {
-            try
-            {
-                List<ClassesViewModel> classes = await GetClassesAsync();
-                return Ok(new { data = classes });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
-            }
+            List<ClassesViewModel> classes = await GetClassesAsync();
+            return Ok(new { data = classes });
         }
 
         [HttpPost]
         public async Task<IActionResult> GetStudents(string classId, string gradeBookId)
         {
-            try
+            var userId = _userManager.GetUserId(User);
+            var googleClassroomStudentResult = await _classroomService.GetStudentsByClassIdAsync(await GetAccessTokenAsync(),
+                                                                                classId,
+                                                                                await GetRefreshTokenAsync(),
+                                                                                userId);
+            var googleStudents = googleClassroomStudentResult.ResultObject.ToList();
+            //Get students from Gradebook
+            if (!string.IsNullOrEmpty(gradeBookId))
             {
-                var userId = _userManager.GetUserId(User);
-                var googleClassroomStudentResult = await _classroomService.GetStudentsByClassIdAsync(await GetAccessTokenAsync(),
-                                                                                    classId,
-                                                                                    await GetRefreshTokenAsync(),
-                                                                                    userId);
-                var googleStudents = googleClassroomStudentResult.ResultObject.ToList();
-                //Get students from Gradebook
-                if (!string.IsNullOrEmpty(gradeBookId))
-                {
-                    var studentsTaskResult = await _spreadSheetService.GetStudentsFromGradebookAsync(googleClassroomStudentResult.Credentials,
-                     gradeBookId,
-                      await GetRefreshTokenAsync(),
-                       userId);
-                    var gradebookStudents = _mapper.Map<IEnumerable<GoogleStudent>>(studentsTaskResult.ResultObject);
+                var studentsTaskResult = await _spreadSheetService.GetStudentsFromGradebookAsync(googleClassroomStudentResult.Credentials,
+                 gradeBookId,
+                  await GetRefreshTokenAsync(),
+                   userId);
+                var gradebookStudents = _mapper.Map<IEnumerable<GoogleStudent>>(studentsTaskResult.ResultObject);
 
-                    foreach (var student in gradebookStudents)
+                foreach (var student in gradebookStudents)
+                {
+                    var parents = student.Parents;
+                    foreach (var p in parents)
                     {
-                        var parents = student.Parents;
-                        foreach (var p in parents)
+                        var parentAccount = await _userManager.FindByEmailAsync(p.Email);
+                        if (parentAccount != null)
                         {
-                            var parentAccount = await _userManager.FindByEmailAsync(p.Email);
-                            if (parentAccount != null)
-                            {
-                                p.HasAccount = true;
-                                p.Name = parentAccount.UserName;
-                            }
-                            else
-                            {
-                                p.HasAccount = false;
-                            }
+                            p.HasAccount = true;
+                            p.Name = parentAccount.UserName;
+                        }
+                        else
+                        {
+                            p.HasAccount = false;
                         }
                     }
-
-                    var gradebookStudentsEmails = gradebookStudents.Select(s => s.Email).ToList();
-                    foreach (var student in googleStudents.Where(s => gradebookStudents.Select(g => g.Email).Contains(s.Email)).ToList())
-                    {
-                        student.IsInClassroom = true;
-                    }
-
-                    googleStudents.AddRange(gradebookStudents.Where(g => !googleStudents.Select(s => s.Email).Contains(g.Email)).ToList());
                 }
 
-                var studentsList = _mapper.Map<List<StudentsViewModel>>(googleStudents);
+                var gradebookStudentsEmails = gradebookStudents.Select(s => s.Email).ToList();
+                foreach (var student in googleStudents.Where(s => gradebookStudents.Select(g => g.Email).Contains(s.Email)).ToList())
+                {
+                    student.IsInClassroom = true;
+                }
 
-                return Ok(new { data = studentsList });
+                googleStudents.AddRange(gradebookStudents.Where(g => !googleStudents.Select(s => s.Email).Contains(g.Email)).ToList());
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
-            }
+
+            var studentsList = _mapper.Map<List<StudentsViewModel>>(googleStudents);
+
+            return Ok(new { data = studentsList });
         }
 
         [HttpPost]
         public async Task<IActionResult> ShareGradeBook(string className, string parentEmail, string studentEmail, string mainGradeBookId)
         {
-            try
-            {
-                var userId = _userManager.GetUserId(User);
-                var result = await _spreadSheetService.ShareGradeBook(
-                    await GetAccessTokenAsync(),
-                    await GetRefreshTokenAsync(),
-                    userId,
-                    parentEmail,
-                    studentEmail,
-                    className,
-                    "",
-                    mainGradeBookId
-                );
+            var userId = _userManager.GetUserId(User);
+            var result = await _spreadSheetService.ShareGradeBook(
+                await GetAccessTokenAsync(),
+                await GetRefreshTokenAsync(),
+                userId,
+                parentEmail,
+                studentEmail,
+                className,
+                "",
+                mainGradeBookId
+            );
 
-                return Ok(result);
-            }
-            catch (Exception err)
-            {
-                return BadRequest(err);
-            }
+            return Ok(result);
         }
 
         [HttpPost]
         public async Task<IActionResult> UnshareGradeBook(string parentEmail, string mainGradeBookId)
         {
-            try
-            {
-                var userId = _userManager.GetUserId(User);
-                var result = await _spreadSheetService.UnShareGradeBook(
-                    await GetAccessTokenAsync(),
-                    await GetRefreshTokenAsync(),
-                    userId,
-                    parentEmail,
-                    "",
-                    mainGradeBookId
-                );
+            var userId = _userManager.GetUserId(User);
+            var result = await _spreadSheetService.UnShareGradeBook(
+                await GetAccessTokenAsync(),
+                await GetRefreshTokenAsync(),
+                userId,
+                parentEmail,
+                "",
+                mainGradeBookId
+            );
 
-                return Ok(result);
-            }
-            catch (Exception err)
-            {
-                return BadRequest(err);
-            }
+            return Ok(result);
         }
 
         [HttpPost]
         public async Task<IActionResult> GetGradeBooks(string classId)
         {
-            try
+            var gradebooks = await _spreadSheetService.GetGradeBooksByClassId(classId);
+            return Json(gradebooks.Select(g => new
             {
-                var gradebooks = await _spreadSheetService.GetGradeBooksByClassId(classId);
-                return Json(gradebooks.Select(g => new
-                {
-                    UniqueId = g.GoogleUniqueId,
-                    Text = g.Name
-                }));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
-            }
+                UniqueId = g.GoogleUniqueId,
+                Text = g.Name
+            }));
         }
 
 
         [HttpGet]
         public async Task<IActionResult> GetClassesForStudents()
         {
-            try
-            {
-                var classes = await GetClassesAsync();
-                var classesList = new SelectList(classes, "Id", "Name");
+            var classes = await GetClassesAsync();
+            var classesList = new SelectList(classes, "Id", "Name");
 
-                return View("ClassesForStudents", new ClassesForStudentsViewModel { Classes = classesList });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
-            }
+            return View("ClassesForStudents", new ClassesForStudentsViewModel { Classes = classesList });
         }
 
         [HttpGet]
@@ -350,70 +306,49 @@ namespace GdevApps.Portal.Controllers
         [HttpGet]
         public async Task<ActionResult> GetGradebookById(string classroomId, string gradebookId)
         {
-            try
+            var gradeBookModel = await _spreadSheetService.GetGradebookByUniqueIdAsync(gradebookId);
+            var gradeBook = _mapper.Map<ClassSheetsViewModel>(gradeBookModel);
+            if (gradeBook != null)
             {
-                var gradeBookModel = await _spreadSheetService.GetGradebookByUniqueIdAsync(gradebookId);
-                var gradeBook = _mapper.Map<ClassSheetsViewModel>(gradeBookModel);
-                if (gradeBook != null)
-                {
-                    return PartialView("_EditGradebook", gradeBook);
-                }
-                else
-                {
-                    return BadRequest($"Gradebook with id {gradebookId} was not found");
-                }
+                return PartialView("_EditGradebook", gradeBook);
             }
-            catch (Exception ex)
+            else
             {
-                return BadRequest(ex.Message);
+                return BadRequest($"Gradebook with id {gradebookId} was not found");
             }
         }
 
         [HttpPost]
         public async Task<ActionResult> RemoveGradebook(string classroomId, string gradebookId)
         {
-            try
+            if (!string.IsNullOrEmpty(classroomId) && !string.IsNullOrEmpty(gradebookId))
             {
-                if (!string.IsNullOrEmpty(classroomId) && !string.IsNullOrEmpty(gradebookId))
+                var result = await _spreadSheetService.DeleteGradeBookAsync(classroomId, gradebookId);
+                if (result)
                 {
-                    var result = await _spreadSheetService.DeleteGradeBookAsync(classroomId, gradebookId);
-                    if (result)
-                    {
-                        return Ok();
-                    }
-                    else
-                    {
-                        return BadRequest($"Gradebook with id {gradebookId} was not found");
-                    }
+                    return Ok();
                 }
-                return BadRequest(classroomId);
+                else
+                {
+                    return BadRequest($"Gradebook with id {gradebookId} was not found");
+                }
             }
-            catch (Exception err)
-            {
-                return BadRequest(err.Message);
-            }
+            return BadRequest(classroomId);
         }
 
         #region "Private"
 
         private async Task<List<ClassesViewModel>> GetClassesAsync()
         {
-            try
+            var serviceClassesRespnse = await _classroomService.GetAllClassesAsync(await GetAccessTokenAsync(), await GetRefreshTokenAsync(), _userManager.GetUserId(User));
+            if (serviceClassesRespnse.Result == ResultType.SUCCESS || serviceClassesRespnse.Result == ResultType.EMPTY)
             {
-                var serviceClassesRespnse = await _classroomService.GetAllClassesAsync(await GetAccessTokenAsync(), await GetRefreshTokenAsync(), _userManager.GetUserId(User));
-                if (serviceClassesRespnse.Result == ResultType.SUCCESS || serviceClassesRespnse.Result == ResultType.EMPTY)
-                {
-                    var classes = _mapper.Map<List<ClassesViewModel>>(serviceClassesRespnse.ResultObject);
-                    return classes;
-                }
-                else
-                {
-                    throw new Exception(string.Join(",", serviceClassesRespnse.Errors));
-                }
+                var classes = _mapper.Map<List<ClassesViewModel>>(serviceClassesRespnse.ResultObject);
+                return classes;
             }
-            catch (Exception ex)
+            else
             {
-                throw ex;
+                throw new Exception(string.Join(",", serviceClassesRespnse.Errors));
             }
         }
 
