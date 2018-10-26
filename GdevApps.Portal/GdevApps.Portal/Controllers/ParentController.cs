@@ -3,15 +3,20 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.Configuration;
+using GdevApps.BLL.Contracts;
 using GdevApps.Portal.Attributes;
 using GdevApps.Portal.Data;
 using GdevApps.Portal.Models;
 using GdevApps.Portal.Models.AccountViewModels;
+using GdevApps.Portal.Models.TeacherViewModels;
 using GdevApps.Portal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 
 namespace GdevApps.Portal.Controllers
@@ -20,6 +25,47 @@ namespace GdevApps.Portal.Controllers
     [VerifyUserRole(UserRoles.Parent)]
     public class ParentController : Controller
     {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IEmailSender _emailSender;
+        private readonly ILogger _logger;
+        private readonly IConfiguration _configuration;
+        private readonly IGdevClassroomService _classroomService;
+        private readonly IMapper _mapper;
+        private readonly HttpContext _context;
+        private readonly IAspNetUserService _aspUserService;
+        private readonly IHttpContextAccessor _contextAccessor;
+        private readonly IGdevSpreadsheetService _spreadSheetService;
+        private readonly IGdevDriveService _driveService;
+
+        public ParentController(UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            IEmailSender emailSender,
+            ILogger<TeacherController> logger,
+            IConfiguration configuration,
+            IGdevClassroomService classroomService,
+            IMapper mapper,
+            IHttpContextAccessor httpContext,
+            IAspNetUserService aspUserService,
+            IHttpContextAccessor contextAccessor,
+            IGdevSpreadsheetService spreadSheetService,
+            IGdevDriveService driveService)
+        {
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _emailSender = emailSender;
+            _logger = logger;
+            _configuration = configuration;
+            _classroomService = classroomService;
+            _mapper = mapper;
+            _context = httpContext.HttpContext;
+            _aspUserService = aspUserService;
+            _contextAccessor = contextAccessor;
+            _spreadSheetService = spreadSheetService;
+            _driveService = driveService;
+        }
+
+
         public IActionResult Index()
         {
             var userCurrentRole = HttpContext.Session.GetString("UserCurrentRole");  
@@ -41,6 +87,29 @@ namespace GdevApps.Portal.Controllers
             ViewData["Message"] = "Your contact page.";
 
             return View();
+        }
+
+        [HttpGet]
+        public IActionResult GetStudents(){
+            //TODO: create method to return a list of students
+            var studentEmails = new List<string>(){
+                "example@gmail.com",
+                "example1@gmail.com"
+            };
+
+            var studentEmailsList = new SelectList(studentEmails, "Id", "Name");
+            return View("ParentStudents", new ParentStudentsViewModel { Students = studentEmailsList });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetClasses(string classId)
+        {
+            var gradebooks = await _spreadSheetService.GetGradeBooksByClassId(classId);
+            return Json(gradebooks.Select(g => new
+            {
+                UniqueId = g.GoogleUniqueId,
+                Text = g.Name
+            }));
         }
 
         public IActionResult Error()

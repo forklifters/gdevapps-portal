@@ -17,6 +17,7 @@ using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource.UpdateRequest;
 
 namespace GdevApps.BLL.Domain
 {
@@ -29,6 +30,7 @@ namespace GdevApps.BLL.Domain
         private readonly IGdevClassroomService _classroomService;
         private const string _studentsRange = "GradeBook";
         private const string _settingsCourseRange = "Settings!A48:A49";
+        private const string _settingsRange = "Settings!A1:B24";
         private readonly IGradeBookRepository _gradeBookRepository;
         private readonly IMapper _mapper;
 
@@ -468,12 +470,20 @@ namespace GdevApps.BLL.Domain
                         continue;
                     }
 
-                    string date = allValues[1][c]?.ToString();
+                    string date = allValues[1][c]?.ToString() ?? "";
                     string creationDate = date;
                     if (string.IsNullOrEmpty(date))
                     {
                         creationDate = DateTime.UtcNow.ToString();
                     }
+                    else
+                    {
+                        double dateDouble;
+                        bool parseResult = Double.TryParse(date, out dateDouble);
+                        date = parseResult ? DateTime.FromOADate(dateDouble).ToString() : "";
+                        creationDate = date;
+                    }
+
                     string maxPoints = allValues[2][c]?.ToString() ?? "";
                     string weight = allValues[3][c]?.ToString() ?? "";
                     string category = allValues[4][c]?.ToString() ?? "";
@@ -568,12 +578,12 @@ namespace GdevApps.BLL.Domain
         {
             if (student == null)
                 throw new ArgumentNullException("Student is null");
-            
-            if(string.IsNullOrWhiteSpace(parentEmail))
+
+            if (string.IsNullOrWhiteSpace(parentEmail))
                 throw new ArgumentNullException("Parent email is null or mepty");
 
             var studentParent = student.Parents.Where(p => p.Email == parentEmail).FirstOrDefault();
-            if(studentParent == null)
+            if (studentParent == null)
                 throw new Exception("Student does not have such parent");
 
             try
@@ -595,17 +605,17 @@ namespace GdevApps.BLL.Domain
                 var isFileExistsResult = await _driveService.IsFileExistsAsync(oldParentGradeBook?.GoogleUniqueId ?? "", googleCredential, refreshToken, userId);
                 googleCredential = isFileExistsResult.Credentials;
 
-                 var service = new SheetsService(new BaseClientService.Initializer()
-                    {
-                        HttpClientInitializer = googleCredential,
-                        ApplicationName = _configuration["ApplicationName"]
-                    });
+                var service = new SheetsService(new BaseClientService.Initializer()
+                {
+                    HttpClientInitializer = googleCredential,
+                    ApplicationName = _configuration["ApplicationName"]
+                });
 
                 if (isFileExistsResult.Result == ResultType.SUCCESS && isFileExistsResult.ResultObject.Result == FileState.EXISTS)
                 {
                     var getSpreadSheetRequest = service.Spreadsheets.Get(oldParentGradeBook.GoogleUniqueId);
                     var spreadSheet = await getSpreadSheetRequest.ExecuteAsync();
-                    return await UpdateParentGradebookForStudentAsync(student, googleCredential, spreadSheet, true);
+                    return await UpdateParentGradebookForStudentAsync(student, googleCredential, spreadSheet, false);
                 }
                 else
                 {
@@ -628,7 +638,9 @@ namespace GdevApps.BLL.Domain
                             await _driveService.DeleteInnerFolderAsync(innerFolderIdResult.ResultObject.GoogleFileId);
                             innerFolderIdResult = await _driveService.CreateInnerFolderAsync(rootFolderIdResult.ResultObject, student.Email, googleCredential, refreshToken, userId);
                             googleCredential = innerFolderIdResult.Credentials;
-                        }else if(isFolderExists.ResultObject.Result == FileState.NOTEXIST){
+                        }
+                        else if (isFolderExists.ResultObject.Result == FileState.NOTEXIST)
+                        {
                             innerFolderIdResult = await _driveService.CreateInnerFolderAsync(rootFolderIdResult.ResultObject, student.Email, googleCredential, refreshToken, userId);
                             googleCredential = innerFolderIdResult.Credentials;
                         }
@@ -639,32 +651,45 @@ namespace GdevApps.BLL.Domain
                         Properties = new SpreadsheetProperties()
                         {
                             Title = parentGradebookName
-                        }
-                    }).ExecuteAsync();
-
-                    BatchUpdateSpreadsheetRequest updateSpreadsheetRequest = new BatchUpdateSpreadsheetRequest()
-                    {
-                        Requests = new List<Request>
-                    {
-                        new Request()
-                        {
-                            UpdateSheetProperties = new UpdateSheetPropertiesRequest(){
+                        },
+                        Sheets = new List<Sheet>(){
+                            new Sheet(){
                                 Properties = new SheetProperties(){
                                     Index = 0,
                                     Title = "GradeBook"
-                                },
-                                Fields = "title"
-                            }
-                        }
-                    },
-                        ResponseIncludeGridData = false,
-                        IncludeSpreadsheetInResponse = false
+                                }
+                            },
+                            new Sheet(){
+                                Properties = new SheetProperties(){
+                                    Index = 1,
+                                    Title = "Settings"
+                                }
+                            },
+                        } 
+                    }).ExecuteAsync();
+
+                    //Get settings information and save on the settings sheet
+                    var valueRenderOption = (SpreadsheetsResource.ValuesResource.GetRequest.ValueRenderOptionEnum)1;
+                    SpreadsheetsResource.ValuesResource.GetRequest requestSettings = service.Spreadsheets.Values.Get(mainGradeBook.GoogleUniqueId, _settingsRange);
+                    requestSettings.ValueRenderOption = valueRenderOption;
+                    Google.Apis.Sheets.v4.Data.ValueRange responseSettings = await requestSettings.ExecuteAsync();
+                    var spreadSheetSettings = responseSettings.Values;
+                    var valueRange = new ValueRange()
+                    {
+                        Range = _settingsRange,
+                        MajorDimension = "ROWS",
+                        Values = spreadSheetSettings
                     };
-                    await service.Spreadsheets.BatchUpdate(updateSpreadsheetRequest, newSpreadSheet.SpreadsheetId).ExecuteAsync();
-                    var updateResult = await UpdateParentGradebookForStudentAsync(student, googleCredential, newSpreadSheet, true);
-                   //TODO: uncomment
-                   // var moveResult = await _driveService.MoveFileToFolderAsync(newSpreadSheet.SpreadsheetId, innerFolderIdResult.ResultObject.GoogleFileId, googleCredential, refreshToken, userId);
-                   // googleCredential = moveResult.Credentials;
+                    var updateRequest = service.Spreadsheets.Values.Update(valueRange, newSpreadSheet.SpreadsheetId, _settingsRange);
+                    updateRequest.ValueInputOption = ValueInputOptionEnum.USERENTERED;
+                    await updateRequest.ExecuteAsync();
+
+                    await UpdateParentGradebookForStudentAsync(student, googleCredential, newSpreadSheet, true);
+
+
+                    //TODO: uncomment
+                    var moveResult = await _driveService.MoveFileToFolderAsync(newSpreadSheet.SpreadsheetId, innerFolderIdResult.ResultObject.GoogleFileId, googleCredential, refreshToken, userId);
+                    googleCredential = moveResult.Credentials;
 
                     var parentGradeBook = new GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentGradeBook
                     {
@@ -794,7 +819,7 @@ namespace GdevApps.BLL.Domain
         public async Task<TaskResult<string, ICredential>> UpdateParentGradebookForStudentAsync(
             GradebookStudent student,
             ICredential googleCredential,
-            Spreadsheet spreadSheet, 
+            Spreadsheet spreadSheet,
             bool isNew = false)
         {
             var service = new SheetsService(new BaseClientService.Initializer()
@@ -816,7 +841,7 @@ namespace GdevApps.BLL.Domain
             var parentGradeBookValuesRequest = await service.Spreadsheets.Values.Get(spreadSheet.SpreadsheetId, parentGradebookRange).ExecuteAsync();
             var numberOfCourseWorks = student.CourseWorks != null ? student.CourseWorks.Count() : 0;
             IList<IList<object>> values = new object[2 + numberOfCourseWorks][];
-            values[0] = new object[8]{
+            values[0] = new object[10]{
                         "Student name",
                         student.Name,
                         "Max points",
@@ -824,11 +849,15 @@ namespace GdevApps.BLL.Domain
                         "Category",
                         "Term",
                         "Date",
-                        "Grade"
+                        "Grade",
+                        "ClassroomId",
+                        "Id"
                     };
-            values[1] = new object[8]{
+            values[1] = new object[10]{
                         "Student email",
                         student.Email,
+                        "",
+                        "",
                         "",
                         "",
                         "",
@@ -840,7 +869,7 @@ namespace GdevApps.BLL.Domain
             var studentCourseWorks = student.CourseWorks.ToList();
             foreach (var cw in studentCourseWorks)
             {
-                var array = new object[8]{
+                var array = new object[10]{
                             "Title",
                             cw.Title,
                             cw.MaxPoints,
@@ -848,7 +877,9 @@ namespace GdevApps.BLL.Domain
                             cw.Category,
                             cw.Term,
                             cw.DueDate,
-                            student.Submissions.Where(s => s.CourseWorkId == cw.IdInGradeBook).Select(s => s.Grade).FirstOrDefault()
+                            student.Submissions.Where(s => s.CourseWorkId == cw.IdInGradeBook).Select(s => s.Grade).FirstOrDefault(),
+                            cw.IdInClassroom,
+                            cw.IdInGradeBook
                         };
                 values[index] = array;
                 index++;
@@ -1023,8 +1054,29 @@ namespace GdevApps.BLL.Domain
                         _gradeBookRepository.Save();
 
                         //Set permissions
-                       var permissionsResult = await _driveService.GrantPermission(googleCredential, refreshToken, userId, parentGradeBook.GoogleUniqueId, parentEmail, PermissionType.User, PermissionRole.Reader);
-                       googleCredential = permissionsResult.Credentials;
+                        var permissionsResult = await _driveService.GrantPermission(googleCredential, refreshToken, userId, parentGradeBook.GoogleUniqueId, parentEmail, PermissionType.User, PermissionRole.Reader);
+                        googleCredential = permissionsResult.Credentials;
+                    }
+
+                    //Add information to the Parent Student Table
+                    //TODO: Create method to get only Id
+                    var mainGradebook = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>(filter: g=> g.GoogleUniqueId == mainGradeBookId);
+                    var parentStudent = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.ParentStudent>(
+                        filter: s => s.ParentId == parent.Id && s.StudentEmail == studentEmail && s.GradeBookId == mainGradebook.Id
+                        );
+
+                    if (parentStudent == null)
+                    {
+                        var aspUser = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.AspNetUsers>(filter: u=> u.Email == parentEmail);
+                        parentStudent = new GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.ParentStudent(){
+                            GradeBookId = mainGradebook.Id,
+                            ParentAspId = aspUser.Id,
+                            ParentId = parent.Id,
+                            StudentEmail = studentEmail
+                        };
+
+                        _gradeBookRepository.Create<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.ParentStudent>(parentStudent);
+                        _gradeBookRepository.Save();
                     }
                 }
 
@@ -1036,13 +1088,13 @@ namespace GdevApps.BLL.Domain
             }
         }
 
-        
+
         public async Task<TaskResult<BoolResult, ICredential>> UnShareGradeBook(
-            string externalAccessToken, 
-            string refreshToken, 
-            string userId, 
-            string parentEmail, 
-            string gradeBookId, 
+            string externalAccessToken,
+            string refreshToken,
+            string userId,
+            string parentEmail,
+            string gradeBookId,
             string mainGradeBookId)
         {
             ICredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
@@ -1057,17 +1109,18 @@ namespace GdevApps.BLL.Domain
         }
 
         public async Task<TaskResult<BoolResult, ICredential>> UnShareGradeBook(
-            ICredential googleCredential, 
-            string refreshToken, 
-            string userId, 
-            string parentEmail, 
-            string gradeBookId, 
+            ICredential googleCredential,
+            string refreshToken,
+            string userId,
+            string parentEmail,
+            string gradeBookId,
             string mainGradeBookId)
         {
             var parent = await _aspUserService.GetParentByEmailAsync(parentEmail);
-            if(string.IsNullOrWhiteSpace(gradeBookId)){
+            if (string.IsNullOrWhiteSpace(gradeBookId))
+            {
                 var parentGradeBook = await _gradeBookRepository.GetFirstAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentGradeBook>(
-                    filter: p=> p.MainGradeBook.GoogleUniqueId == mainGradeBookId && p.CreatedBy == userId && !p.IsDeleted
+                    filter: p => p.MainGradeBook.GoogleUniqueId == mainGradeBookId && p.CreatedBy == userId && !p.IsDeleted
                     );
                 if (parentGradeBook == null)
                 {
@@ -1077,17 +1130,37 @@ namespace GdevApps.BLL.Domain
                 }
 
                 gradeBookId = parentGradeBook.GoogleUniqueId;
+
+                //TODO: Remove when unshare or change the status? 
+                //remove
+                //TODO: Check why when deleting ParentGradeBook the ParentSharedGradeBook doe not delete
+                _gradeBookRepository.Delete<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentGradeBook>(parentGradeBook);
+
+                var parentSharedGradeBookToDelete = await _gradeBookRepository.GetFirstAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentSharedGradeBook>(
+                filter: g => g.ParentGradeBook.GoogleUniqueId == gradeBookId && g.ParentId == parent.Id && g.SharedStatus == (int)SharedStatus.SHARED
+                );
+                if (parentSharedGradeBookToDelete != null)
+                {
+                    _gradeBookRepository.Delete<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentSharedGradeBook>(parentSharedGradeBookToDelete);
+
+                }
+                _gradeBookRepository.Save();
+                return new TaskResult<BoolResult, ICredential>(ResultType.SUCCESS, new BoolResult(true), googleCredential);
             }
 
+            //change the status
             var parentSharedGradeBook = await _gradeBookRepository.GetFirstAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentSharedGradeBook>(
                 filter: g => g.ParentGradeBook.GoogleUniqueId == gradeBookId && g.ParentId == parent.Id && g.SharedStatus == (int)SharedStatus.SHARED
                 );
-            if(parentSharedGradeBook == null){
+            if (parentSharedGradeBook == null)
+            {
                 //TODO: Maybe return a message
                 return new TaskResult<BoolResult, ICredential>(ResultType.ERROR, new BoolResult(false), googleCredential, new List<string>(){
                     "Nothing to unshare"
-                }); 
+                });
             }
+
+
             parentSharedGradeBook.SharedStatus = (int)SharedStatus.NOTSHARED;
             _gradeBookRepository.Update<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentSharedGradeBook>(parentSharedGradeBook);
             await _gradeBookRepository.SaveAsync();
@@ -1095,6 +1168,140 @@ namespace GdevApps.BLL.Domain
             var deleteResult = await _driveService.DeletePermissionAsync(googleCredential, refreshToken, userId, gradeBookId, PermissionType.User, PermissionRole.Reader);
             googleCredential = deleteResult.Result == ResultType.SUCCESS ? deleteResult.Credentials : googleCredential;
             return new TaskResult<BoolResult, ICredential>(ResultType.SUCCESS, new BoolResult(true), googleCredential);
+        }
+
+
+        public async Task<TaskResult<GradebookStudent, ICredential>> GetStudentInformationFromParentGradeBook(string externalAccessToken, string refreshToken, string userId, string gradeBookId)
+        {
+            ICredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
+            return await GetStudentInformationFromParentGradeBook(googleCredential, refreshToken, userId, gradeBookId);
+        }
+
+        public async Task<TaskResult<GradebookStudent, ICredential>> GetStudentInformationFromParentGradeBook(ICredential googleCredential, string refreshToken, string userId, string gradeBookId)
+        {
+            var parentGradeBook = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentGradeBook>(filter: g => g.GoogleUniqueId == gradeBookId);
+            if (parentGradeBook == null)
+            {
+                throw new ArgumentNullException("Parent Gradebook was not found");
+            }
+
+            parentGradeBook.MainGradeBook = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>(filter: g => g.Id == parentGradeBook.MainGradeBookId);
+
+            SheetsService service;
+            SpreadsheetsResource.ValuesResource.GetRequest request;
+            Google.Apis.Sheets.v4.Data.ValueRange response;
+            IList<IList<object>> values;
+            // Create Classroom API service.
+            service = new SheetsService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = googleCredential,
+                ApplicationName = _configuration["ApplicationName"]
+            });
+
+            SpreadsheetsResource.ValuesResource.GetRequest.ValueRenderOptionEnum valueRenderOption = (SpreadsheetsResource.ValuesResource.GetRequest.ValueRenderOptionEnum)1;
+            try
+            {
+                request = service.Spreadsheets.Values.Get(gradeBookId, _studentsRange);
+                request.ValueRenderOption = valueRenderOption;
+                response = request.Execute();
+            }
+            catch (Google.GoogleApiException ex)
+            {
+                switch (ex?.Error?.Code)
+                {
+                    case 401:
+                        _logger.LogError(ex, $"An error occurred while retrieving students from GradeBook with id {gradeBookId}. Refreshing the token and trying again");
+                        var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
+                        googleCredential = new UserCredential(new GoogleAuthorizationCodeFlow(
+                           new GoogleAuthorizationCodeFlow.Initializer
+                           {
+                               ClientSecrets = new ClientSecrets
+                               {
+                                   ClientId = _configuration["installed:client_id"],
+                                   ClientSecret = _configuration["installed:client_secret"]
+                               }
+                           }), "user", token);
+
+                        service = new SheetsService(new BaseClientService.Initializer()
+                        {
+                            HttpClientInitializer = googleCredential,
+                            ApplicationName = _configuration["ApplicationName"]
+                        });
+
+                        request = service.Spreadsheets.Values.Get(gradeBookId, _studentsRange);
+                        request.ValueRenderOption = valueRenderOption;
+                        response = request.Execute();
+                        await UpdateAllTokens(userId, googleCredential as UserCredential);
+                        break;
+                    default: throw ex;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            var gradeBookStudent = new GradebookStudent()
+            {
+                ClassName = parentGradeBook.ClassroomName,
+                ClassId = parentGradeBook.MainGradeBook.ClassroomId
+            };
+
+            var submissions = new List<GradebookStudentSubmission>();
+            var courseWorks = new List<GradebookCourseWork>();
+            values = response.Values;
+            for (var i = 0; i < values.Count; i++)
+            {
+                if (i == 0)
+                {
+                    gradeBookStudent.Name = values[0][1]?.ToString() ?? "";
+                    continue;
+                }
+                else if (i == 1)
+                {
+                    gradeBookStudent.Email = values[1][1]?.ToString() ?? "";
+                    continue;
+                }
+                else if (values[i].Count > 2)
+                {
+
+                    string date = values[i][6]?.ToString() ?? "";
+                    if (!string.IsNullOrEmpty(date))
+                    {
+                        double dateDouble;
+                        bool parseResult = Double.TryParse(date, out dateDouble);
+                        date = parseResult ? DateTime.FromOADate(dateDouble).ToString() : "";
+                    }
+
+                    var courseWork = new GradebookCourseWork()
+                    {
+                        Title = values[i][1]?.ToString() ?? "",
+                        MaxPoints = values[i][2]?.ToString() ?? "",
+                        Weight = values[i][3]?.ToString() ?? "",
+                        Category = values[i][4]?.ToString() ?? "",
+                        Term = values[i][5]?.ToString() ?? "",
+                        DueDate = date,
+                        IdInClassroom = values[i][8]?.ToString() ?? "",
+                        IdInGradeBook = values[i][9]?.ToString() ?? ""
+                    };
+                    var submission = new GradebookStudentSubmission()
+                    {
+                        StudentId = gradeBookStudent.Email,
+                        ClassId = gradeBookStudent.ClassId,
+                        Email = gradeBookStudent.Email,
+                        Grade = values[i][7]?.ToString() ?? "",
+                        CourseWorkId = courseWork.IdInGradeBook
+                    };
+
+                    submissions.Add(submission);
+                    courseWorks.Add(courseWork);
+                }
+            }
+
+            gradeBookStudent.Submissions = submissions;
+            gradeBookStudent.CourseWorks = courseWorks;
+
+            return new TaskResult<GradebookStudent, ICredential>(ResultType.SUCCESS, gradeBookStudent, googleCredential);
         }
 
 
@@ -1126,6 +1333,74 @@ namespace GdevApps.BLL.Domain
                 tokenUpdatedTimeRecord.Value = DateTime.UtcNow.ToString();
                 await _aspUserService.UpdateUserTokensAsync(tokenUpdatedRecord);
             }
+        }
+
+        public async Task<TaskResult<BoolResult, ICredential>> CreateSpreadsheet(ICredential googleCredential, string refreshToken, string userId)
+        {
+            try{
+                var service = new SheetsService(new BaseClientService.Initializer()
+                {
+                    HttpClientInitializer = googleCredential,
+                    ApplicationName = _configuration["ApplicationName"]
+                });
+				
+				 var newSpreadSheet = await service.Spreadsheets.Create(new Spreadsheet()
+                    {
+                        Properties = new SpreadsheetProperties()
+                        {
+                            Title = "Test GradeBook"
+                        },
+                        Sheets = new List<Sheet>(){
+                            new Sheet(){
+                                Properties = new SheetProperties(){
+                                    Index = 0,
+                                    Title = "GradeBook"
+                                }
+                            },
+                            new Sheet(){
+                                Properties = new SheetProperties(){
+                                    Index = 1,
+                                    Title = "Settings"
+                                }
+                            },
+                        }   
+                    }).ExecuteAsync();
+
+                var _settingsRange = "Settings!A1:B24";
+
+                // var clearRequestBody = new ClearValuesRequest();
+                // SpreadsheetsResource.ValuesResource.ClearRequest request = service.Spreadsheets.Values.Clear(clearRequestBody, newSpreadSheet.SpreadsheetId, _settingsRange);
+                // var clearResponse = await request.ExecuteAsync();
+
+                SpreadsheetsResource.ValuesResource.GetRequest.ValueRenderOptionEnum valueRenderOption = (SpreadsheetsResource.ValuesResource.GetRequest.ValueRenderOptionEnum)1;
+                var gradebookId = "1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg";
+                SpreadsheetsResource.ValuesResource.GetRequest requestSettings = service.Spreadsheets.Values.Get(gradebookId, _settingsRange);
+                requestSettings.ValueRenderOption = valueRenderOption;
+                
+                Google.Apis.Sheets.v4.Data.ValueRange responseSettings = await requestSettings.ExecuteAsync();
+                string className = "";
+                string classId = "";
+                var courseSettings = responseSettings.Values;
+                var valueRange = new ValueRange()
+                {
+                    Range = _settingsRange,
+                    MajorDimension = "ROWS",
+                    Values = courseSettings
+                };
+                var updateRequest = service.Spreadsheets.Values.Update(valueRange, newSpreadSheet.SpreadsheetId, _settingsRange);
+                updateRequest.ValueInputOption = ValueInputOptionEnum.USERENTERED;
+                await updateRequest.ExecuteAsync();
+
+                return new TaskResult<BoolResult, ICredential>(ResultType.SUCCESS, new BoolResult(true), googleCredential);
+            }catch(Exception err){
+                throw err;
+            }
+        }
+
+        public async Task<TaskResult<BoolResult, ICredential>> CreateSpreadsheet(string externalAccessToken, string refreshToken, string userId)
+        {
+            ICredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
+            return await CreateSpreadsheet(googleCredential, refreshToken, userId);
         }
         #endregion
     }

@@ -102,5 +102,31 @@ namespace GdevApps.BLL.Contracts
             string gradeBookId,
             string mainGradeBookId
         );
+
+        Task<TaskResult<GradebookStudent, ICredential>> GetStudentInformationFromParentGradeBook(
+            string externalAccessToken,
+            string refreshToken,
+            string userId,
+            string gradeBookId
+        );
+
+        Task<TaskResult<GradebookStudent, ICredential>> GetStudentInformationFromParentGradeBook(
+            ICredential googleCredential,
+            string refreshToken,
+            string userId,
+            string gradeBookId
+        );
+
+        Task<TaskResult<BoolResult, ICredential>> CreateSpreadsheet(
+            ICredential googleCredential,
+            string refreshToken,
+            string userId
+        );
+
+        Task<TaskResult<BoolResult, ICredential>> CreateSpreadsheet(
+            string externalAccessToken,
+            string refreshToken,
+            string userId
+        );
     }
 }

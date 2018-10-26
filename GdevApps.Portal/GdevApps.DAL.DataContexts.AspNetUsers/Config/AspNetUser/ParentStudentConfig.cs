@@ -12,7 +12,7 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.AspNetUser
         public void Configure(EntityTypeBuilder<ParentStudent> entity)
         {
             entity.HasIndex(e => e.GradeBookId)
-                    .HasName("paarentstudent_gradebook_id_idx");
+                   .HasName("paarentstudent_gradebook_id_idx");
             entity.HasIndex(e => e.ParentAspId)
                 .HasName("parent_student_id_idx");
             entity.HasIndex(e => e.ParentId)
@@ -27,16 +27,15 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.AspNetUser
             entity.HasOne(d => d.GradeBook)
                 .WithMany(p => p.ParentStudent)
                 .HasForeignKey(d => d.GradeBookId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("paarentstudent_gradebook_id");
             entity.HasOne(d => d.ParentAsp)
                 .WithMany(p => p.ParentStudent)
                 .HasForeignKey(d => d.ParentAspId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("parentstudentasp_aspuser_id");
             entity.HasOne(d => d.Parent)
                 .WithMany(p => p.ParentStudent)
                 .HasForeignKey(d => d.ParentId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("parentstudent_parent_id");
         }
     }

@@ -41,17 +41,10 @@ namespace GdevApps.Portal.Controllers
         private readonly IConfiguration _configuration;
         private readonly IGdevClassroomService _classroomService;
         private readonly IMapper _mapper;
-
         private readonly HttpContext _context;
-
-        private Singleton Singleton;
-
         private readonly IAspNetUserService _aspUserService;
-
         private readonly IHttpContextAccessor _contextAccessor;
-
         private readonly IGdevSpreadsheetService _spreadSheetService;
-
         private readonly IGdevDriveService _driveService;
 
         public TeacherController(
@@ -199,14 +192,23 @@ namespace GdevApps.Portal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GetGradeBooks(string classId)
+        public async Task<IActionResult> GetClasses(string studentEmail)
         {
-            var gradebooks = await _spreadSheetService.GetGradeBooksByClassId(classId);
-            return Json(gradebooks.Select(g => new
-            {
-                UniqueId = g.GoogleUniqueId,
-                Text = g.Name
-            }));
+            //TODO: Get Classes names
+            //find gradebookId from parentstudent by parent email and student email
+            //get the class name
+            var classes = new List<object>(){
+                new {
+                    Id = 1,
+                    Name = "test class"
+                },
+                new {
+                    Id = 2,
+                    Name = "test class second"
+                },
+            };
+
+            return Json(classes);
         }
 
 
@@ -460,21 +462,6 @@ namespace GdevApps.Portal.Controllers
         {
             Sheets = new List<ClassSheetsViewModel>();
             ExternalAccessToken = "";
-        }
-
-        public static Singleton Instance
-        {
-            get
-            {
-                lock (padlock)
-                {
-                    if (instance == null)
-                    {
-                        instance = new Singleton();
-                    }
-                    return instance;
-                }
-            }
         }
     }
 
