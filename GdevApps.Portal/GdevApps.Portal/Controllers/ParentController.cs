@@ -104,12 +104,21 @@ namespace GdevApps.Portal.Controllers
         [HttpPost]
         public async Task<IActionResult> GetClasses(string classId)
         {
-            var gradebooks = await _spreadSheetService.GetGradeBooksByClassId(classId);
-            return Json(gradebooks.Select(g => new
-            {
-                UniqueId = g.GoogleUniqueId,
-                Text = g.Name
-            }));
+            //TODO: Get Classes names
+            //find gradebookId from parentstudent by parent email and student email
+            //get the class name
+            var classes = new List<object>(){
+                new {
+                    Id = 1,
+                    Name = "test class"
+                },
+                new {
+                    Id = 2,
+                    Name = "test class second"
+                },
+            };
+
+            return Json(classes);
         }
 
         public IActionResult Error()

@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using GdevApps.Portal.Data;
+using GdevApps.Portal.Models.TeacherViewModels;
 using GdevApps.Portal.Services;
 using System;
 using System.Collections.Generic;
@@ -22,6 +24,11 @@ namespace GdevApps.Portal.Configuration
               config.CreateMap<GdevApps.BLL.Models.AspNetUsers.Parent, GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Parent>();
               config.CreateMap<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder, GdevApps.BLL.Models.GDevDriveService.Folder>();
               config.CreateMap<ClassSheetsViewModel, GdevApps.BLL.Models.GDevClassroomService.GradeBook>();
+
+              config.CreateMap<GdevApps.BLL.Models.GDevSpreadSheetService.StudentReport, ReportsViewModel>();
+              config.CreateMap<GdevApps.BLL.Models.GDevSpreadSheetService.GradebookReportSubmission, GdevApps.Portal.Data.StudentSubmission>()
+              .ForMember(s => s.Percent, d=> d.MapFrom(o => o.Percent*100));
+              config.CreateMap<GdevApps.BLL.Models.GDevSpreadSheetService.GradebookSettings, ReportSettings>();
           });
     }
 }

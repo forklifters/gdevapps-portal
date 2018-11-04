@@ -79,15 +79,119 @@ namespace GdevApps.Portal.Controllers
         public async Task<IActionResult> Test()
         {
             var gradeBookLink = "https://docs.google.com/spreadsheets/d/1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg/edit?usp=drive_web&ouid=106890447120707259670";
-            var gradebookId = "1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg";
+            var gradebookId = "1IyeKB6duG8M2go8G-41cY2VI2th9iGTd2fZtIbW69l0";
             //var gradebookId = "";
             var fileId = "1JYB-P0mcfYhJeKqG4_U22JaHj2L4MJURair1qkbe1sI";
             var folderId = "1QJY6E4Yww5y238DZgZ9drrSoJH0fgj2h";
             var userId = _userManager.GetUserId(User);
 
-            var resul = await _driveService.MoveFileToFolderAsync(fileId, folderId, await GetAccessTokenAsync(), await GetRefreshTokenAsync(), userId);
+            // var resul = await _driveService.MoveFileToFolderAsync(fileId, folderId, await GetAccessTokenAsync(), await GetRefreshTokenAsync(), userId);
+            var accessToken = await GetAccessTokenAsync();
+            var refreshToken = await GetRefreshTokenAsync();
 
+            var settings = await _spreadSheetService.GetSettingsFromParentGradeBookAsync(accessToken, refreshToken, userId, gradebookId);
+            var student = await _spreadSheetService.GetStudentInformationFromParentGradeBook(accessToken, refreshToken, userId, gradebookId);
+
+            var report = _spreadSheetService.GetStudentReportInformation(
+                accessToken,
+                refreshToken,
+                userId,
+                student.ResultObject,
+                settings.ResultObject,
+                "pavlo.karasyuk@gmail.com");
             return Ok();
+        }
+
+        [HttpGet]
+        public IActionResult GetStudents()
+        {
+            //TODO: create method to return a list of students
+            var studentEmails = new List<StudentsViewModel>(){
+                new StudentsViewModel(){
+                    Id = "1",
+                    Email = "example@gmail.com"
+                },
+                new StudentsViewModel(){
+                    Id = "2",
+                    Email = "example1@gmail.com"
+                }
+            };
+
+            var studentEmailsList = new SelectList(studentEmails, "Id", "Email");
+            var studentsModel = new ParentStudentsViewModelTest
+            {
+                Students = studentEmailsList,
+                StudentReports = new List<ReportsViewModel>()
+            };
+            return View("ParentStudentsTest", studentsModel);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> GetClasses(string classId)
+        {
+            //TODO: Get Classes names
+            //find gradebookId from parentstudent by parent email and student email
+            //get the class name
+            var classes = new List<object>(){
+                new {
+                    Id = 1,
+                    Name = "test class"
+                },
+                new {
+                    Id = 2,
+                    Name = "test class second"
+                },
+            };
+
+            return Json(classes);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetReport(string gradebookId)
+        {
+            gradebookId = "1IyeKB6duG8M2go8G-41cY2VI2th9iGTd2fZtIbW69l0";
+            var userId = _userManager.GetUserId(User);
+
+            // var resul = await _driveService.MoveFileToFolderAsync(fileId, folderId, await GetAccessTokenAsync(), await GetRefreshTokenAsync(), userId);
+            var accessToken = await GetAccessTokenAsync();
+            var refreshToken = await GetRefreshTokenAsync();
+
+            var settings = await _spreadSheetService.GetSettingsFromParentGradeBookAsync(accessToken, refreshToken, userId, gradebookId);
+            var student = await _spreadSheetService.GetStudentInformationFromParentGradeBook(accessToken, refreshToken, userId, gradebookId);
+
+            var report = _spreadSheetService.GetStudentReportInformation(
+                accessToken,
+                refreshToken,
+                userId,
+                student.ResultObject,
+                settings.ResultObject,
+                "pavlo.karasyuk@gmail.com");
+
+            var studentEmails = new List<string>(){
+                "example@gmail.com",
+                "example1@gmail.com"
+            };
+
+            try
+            {
+                var studentEmailsList = new SelectList(studentEmails, "Id", "Name");
+                List<ReportsViewModel> studentReport = _mapper.Map<List<ReportsViewModel>>(report.ReportInfos);
+                ReportSettings reportSettings = _mapper.Map<ReportSettings>(settings.ResultObject);
+                var studentsModel = new ParentStudentsViewModelTest
+                {
+                    StudentReports = studentReport,
+                    ReportSettings = reportSettings,
+                    StudentName = report.Student.Name,
+                    FinalGrade = report.FinalGrade,
+                    StudentGrade = $"{report.ReportInfos.First().TotalMark}%" 
+                };
+                return PartialView("_ReportsTest", studentsModel);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
         }
 
         public IActionResult Index()
@@ -192,25 +296,16 @@ namespace GdevApps.Portal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GetClasses(string studentEmail)
+        public async Task<IActionResult> GetGradeBooks(string classId)
         {
-            //TODO: Get Classes names
-            //find gradebookId from parentstudent by parent email and student email
-            //get the class name
-            var classes = new List<object>(){
-                new {
-                    Id = 1,
-                    Name = "test class"
-                },
-                new {
-                    Id = 2,
-                    Name = "test class second"
-                },
-            };
+            var gradebooks = await _spreadSheetService.GetGradeBooksByClassId(classId);
+            return Json(gradebooks.Select(g => new
+            {
+                UniqueId = g.GoogleUniqueId,
+                Text = g.Name
+            }));
 
-            return Json(classes);
         }
-
 
         [HttpGet]
         public async Task<IActionResult> GetClassesForStudents()

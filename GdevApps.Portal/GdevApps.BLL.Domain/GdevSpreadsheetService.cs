@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -30,10 +33,11 @@ namespace GdevApps.BLL.Domain
         private readonly IGdevClassroomService _classroomService;
         private const string _studentsRange = "GradeBook";
         private const string _settingsCourseRange = "Settings!A48:A49";
-        private const string _settingsRange = "Settings!A1:B24";
+        private const string _settingsRange = "Settings!A1:B25";
+        private const string _statisticsRange = "Statistics!A1:N21";
+        private const string _statisticsAverageMedianRange = "Statistics!G4:K4";
         private readonly IGradeBookRepository _gradeBookRepository;
         private readonly IMapper _mapper;
-
 
         public GdevSpreadsheetService(
             IConfiguration configuration,
@@ -335,8 +339,8 @@ namespace GdevApps.BLL.Domain
                             ClassId = classId,
                             Grade = allValues[r][c]?.ToString() ?? "",
                             CourseWorkId = c.ToString(),
-                            StudentId = studentName,
-                            Email = email
+                            StudentName = studentName,
+                            StudentId = email
                         });
                     }
 
@@ -527,13 +531,17 @@ namespace GdevApps.BLL.Domain
                     for (var c = subIndex; c < values[r].Count; c += 2)
                     {
                         var grade = allValues[r][c];
+                        var percent = allValues[r][c+1]?.ToString() ?? "";//TODO:Check percent
+                        double percentDouble;
+                        double.TryParse(percent, out percentDouble);
                         studentSubmissions.Add(new GradebookStudentSubmission()
                         {
                             ClassId = classId,
                             Grade = grade?.ToString() ?? "",
                             CourseWorkId = c.ToString(),
-                            StudentId = studentName,
-                            Email = email
+                            StudentId = email,
+                            StudentName = studentName,
+                            Percent = percentDouble
                         });
                     }
 
@@ -645,7 +653,7 @@ namespace GdevApps.BLL.Domain
                             googleCredential = innerFolderIdResult.Credentials;
                         }
                     }
-
+                    //TODO: Add attendance sheet use getStudentAttendanceInformation on gs file
                     var newSpreadSheet = await service.Spreadsheets.Create(new Spreadsheet()
                     {
                         Properties = new SpreadsheetProperties()
@@ -665,6 +673,12 @@ namespace GdevApps.BLL.Domain
                                     Title = "Settings"
                                 }
                             },
+                            new Sheet(){
+                                Properties = new SheetProperties(){
+                                    Index = 2,
+                                    Title = "Statistics"
+                                }
+                            }
                         } 
                     }).ExecuteAsync();
 
@@ -684,12 +698,28 @@ namespace GdevApps.BLL.Domain
                     updateRequest.ValueInputOption = ValueInputOptionEnum.USERENTERED;
                     await updateRequest.ExecuteAsync();
 
+                    //Get statistics information and save on the statistics sheet
+                    SpreadsheetsResource.ValuesResource.GetRequest requestStatistics = service.Spreadsheets.Values.Get(mainGradeBook.GoogleUniqueId, _statisticsRange);
+                    requestStatistics.ValueRenderOption = valueRenderOption;
+                    var responseStatistics = await requestStatistics.ExecuteAsync();
+                    var spreadSheetStatisticsValues = responseStatistics.Values;
+                    var statisticsValueRange = new ValueRange()
+                    {
+                        Range = _statisticsRange,
+                        MajorDimension = "ROWS",
+                        Values = spreadSheetStatisticsValues
+                    };
+
+                    var updateStatisticsRequest = service.Spreadsheets.Values.Update(statisticsValueRange, newSpreadSheet.SpreadsheetId, _statisticsRange);
+                    updateStatisticsRequest.ValueInputOption = ValueInputOptionEnum.USERENTERED;
+                    await updateStatisticsRequest.ExecuteAsync();
+
+                    //Update Gradebook sheet
                     await UpdateParentGradebookForStudentAsync(student, googleCredential, newSpreadSheet, true);
 
-
-                    //TODO: uncomment
-                    var moveResult = await _driveService.MoveFileToFolderAsync(newSpreadSheet.SpreadsheetId, innerFolderIdResult.ResultObject.GoogleFileId, googleCredential, refreshToken, userId);
-                    googleCredential = moveResult.Credentials;
+                    //TODO: uncomment.
+                   // var moveResult = await _driveService.MoveFileToFolderAsync(newSpreadSheet.SpreadsheetId, innerFolderIdResult.ResultObject.GoogleFileId, googleCredential, refreshToken, userId);
+                    //googleCredential = moveResult.Credentials;
 
                     var parentGradeBook = new GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentGradeBook
                     {
@@ -841,7 +871,7 @@ namespace GdevApps.BLL.Domain
             var parentGradeBookValuesRequest = await service.Spreadsheets.Values.Get(spreadSheet.SpreadsheetId, parentGradebookRange).ExecuteAsync();
             var numberOfCourseWorks = student.CourseWorks != null ? student.CourseWorks.Count() : 0;
             IList<IList<object>> values = new object[2 + numberOfCourseWorks][];
-            values[0] = new object[10]{
+            values[0] = new object[12]{
                         "Student name",
                         student.Name,
                         "Max points",
@@ -850,12 +880,16 @@ namespace GdevApps.BLL.Domain
                         "Term",
                         "Date",
                         "Grade",
+                        "Percent",
+                        "Final Grade",
                         "ClassroomId",
                         "Id"
                     };
-            values[1] = new object[10]{
+            values[1] = new object[12]{
                         "Student email",
                         student.Email,
+                        "",
+                        "",
                         "",
                         "",
                         "",
@@ -869,7 +903,8 @@ namespace GdevApps.BLL.Domain
             var studentCourseWorks = student.CourseWorks.ToList();
             foreach (var cw in studentCourseWorks)
             {
-                var array = new object[10]{
+                var studentSubmission = student.Submissions.Where(s => s.CourseWorkId == cw.IdInGradeBook).FirstOrDefault();
+                var array = new object[12]{
                             "Title",
                             cw.Title,
                             cw.MaxPoints,
@@ -877,7 +912,9 @@ namespace GdevApps.BLL.Domain
                             cw.Category,
                             cw.Term,
                             cw.DueDate,
-                            student.Submissions.Where(s => s.CourseWorkId == cw.IdInGradeBook).Select(s => s.Grade).FirstOrDefault(),
+                            studentSubmission?.Grade,
+                            studentSubmission?.Percent,//TODO:Check percent and final grade
+                            student.FinalGrade,
                             cw.IdInClassroom,
                             cw.IdInGradeBook
                         };
@@ -1281,20 +1318,28 @@ namespace GdevApps.BLL.Domain
                         Category = values[i][4]?.ToString() ?? "",
                         Term = values[i][5]?.ToString() ?? "",
                         DueDate = date,
-                        IdInClassroom = values[i][8]?.ToString() ?? "",
-                        IdInGradeBook = values[i][9]?.ToString() ?? ""
+                        IdInClassroom = values[i][10]?.ToString() ?? "",
+                        IdInGradeBook = values[i][11]?.ToString() ?? "",
+                        
                     };
+
+                    var percent = values[i][8]?.ToString() ?? "";
+                    double percentDouble;
+                    double.TryParse(percent, out percentDouble);
+                    var grade = values[i][7]?.ToString() ?? "";
                     var submission = new GradebookStudentSubmission()
                     {
                         StudentId = gradeBookStudent.Email,
                         ClassId = gradeBookStudent.ClassId,
-                        Email = gradeBookStudent.Email,
-                        Grade = values[i][7]?.ToString() ?? "",
-                        CourseWorkId = courseWork.IdInGradeBook
+                        StudentName = gradeBookStudent.Name,
+                        Grade = string.IsNullOrEmpty(grade) ? "No Mark" : grade,
+                        CourseWorkId = courseWork.IdInGradeBook,
+                        Percent = percentDouble
                     };
 
                     submissions.Add(submission);
                     courseWorks.Add(courseWork);
+                    gradeBookStudent.FinalGrade = values[i][9]?.ToString() ?? "";
                 }
             }
 
@@ -1302,6 +1347,137 @@ namespace GdevApps.BLL.Domain
             gradeBookStudent.CourseWorks = courseWorks;
 
             return new TaskResult<GradebookStudent, ICredential>(ResultType.SUCCESS, gradeBookStudent, googleCredential);
+        }
+
+        
+        public async Task<TaskResult<BoolResult, ICredential>> CreateSpreadsheet(ICredential googleCredential, string refreshToken, string userId)
+        {
+            try{
+                var service = new SheetsService(new BaseClientService.Initializer()
+                {
+                    HttpClientInitializer = googleCredential,
+                    ApplicationName = _configuration["ApplicationName"]
+                });
+				
+				 var newSpreadSheet = await service.Spreadsheets.Create(new Spreadsheet()
+                    {
+                        Properties = new SpreadsheetProperties()
+                        {
+                            Title = "Test GradeBook"
+                        },
+                        Sheets = new List<Sheet>(){
+                            new Sheet(){
+                                Properties = new SheetProperties(){
+                                    Index = 0,
+                                    Title = "GradeBook"
+                                }
+                            },
+                            new Sheet(){
+                                Properties = new SheetProperties(){
+                                    Index = 1,
+                                    Title = "Settings"
+                                }
+                            },
+                            new Sheet(){
+                                Properties = new SheetProperties(){
+                                    Index = 2,
+                                    Title = "Statistics"
+                                }
+                            },
+                        }   
+                    }).ExecuteAsync();
+
+
+                // var clearRequestBody = new ClearValuesRequest();
+                // SpreadsheetsResource.ValuesResource.ClearRequest request = service.Spreadsheets.Values.Clear(clearRequestBody, newSpreadSheet.SpreadsheetId, _settingsRange);
+                // var clearResponse = await request.ExecuteAsync();
+
+                //TODO: get information from Statistics sheet G4 - course average and K4 - course median
+
+                //var statistics = agradeBookCheck[3];
+                // var courseAverage = statistics.getRange("G4").getValue();
+                // if (!isNaN(courseAverage) && courseAverage != '') {
+                //     courseAverage = courseAverage.toFixed(decimal) + "%";
+                // }
+
+                // var courseMedian = statistics.getRange("K4").getValue();
+                // if (!isNaN(courseMedian) && courseMedian != '') {
+                //     courseMedian = courseMedian.toFixed(decimal) + "%";
+                // }
+
+
+
+                SpreadsheetsResource.ValuesResource.GetRequest.ValueRenderOptionEnum valueRenderOption = (SpreadsheetsResource.ValuesResource.GetRequest.ValueRenderOptionEnum)1;
+                var gradebookId = "1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg";
+                SpreadsheetsResource.ValuesResource.GetRequest requestSettings = service.Spreadsheets.Values.Get(gradebookId, _settingsRange);
+                requestSettings.ValueRenderOption = valueRenderOption;
+                
+                Google.Apis.Sheets.v4.Data.ValueRange responseSettings = await requestSettings.ExecuteAsync();
+                string className = "";
+                string classId = "";
+                var courseSettings = responseSettings.Values;
+                var valueRange = new ValueRange()
+                {
+                    Range = _settingsRange,
+                    MajorDimension = "ROWS",
+                    Values = courseSettings
+                };
+                var updateRequest = service.Spreadsheets.Values.Update(valueRange, newSpreadSheet.SpreadsheetId, _settingsRange);
+                updateRequest.ValueInputOption = ValueInputOptionEnum.USERENTERED;
+                await updateRequest.ExecuteAsync();
+
+                return new TaskResult<BoolResult, ICredential>(ResultType.SUCCESS, new BoolResult(true), googleCredential);
+            }catch(Exception err){
+                throw err;
+            }
+        }
+
+        public async Task<TaskResult<BoolResult, ICredential>> CreateSpreadsheet(string externalAccessToken, string refreshToken, string userId)
+        {
+            ICredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
+            return await CreateSpreadsheet(googleCredential, refreshToken, userId);
+        }
+
+        public GradebookStudentReport<StudentReport> GetStudentReportInformation(string externalAccessToken, string refreshToken, string userId, GradebookStudent student, GradebookSettings settings, string parentEmail){
+            //Conditions for course works (cw):
+            // if no cw has no title - skip
+            // if weight == 0 - skip
+            // round final grade Utilities.RoundNumber
+            var isCategoryGradeBook = student.CourseWorks.Any(cw => !string.IsNullOrWhiteSpace(cw.Title));
+            var isTermsGradeBook = student.CourseWorks.Any(cw => !string.IsNullOrWhiteSpace(cw.Term));
+            var isSortedByCategory = settings.StudentReportSortBy == "Category";
+            var isSortedByDateOrTitle = settings.StudentReportSortBy == "Date" || settings.StudentReportSortBy == "Title";
+            var isSortedByTerm = settings.StudentReportSortBy == "Term";
+
+             var studentGradeBookReport = new GradebookStudentReport<StudentReport>(){
+                Student = student,
+                FinalGrade = student.FinalGrade
+            };
+
+            //wrong combinations
+            if(!isCategoryGradeBook && isSortedByCategory)
+                throw new Exception("The non category GradeBook can not be sorted by Category");
+
+            if(!isTermsGradeBook && isSortedByTerm)
+                throw new Exception("The non term GradeBook can not be sorted by Term");
+
+            if(isTermsGradeBook){
+                if(isCategoryGradeBook){
+                    throw new NotImplementedException();
+                }else{
+                    throw new NotImplementedException();
+                }
+            }else if(isCategoryGradeBook){
+                 var categoriesInfos = GetCategorySortedReport(student, settings);
+                 IEnumerable<StudentReport> studentReports = (IEnumerable<StudentReport>)categoriesInfos; //TODO:CHECK
+                 studentGradeBookReport.ReportInfos = studentReports.ToList();
+            }else{
+                var standardInfo = GetStandardReport(student, settings);
+                StudentReport studentReport = (StudentReport)standardInfo;
+                studentGradeBookReport.ReportInfos = new List<StudentReport>(){studentReport};
+            }
+
+            return studentGradeBookReport;
         }
 
 
@@ -1334,74 +1510,272 @@ namespace GdevApps.BLL.Domain
                 await _aspUserService.UpdateUserTokensAsync(tokenUpdatedRecord);
             }
         }
-
-        public async Task<TaskResult<BoolResult, ICredential>> CreateSpreadsheet(ICredential googleCredential, string refreshToken, string userId)
+        
+        //TODO: Create a new table document properties which will contain information about the document settings and it should be connected to the main gradebook. 
+        //TODO: As an option: the settings.gs script should be updated and settings should be saved into the db after click Save from UI. Or just make it on UI
+        private GradebookReportInfo GetStandardReport(GradebookStudent student, GradebookSettings settings)
         {
-            try{
-                var service = new SheetsService(new BaseClientService.Initializer()
+            var reportInfo = new GradebookReportInfo(GradebookType.STANDARD);// TODO: Check if the same with total points
+            foreach (var studentSubmission in student.Submissions)
+            {
+                if (studentSubmission.Grade?.ToUpper() == "E")
                 {
-                    HttpClientInitializer = googleCredential,
-                    ApplicationName = _configuration["ApplicationName"]
-                });
-				
-				 var newSpreadSheet = await service.Spreadsheets.Create(new Spreadsheet()
+                    reportInfo.StudentMark = "Excempted";
+                }
+                else if (!string.IsNullOrWhiteSpace(studentSubmission.Grade))
+                {
+                    reportInfo.IsGraded = true;
+                    double studentGradeDouble = 0;
+                    double courseWorkMaxPoints = 0;
+                    if (studentSubmission.Grade.Contains('['))
                     {
-                        Properties = new SpreadsheetProperties()
+                        var studentGrade = Utilities.GetNumberFromBrakets(studentSubmission.Grade);
+                        if (studentGrade.Grade.HasValue && studentGrade.Total.HasValue)
                         {
-                            Title = "Test GradeBook"
-                        },
-                        Sheets = new List<Sheet>(){
-                            new Sheet(){
-                                Properties = new SheetProperties(){
-                                    Index = 0,
-                                    Title = "GradeBook"
-                                }
-                            },
-                            new Sheet(){
-                                Properties = new SheetProperties(){
-                                    Index = 1,
-                                    Title = "Settings"
-                                }
-                            },
-                        }   
-                    }).ExecuteAsync();
+                            studentGradeDouble = studentGrade.Grade.Value;
+                            courseWorkMaxPoints = studentGrade.Total.Value;
+                        }
+                    }
+                    else
+                    {
+                        Double.TryParse(studentSubmission.Grade, out studentGradeDouble);
+                        var courseWorkMaxPointsStr = student.CourseWorks.Where(cw => cw.IdInGradeBook == studentSubmission.CourseWorkId).Select(cw => cw.MaxPoints).FirstOrDefault();
+                        Double.TryParse(courseWorkMaxPointsStr, out courseWorkMaxPoints);
+                    }
 
-                var _settingsRange = "Settings!A1:B24";
-
-                // var clearRequestBody = new ClearValuesRequest();
-                // SpreadsheetsResource.ValuesResource.ClearRequest request = service.Spreadsheets.Values.Clear(clearRequestBody, newSpreadSheet.SpreadsheetId, _settingsRange);
-                // var clearResponse = await request.ExecuteAsync();
-
-                SpreadsheetsResource.ValuesResource.GetRequest.ValueRenderOptionEnum valueRenderOption = (SpreadsheetsResource.ValuesResource.GetRequest.ValueRenderOptionEnum)1;
-                var gradebookId = "1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg";
-                SpreadsheetsResource.ValuesResource.GetRequest requestSettings = service.Spreadsheets.Values.Get(gradebookId, _settingsRange);
-                requestSettings.ValueRenderOption = valueRenderOption;
-                
-                Google.Apis.Sheets.v4.Data.ValueRange responseSettings = await requestSettings.ExecuteAsync();
-                string className = "";
-                string classId = "";
-                var courseSettings = responseSettings.Values;
-                var valueRange = new ValueRange()
-                {
-                    Range = _settingsRange,
-                    MajorDimension = "ROWS",
-                    Values = courseSettings
-                };
-                var updateRequest = service.Spreadsheets.Values.Update(valueRange, newSpreadSheet.SpreadsheetId, _settingsRange);
-                updateRequest.ValueInputOption = ValueInputOptionEnum.USERENTERED;
-                await updateRequest.ExecuteAsync();
-
-                return new TaskResult<BoolResult, ICredential>(ResultType.SUCCESS, new BoolResult(true), googleCredential);
-            }catch(Exception err){
-                throw err;
+                    if (courseWorkMaxPoints > 0)//can not devide by 0. Avoid zeros
+                    {
+                        reportInfo.TotalPoints += courseWorkMaxPoints;
+                        reportInfo.StudentMark = (studentGradeDouble / courseWorkMaxPoints).ToString();
+                        reportInfo.Percent = (studentSubmission.Percent*100).ToString();
+                        reportInfo.TotalMark += studentGradeDouble / courseWorkMaxPoints;
+                    }
+                }
             }
+
+            return reportInfo;
         }
 
-        public async Task<TaskResult<BoolResult, ICredential>> CreateSpreadsheet(string externalAccessToken, string refreshToken, string userId)
+        private bool ConvertStringToBool(string value)
+        {
+            if(string.IsNullOrWhiteSpace(value))
+                return false;
+
+            return value.ToUpper() == "YES" ? true : false;
+        }
+        private IEnumerable<GradebookStudentCategoryInfo> GetCategorySortedReport(GradebookStudent student, GradebookSettings settings)
+        {
+            //TODO: Finish and test
+            var categories = student.CourseWorks.Where(cw => !string.IsNullOrWhiteSpace(cw.Category)).Select(cw => cw.Category).Distinct();
+            var studentCategoryInfos = new List<GradebookStudentCategoryInfo>();
+
+            foreach (var category in categories)
+            {
+                var studentCourseWorks = student.CourseWorks.Where(cw => cw.Category == category).ToList();
+                var studentCourseWorksIds = studentCourseWorks.Select(cw => cw.IdInGradeBook).ToList();
+                var studentSubmissions = student.Submissions.Where(s => studentCourseWorksIds.Contains(s.CourseWorkId)).ToList();
+                var studentCategoryInfo = new GradebookStudentCategoryInfo(GradebookType.CATEGORY)
+                {
+                    AverageCatGrade = 0,
+                    AverageStudentGrade = 0,
+                    TotalWeight = 0,
+                    StudentMark = "No Grade",
+                    Percent = "-",
+                    Category = category
+                };
+
+                var reportSubmissions = new List<GradebookReportSubmission>();
+
+                foreach (var studentSubmission in studentSubmissions)
+                {
+                    if (studentSubmission.Grade?.ToUpper() == "E")
+                    {
+                        studentCategoryInfo.StudentMark = "Excempted";
+                    }
+                    else if (!string.IsNullOrWhiteSpace(studentSubmission.Grade) && studentSubmission.Grade != "No Mark")
+                    {
+                        studentCategoryInfo.IsGraded = true;
+                        double studentGradeDouble = 0;
+                        double courseWorkMaxPoints = 0;
+                        double categoryWeight = 0;
+                        if (studentSubmission.Grade.Contains('['))
+                        {
+                            var studentGrade = Utilities.GetNumberFromBrakets(studentSubmission.Grade);
+                            if (studentGrade.Grade.HasValue && studentGrade.Total.HasValue)
+                            {
+                                var categoryWeightStr = student.CourseWorks.Where(cw => cw.IdInGradeBook == studentSubmission.CourseWorkId).Select(cw => cw.Weight).FirstOrDefault();
+                                Double.TryParse(categoryWeightStr, out categoryWeight);
+                                studentGradeDouble = studentGrade.Grade.Value;
+                                courseWorkMaxPoints = studentGrade.Total.Value;
+                            }
+                        }
+                        else
+                        {
+                            Double.TryParse(studentSubmission.Grade, out studentGradeDouble);
+                            var courseWorkMaxPointsStr = student.CourseWorks.Where(cw => cw.IdInGradeBook == studentSubmission.CourseWorkId).Select(cw => cw.MaxPoints).FirstOrDefault();
+                            Double.TryParse(courseWorkMaxPointsStr, out courseWorkMaxPoints);
+                            var categoryWeightStr = student.CourseWorks.Where(cw => cw.IdInGradeBook == studentSubmission.CourseWorkId).Select(cw => cw.Weight).FirstOrDefault();
+                            Double.TryParse(categoryWeightStr, out categoryWeight);
+                        }
+
+                        if (courseWorkMaxPoints > 0)//can not devide by 0. Avoid zeros
+                        {
+                            studentCategoryInfo.AverageStudentGrade += (studentGradeDouble * categoryWeight) / courseWorkMaxPoints;
+                            studentCategoryInfo.TotalWeight += categoryWeight;
+                            studentCategoryInfo.StudentMark = (studentGradeDouble / courseWorkMaxPoints).ToString();
+                            studentCategoryInfo.Percent = (studentSubmission.Percent*100).ToString();
+                        }
+                    }
+
+                                
+                    var courseWork = student.CourseWorks.Where(cw => cw.IdInGradeBook == studentSubmission.CourseWorkId).FirstOrDefault();
+                    reportSubmissions.Add(new  GradebookReportSubmission()
+                    {
+                        CourseWorkId = studentSubmission.CourseWorkId,
+                        CreationTime = courseWork?.CreationTime,
+                        DueDate = courseWork?.DueDate,
+                        Grade = studentSubmission.Grade,
+                        MaxPoints = courseWork?.MaxPoints,
+                        Percent = studentSubmission.Percent,
+                        Note = studentSubmission.Note,
+                        StudentId =  studentSubmission.StudentId,
+                        Title = courseWork?.Title
+                    });
+                }
+
+                studentCategoryInfo.AverageCatGrade = Math.Round((studentCategoryInfo.AverageStudentGrade/studentCategoryInfo.TotalWeight)*100, settings.Decimal);
+                studentCategoryInfo.Submissions = reportSubmissions;
+                studentCategoryInfos.Add(studentCategoryInfo);
+            }
+
+
+            return studentCategoryInfos;
+        }
+
+        #endregion
+
+        public async Task<TaskResult<GradebookSettings, ICredential>> GetSettingsFromParentGradeBookAsync(ICredential googleCredential, string refreshToken, string userId, string gradeBookId)
+        {
+            SheetsService service;
+            SpreadsheetsResource.ValuesResource.GetRequest settingsRequest;
+            Google.Apis.Sheets.v4.Data.ValueRange settingsResponse;
+            IList<IList<object>> settingValues;
+             service = new SheetsService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = googleCredential,
+                ApplicationName = _configuration["ApplicationName"],
+            });
+
+            SpreadsheetsResource.ValuesResource.GetRequest.ValueRenderOptionEnum valueRenderOption = (SpreadsheetsResource.ValuesResource.GetRequest.ValueRenderOptionEnum)1;
+
+            try
+            {
+                settingsRequest = service.Spreadsheets.Values.Get(gradeBookId, _settingsRange);
+                settingsRequest.ValueRenderOption = valueRenderOption;
+                settingsResponse = await settingsRequest.ExecuteAsync();
+            }
+            catch (Google.GoogleApiException ex)
+            {
+                switch (ex?.Error?.Code)
+                {
+                    case 401:
+                        _logger.LogError(ex, $"An error occurred while retrieving settings from GradeBook with id {gradeBookId}. Token has expired. Refreshing the token and trying again");
+                        var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse
+                        {
+                            RefreshToken = refreshToken
+                        };;
+                        googleCredential = new UserCredential(new GoogleAuthorizationCodeFlow(
+                           new GoogleAuthorizationCodeFlow.Initializer
+                           {
+                               ClientSecrets = new ClientSecrets
+                               {
+                                   ClientId = _configuration["installed:client_id"],
+                                   ClientSecret = _configuration["installed:client_secret"]
+                               }
+                           }), "user", token);
+
+                        service = new SheetsService(new BaseClientService.Initializer()
+                        {
+                            HttpClientInitializer = googleCredential,
+                            ApplicationName = _configuration["ApplicationName"]
+                        });
+
+                        settingsRequest = service.Spreadsheets.Values.Get(gradeBookId, _studentsRange);
+                        settingsRequest.ValueRenderOption = valueRenderOption;
+                        settingsResponse = settingsRequest.Execute();
+                        await UpdateAllTokens(userId, googleCredential as UserCredential);
+                        break;
+                    default: throw ex;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while retrieving settings from GradeBook with id {gradeBookId}");
+                throw ex;
+            }
+
+            settingValues = settingsResponse.Values;
+            var statisticsRequest = service.Spreadsheets.Values.Get(gradeBookId, _statisticsAverageMedianRange);
+            statisticsRequest.ValueRenderOption = valueRenderOption;
+            var statisticsResponse = await statisticsRequest.ExecuteAsync();
+            var statisticsValues = statisticsResponse.Values;
+            
+            var settings = new GradebookSettings();
+            var settingsValues = settingsResponse.Values;
+            var allSettings = new object[25][];//TODO: Check terms
+            for (var a = 0; a < settingsValues.Count; a++)
+            {
+                var newArrey = new object[2];
+                Array.Copy(settingsValues[a].ToArray(), newArrey, settingsValues[a].Count);
+                allSettings[a] = newArrey;
+            }
+
+            // settings.CourseName = allSettings[0][0]?.ToString() ?? ""; 
+            settings.CourseCode = allSettings[2][1]?.ToString() ?? "";
+            settings.CourseName = allSettings[3][1]?.ToString() ?? "";
+            settings.CoursePeriod = allSettings[4][1]?.ToString() ?? "";
+            settings.TeacherName = allSettings[5][1]?.ToString() ?? "";
+            settings.SchoolName = allSettings[6][1]?.ToString() ?? "";
+            settings.SchoolPhone = allSettings[7][1]?.ToString() ?? "";
+
+            int decimalPlaces;
+            int.TryParse(allSettings[9][1]?.ToString() ?? "", out decimalPlaces);
+            settings.Decimal = decimalPlaces;
+            settings.Rounding = allSettings[10][1]?.ToString() ?? "";
+            settings.ShowCourseAverage = ConvertStringToBool(allSettings[11][1]?.ToString());
+            settings.ShowCourseMedian = ConvertStringToBool(allSettings[12][1]?.ToString());
+            settings.SendEmailsAsNoReply = ConvertStringToBool(allSettings[13][1]?.ToString());
+            settings.StudentReportSortBy = allSettings[15][1]?.ToString() ?? "";
+            settings.ReportSchoolNameColor = allSettings[18][1]?.ToString() ?? "";
+            settings.ReportHeadingColor = allSettings[19][1]?.ToString() ?? "";
+            settings.ReportAlternatingColorFirst = allSettings[20][1]?.ToString() ?? "";
+            settings.ReportAlternatingColorSecond = allSettings[21][1]?.ToString() ?? "";
+
+            if (allSettings[24] != null)
+            {
+                int terms;
+                int.TryParse(allSettings[24][1]?.ToString() ?? "", out terms);
+                settings.Terms = terms;
+            }
+
+             if(statisticsValues != null)
+            {
+                double courseAverage;
+                double courseMedian;
+                double.TryParse(statisticsValues[0][0]?.ToString(), out courseAverage);
+                double.TryParse(statisticsValues[0][4]?.ToString(), out courseMedian);
+
+                settings.CourseAverage =  Math.Round(courseAverage, decimalPlaces);
+                settings.CourseMedian = Math.Round(courseMedian, decimalPlaces);
+            }
+
+            return new TaskResult<GradebookSettings, ICredential>(ResultType.SUCCESS, settings, googleCredential);
+        }
+
+        public async Task<TaskResult<GradebookSettings, ICredential>> GetSettingsFromParentGradeBookAsync(string externalAccessToken, string refreshToken, string userId, string gradeBookId)
         {
             ICredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
-            return await CreateSpreadsheet(googleCredential, refreshToken, userId);
+            return await GetSettingsFromParentGradeBookAsync(googleCredential, refreshToken, userId, gradeBookId);
         }
-        #endregion
     }
 }

@@ -1,0 +1,87 @@
+@model ParentStudentsViewModelTest
+            @{
+                if(Model.StudentReports != null && Model.StudentReports.Any())
+                {
+                    <div class="row top-buffer">
+                            <div class="cols-sm-12">
+                                <div class="col-sm-4 col-sm-offset-8">
+                                   Course Average: <b>@Model.ReportSettings.CourseAverage %</b>
+                                </div>
+                            </div>
+                            <div class="cols-sm-12">
+                                <div class="col-sm-4 col-sm-offset-8">
+                                   Course Median <b>@Model.ReportSettings.CourseMedian %</b> 
+                                </div>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div class="row">
+                            <div class="cols-sm-12">
+                                <div class="col-sm-4">
+                                    Report Generated on: <b>@Model.ReportGenerationDate</b> 
+                                </div>
+                            </div>
+                        </div>
+                        <hr/>
+                         <div class="row">
+                            <div class="cols-sm-12">
+                                <div class="col-sm-6">
+                                    Student Name: <b>@Model.StudentName</b> 
+                                </div>
+                                <div class="col-sm-6">
+                                   Course Code: <b>@Model.ReportSettings.CourseCode</b> 
+                                </div>
+                            </div>
+                            <div class="cols-sm-12">
+                                <div class="col-sm-6">
+                                     Student Grade: <b>@Model.FinalGrade</b> 
+                                </div>
+                                <div class="col-sm-6">
+                                    Course Name: <b>@Model.ReportSettings.CourseName</b> 
+                                </div>
+                            </div>
+                            <div class="cols-sm-12">
+                                <div class="col-sm-6">
+                                    Teacher: <b>@Model.ReportSettings.TeacherName</b> 
+                                </div>
+                                <div class="col-sm-6">
+                                    Course Period: <b>@Model.ReportSettings.CoursePeriod</b> 
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cols-sm-12">
+                                <table class="table table-striped">
+                                    @foreach(var report in Model.StudentReports)
+                                    {   
+                                        <tr class="table-info">
+                                                <th>Date</th>
+                                                @if(@report.IsGraded){
+                                                    <th>@report.Category - your average in this category is: @report.AverageCatGrade %</th>
+                                                }else{
+                                                    <th>@report.Category - this category is not graded</th>
+                                                }
+                                                <th>Mark</th>
+                                                <th>Percent</th>
+                                        </tr>
+                                        @foreach(var submission in report.Submissions)
+                                        {
+                                            <tr>
+                                                <td>@submission.DueDate</td>
+                                                <td>@submission.Title</td>
+                                                @if(submission.Grade == "No Mark"){
+                                                    <td>@submission.Grade</td>
+                                                    <td>-</td>
+                                                }else{
+                                                    <td>@submission.Percent/@submission.MaxPoints</td>
+                                                    <td>@submission.Percent%</td>
+                                                }
+                                            </tr>
+                                        }
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                        
+                }
+            }

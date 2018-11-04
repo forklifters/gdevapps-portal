@@ -1,0 +1,40 @@
+@model ParentStudentsViewModelTest
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<script src="~/js/Parent/parentStudents.js" asp-append-version="true"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="~/js/bootstrap-dialog.min.js"></script>
+<link rel="stylesheet" href="~/css/bootstrap-dialog.min.css" />
+<link rel="stylesheet" href="~/css/Parent/parentStudents.css" />
+
+<script type="text/javascript">
+    $(function() {
+        ParentStudents.init();
+    })
+</script>
+
+
+<h2>Google Classroom Students</h2>
+@Html.AntiForgeryToken()
+
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12 col-sm-4">
+            <label for="ddlStudents" class="control-label">Select Student</label>
+            <select id="ddlStudents" class="form-control select2" asp-items="@Model.Students">
+                
+            </select>
+        </div>
+        <div class="col-xs-12 col-sm-4" id="divClasses" style="display: none;">
+            <label for="ddlClasses" class="control-label">Select Class</label>
+            <select id="ddlClasses" class="form-control select2">
+            </select>
+        </div>
+        
+    </div>
+    <div id="loader" class="hidden"><img src="../images/google/google-loader.gif" alt="ASP.NET" class="loader-spin" /></div>
+</div>
+<div id="dvReportResults">
+@{
+    Html.RenderPartial("_ReportsTest", Model);
+}
+</div>

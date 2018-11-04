@@ -110,6 +110,8 @@ namespace GdevApps.BLL.Contracts
             string gradeBookId
         );
 
+        //TODO: Return Student information as well as the settings information or create ad new method to return all info from Parent GradeBook
+        
         Task<TaskResult<GradebookStudent, ICredential>> GetStudentInformationFromParentGradeBook(
             ICredential googleCredential,
             string refreshToken,
@@ -117,6 +119,20 @@ namespace GdevApps.BLL.Contracts
             string gradeBookId
         );
 
+        Task<TaskResult<GradebookSettings, ICredential>> GetSettingsFromParentGradeBookAsync(
+                    string externalAccessToken,
+                    string refreshToken,
+                    string userId,
+                    string gradeBookId
+                );
+        Task<TaskResult<GradebookSettings, ICredential>> GetSettingsFromParentGradeBookAsync(
+                ICredential googleCredential,
+                string refreshToken,
+                string userId,
+                string gradeBookId
+            );
+
+//TEST METHOD
         Task<TaskResult<BoolResult, ICredential>> CreateSpreadsheet(
             ICredential googleCredential,
             string refreshToken,
@@ -128,5 +144,13 @@ namespace GdevApps.BLL.Contracts
             string refreshToken,
             string userId
         );
+
+        GradebookStudentReport<StudentReport> GetStudentReportInformation(
+            string externalAccessToken,
+            string refreshToken,
+            string userId,
+            GradebookStudent student, 
+            GradebookSettings settings, 
+            string parentEmail);
     }
 }
