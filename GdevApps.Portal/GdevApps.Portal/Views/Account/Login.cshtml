@@ -9,6 +9,8 @@
     @{ Layout = "/Views/Shared/_LoginLayout.cshtml"; }
     
     <script src="~/js/Login/login.js" asp-append-version="true"></script>
+    <link rel="stylesheet" href="~/css/non-responsive.css" />
+
     <script type="text/javascript">
             $(document).ready(function() {
                 Login.init();
@@ -28,9 +30,8 @@
     <div class="container">
         <div class="formLogin">
             <img src="../images/mainLogo.png" class="formImg"> 
-            <hr />
             <div class="row">
-                <div class="col-xs-12 col-md-12 col-md-offset-2">
+                <div class="col-xs-12 col-md-12 col-md-offset-2 col-xs-offset-2">
                     <div class="input-group">
                         <div id="divChbxAgreeWithTerms" class="form-group">    
                                 <input type="checkbox" asp-for="AgreeWithTerms" id="chbxAgreeWithTerms">  
@@ -48,10 +49,10 @@
                 </div>
             </div>
             <div class="row top-buffer">      
-                <div class="col-xs-12 col-md-12 col-md-offset-2">
+                <div class="col-xs-8 col-md-8 col-md-offset-2 col-xs-offset-2">
                         <form asp-action="ExternalLogin" id="formExternalLogin" returnurl="@ViewData[" ReturnUrl "]" method="post" class="form-horizontal">
                             @Html.AntiForgeryToken()
-                            <div class="col-md-8">
+                            <div class="col-md-12">
                                 <button 
                                     type="submit" 
                                         id="btnLoginGoogle"

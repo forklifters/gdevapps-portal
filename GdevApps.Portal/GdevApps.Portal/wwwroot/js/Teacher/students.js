@@ -61,15 +61,17 @@ var Students = (function () {
         if ($divGradeBooks.css("display") != 'none') {
             d.parents.forEach(parent => {
                 //cell = cell + '<li class="list"><a target="_blank" href="https://mail.google.com/mail/?view=cm&fs=1&to=' + email + '">' + email + '</li>'
-                var btn = '<button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-toggle="ajax-modal" onclick="Students.getTeacherInfo(this)">ADD USER</button>';
-                if (parent.hasAccount) {
-                    btn = '<div class="col-xs-12 col-md-6"><button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-student-email="' + studentEmail + '" data-class-id="' + classId + '" data-toggle="ajax-modal" onclick="Students.share(this)" >SHARE GRADEBOOK</button></div>';
-                    btn += '<div class="col-xs-12 col-md-6"><button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-student-email="' + studentEmail + '" data-class-id="' + classId + '" data-toggle="ajax-modal" onclick="Students.unshare(this)" >UNSHARE GRADEBOOK</button></div>';
-                }
+                if(parent.email && parent.name){
+                    var btn = '<button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-toggle="ajax-modal" onclick="Students.getTeacherInfo(this)">ADD USER</button>';
+                    if (parent.hasAccount) {
+                        btn = '<div class="col-xs-12 col-md-6 btn-group-sm"><button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-student-email="' + studentEmail + '" data-class-id="' + classId + '" data-toggle="ajax-modal" onclick="Students.share(this)" >SHARE GRADEBOOK</button></div>';
+                        btn += '<div class="col-xs-12 col-md-6 btn-group-sm"><button type="button" class="btn btn-primary" data-email="' + parent.email + '" data-name="' + parent.name + '" data-student-email="' + studentEmail + '" data-class-id="' + classId + '" data-toggle="ajax-modal" onclick="Students.unshare(this)" >UNSHARE GRADEBOOK</button></div>';
+                    }
 
-                row = row + '<tr><td class="pricing-plans__features ng-scope">'
-                    + (parent.name ? parent.name : "") + '</td><td> <a target="_blank" class="pricing-plans__feature feature-icon icon--gmail " href="https://mail.google.com/mail/?view=cm&fs=1&to='
-                    + parent.email + '">' + parent.email + '</a></td> <td class="col-xs-5">' + btn + '</td></tr>'
+                    row = row + '<tr><td class="pricing-plans__features ng-scope">'
+                        + (parent.name ? parent.name : "") + '</td><td> <a target="_blank" class="pricing-plans__feature feature-icon icon--gmail " href="https://mail.google.com/mail/?view=cm&fs=1&to='
+                        + parent.email + '">' + parent.email + '</a></td> <td class="col-xs-5">' + btn + '</td></tr>'
+                }
             });
             return row ? row : "<tr><td>No parents were found for this student</td></tr>";
         }else{

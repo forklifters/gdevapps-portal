@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GdevApps.Portal.Data;
+using GdevApps.Portal.Models.SharedViewModels;
 using GdevApps.Portal.Models.TeacherViewModels;
 using GdevApps.Portal.Services;
 using System;
@@ -29,6 +30,11 @@ namespace GdevApps.Portal.Configuration
               config.CreateMap<GdevApps.BLL.Models.GDevSpreadSheetService.GradebookReportSubmission, GdevApps.Portal.Data.StudentSubmission>()
               .ForMember(s => s.Percent, d=> d.MapFrom(o => o.Percent*100));
               config.CreateMap<GdevApps.BLL.Models.GDevSpreadSheetService.GradebookSettings, ReportSettings>();
+
+              config.CreateMap<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Parent, BLL.Models.GDevSpreadSheetService.GradebookParent>()
+              .ForMember(d => d.Email, s => s.MapFrom(o => o.Email))
+              .ForMember(d => d.Name, s => s.MapFrom(o => o.Name))
+              .ForMember(d => d.HasAccount, x => x.Ignore());
           });
     }
 }

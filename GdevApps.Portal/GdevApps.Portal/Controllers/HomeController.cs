@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using GdevApps.Portal.Data;
 using GdevApps.Portal.Models;
@@ -17,9 +18,19 @@ namespace GdevApps.Portal.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+         private readonly UserManager<ApplicationUser> _userManager;
+
+         public HomeController(UserManager<ApplicationUser> userManager)
+         {
+             _userManager = userManager;
+         }
+        public async Task<IActionResult> Index()
         {
-            return View();
+            // var user = await _userManager.GetUserAsync(User);
+            // var roles = ((ClaimsIdentity)User.Identity).Claims
+            //                 .Where(c => c.Type == ClaimTypes.Role)
+            //                 .Select(c => c.Value);
+            // //return View();
 
             var userCurrentRole = HttpContext.Session.GetString("UserCurrentRole");
             if (!string.IsNullOrWhiteSpace(userCurrentRole))

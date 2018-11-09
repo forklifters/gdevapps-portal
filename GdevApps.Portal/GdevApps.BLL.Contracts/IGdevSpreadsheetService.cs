@@ -63,7 +63,6 @@ namespace GdevApps.BLL.Contracts
         GradeBook GetGradebookByIdAsync(int id);
         Task<bool> DeleteGradeBookAsync(string classroomId, string gradebookId); 
         Task<IEnumerable<GradeBook>> GetGradeBooksByClassId(string classId);
-
         Task<TaskResult<BoolResult, ICredential>> ShareGradeBook(
             string externalAccessToken,
             string refreshToken,
@@ -73,7 +72,6 @@ namespace GdevApps.BLL.Contracts
             string className,
             string gradeBookId,
             string mainGradeBookId);
-
         Task<TaskResult<BoolResult, ICredential>> ShareGradeBook(
             ICredential googleCredential,
             string refreshToken,
@@ -92,8 +90,6 @@ namespace GdevApps.BLL.Contracts
             string gradeBookId,
             string mainGradeBookId
         );
-
-        
         Task<TaskResult<BoolResult, ICredential>> UnShareGradeBook(
             ICredential googleCredential,
             string refreshToken,
@@ -110,8 +106,6 @@ namespace GdevApps.BLL.Contracts
             string gradeBookId
         );
 
-        //TODO: Return Student information as well as the settings information or create ad new method to return all info from Parent GradeBook
-        
         Task<TaskResult<GradebookStudent, ICredential>> GetStudentInformationFromParentGradeBook(
             ICredential googleCredential,
             string refreshToken,
@@ -152,5 +146,11 @@ namespace GdevApps.BLL.Contracts
             GradebookStudent student, 
             GradebookSettings settings, 
             string parentEmail);
+
+        Task<List<GdevApps.BLL.Models.GDevClassroomService.GradeBook>> GetMainGradebooksByParentEmailAndStudentEmailAsync(string parentEmail, string studentEmail);
+
+        Task<List<GradebookStudent>> GetGradebookStudentsByParentEmailAsync(string parentEmail);
+
+        Task<string> GetParentGradebookUniqueIdByMainGradebookIdAsync(string mainGradebookId);
     }
 }

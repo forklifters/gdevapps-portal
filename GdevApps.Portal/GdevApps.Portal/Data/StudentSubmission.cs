@@ -27,7 +27,7 @@ namespace GdevApps.Portal.Data
                 DateTime dueDate;
                 if(DateTime.TryParse(value, out dueDate))
                 {
-                    value = dueDate.ToString("yyyy-MM-dd");
+                    _dueDate = dueDate.ToString("yyyy-MM-dd");
                 }
              }
         }

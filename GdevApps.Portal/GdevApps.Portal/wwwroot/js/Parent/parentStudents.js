@@ -7,10 +7,14 @@ var ParentStudents = (function () {
 
     function intiDdls() {
         $('#ddlStudents').on("change", function (item) {
-            //var url = "/Parent/GetClasses";
-            var url = "/Teacher/GetClasses"; //Test
+            var url = "/Parent/GetClasses";
             var id = $(this).val(); // Use $(this) so you don't traverse the DOM again
-            var data = { classId: id }
+            if (id === "-1") {//ignore the first element selection
+                event.preventDefault();
+                return;
+            }
+
+            var data = { studentEmail: id }
             var $loader = $('#loader');
             $loader.removeClass("hidden");
             $.ajax({
@@ -25,9 +29,11 @@ var ParentStudents = (function () {
                     $loader.addClass("hidden");
                     var $ddlClasses = $('#ddlClasses');
                     $ddlClasses.empty();
+                    //set the first element
+                    $ddlClasses.append($('<option></option>').text("Select class").val("-1"));
                     $.each(response, function (index, item) {
                         if (item && item.id && item.name) {// TODO: Change this is test
-                            $ddlClasses.append($('<option></option>').text(item.id).val(item.name));
+                            $ddlClasses.append($('<option></option>').text(item.name).val(item.id));
                         }
                     });
 
@@ -49,10 +55,15 @@ var ParentStudents = (function () {
 
         });
 
-        $("#ddlClasses").on("change", function () {
-            var url = "/Teacher/GetReport"; //Test
+        $("#ddlClasses").on("change", function (event) {
+            var url = "/Parent/GetReport"; //Test
             var id = $(this).val(); // Use $(this) so you don't traverse the DOM again
-            var data = { gradebookId: id };
+            if (id === "-1") {//ignore the first element selection
+                event.preventDefault();
+                return;
+            }
+
+            var data = { mainGradeBookId: id };
             var $loader = $('#loader');
             $loader.removeClass("hidden");
             $.ajax({
@@ -64,16 +75,65 @@ var ParentStudents = (function () {
                 }
             }).done(function (result) {
                 $loader.addClass("hidden");
-                $('#dvReportResults').html(result)
+                $('#dvReportResults').html(result);
+                initDdlPartial();
+                initA4();
             }).fail(function (err) {
                 $loader.addClass("hidden");
                 console.log(err);
             })
-        })
+        });
+
+
     }
 
+    function initDdlPartial() {
+        $('#ddlGrades').on('change', function (event) {
+            var id = $(this).val();
+            if (id == 1) {
+                $('.letter-grade').addClass('hidden');
+                $('.final-grade').removeClass('hidden');
+            } else if (id == 2) {
+                $('.final-grade').addClass('hidden');
+                $('.letter-grade').removeClass('hidden');
+            }
+        });
+    }
+
+    var max_pages = 100;
+    var page_count = 0;
+    //Not for tables
+    function snipMe() {
+        page_count++;
+        if (page_count > max_pages) {
+            return;
+        }
+        var long = $(this)[0].scrollHeight - Math.ceil($(this).innerHeight());
+        var children = $(this).children().toArray();
+        var removed = [];
+        while (long > 0 && children.length > 0) {
+            var child = children.pop();
+            $(child).detach();
+            removed.unshift(child);
+            long = $(this)[0].scrollHeight - Math.ceil($(this).innerHeight());
+        }
+        if (removed.length > 0) {
+            var a4 = $('<div class="A4"></div>');
+            a4.append(removed);
+            $(this).after(a4);
+            snipMe.call(a4[0]);
+        }
+    }
+
+    function initA4(){
+        $('.A4').removeClass('hidden');
+        // $('.A4').each(function () {
+        //     ParentStudents.snipMe.call(this);
+        // });
+    }
 
     return {
-        init: init
+        init: init,
+        snipMe: snipMe
     }
 })(jQuery)

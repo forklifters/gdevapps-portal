@@ -1,7 +1,9 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
+using GdevApps.BLL.Models.GDevSpreadSheetService;
 
 namespace GdevApps.BLL.Domain
 {
@@ -12,28 +14,29 @@ namespace GdevApps.BLL.Domain
             int number = 0;
             if (int.TryParse(numberStr, out number))
             {
-                return RoundNumber(roundSetup, decimalRound, number);
+                return RoundNumber(roundSetup, decimalRound, number).ToString();
             }
             return numberStr;
         }
 
-        public static string RoundNumber(string roundSetup, int decimalRound, int number)
+        public static double RoundNumber(string roundSetup, int decimalRound, double number)
         {
             roundSetup = roundSetup?.ToUpperInvariant() ?? "";
             var decimalNumber = Math.Pow(10, decimalRound);
             switch (roundSetup)
             {
                 case "ROUND UP":
-                    return (Math.Ceiling(number * decimalNumber) / decimalNumber).ToString();
+                    return (Math.Ceiling(number * decimalNumber) / decimalNumber);
                 case "ROUND DOWN":
-                    return (Math.Floor(number * decimalNumber) / decimalNumber).ToString();
+                    return (Math.Floor(number * decimalNumber) / decimalNumber);
                 case "ROUND TO NEAREST":
-                    return (Math.Round(number * decimalNumber) / decimalNumber).ToString();
+                    return (Math.Round(number * decimalNumber) / decimalNumber);
                 default:
-                    return number.ToString();
+                    return number;
             }
         }
 
+        
         public static GradebookGrade GetNumberFromBrakets(string grade)
         {
             if (string.IsNullOrWhiteSpace(grade))
@@ -98,6 +101,38 @@ namespace GdevApps.BLL.Domain
                 object obj = bf.Deserialize(ms);
                 return (T)obj;
             }
+        }
+
+        public static string GetLetterGradeFromPercent(double finalGrade, GradebookSettings settings)
+        {
+            if(settings == null || settings.LetterGrades == null || !settings.LetterGrades.Any())
+            {
+                return "";
+            }
+
+            string letter = "";
+            var maxItem = settings.LetterGrades.OrderByDescending(s => s.To).First();
+            var minItem = settings.LetterGrades.OrderBy(s => s.From).First();
+            foreach(var letterGrade in settings.LetterGrades)
+            {
+                if(finalGrade >= letterGrade.From && (finalGrade >= letterGrade.To || finalGrade <= letterGrade.To))
+                {
+                    letter = letterGrade.Letter;
+                    break;
+                }
+            }
+
+            if(finalGrade >= maxItem.To)
+            {
+                letter = maxItem.Letter;
+            }
+            
+            if(finalGrade <= minItem.From)
+            {
+                letter = minItem.Letter;
+            }
+
+            return letter;
         }
     }
 

@@ -24,5 +24,6 @@ namespace GdevApps.BLL.Models.GDevSpreadSheetService
         public int Terms { get; set; }
         public double CourseAverage { get; set; }
         public double CourseMedian { get; set; }
+        public List<LetterGrade> LetterGrades {get;set;}
     }
 }

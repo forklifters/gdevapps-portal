@@ -1,0 +1,169 @@
+@using Microsoft.AspNetCore.Identity
+@using GdevApps.Portal.Models
+
+@inject SignInManager<GdevApps.Portal.Data.ApplicationUser> SignInManager
+    @inject UserManager<GdevApps.Portal.Data.ApplicationUser> UserManager
+
+        <!DOCTYPE html>
+        <html>
+
+        <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>
+                @ViewData["Title"] - Gdev apps Portal
+            </title>
+            <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+            <link rel="stylesheet" href="~/css/site.css" />
+            <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
+                asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-fallback-test-class="sr-only"
+                asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+            <link href='http://fonts.googleapis.com/css?family=Roboto:400,100,100italic,300,300italic,400italic,500,500italic,700,700italic,900italic,900'
+                rel='stylesheet' type='text/css'>
+            <link href="//fonts.googleapis.com/css?family=Roboto+Slab:100,300,400,700&amp;lang=en" rel="stylesheet">
+            <link href="//fonts.googleapis.com/css?family=Product+Sans:400&amp;lang=en" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Extended" rel="stylesheet">
+            <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+            <link href="~/css/gsuite.min.css" rel="stylesheet">
+            <script src="~/lib/jquery/dist/jquery.js"></script>
+            <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+            <!-- <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js" asp-fallback-src="~/lib/jquery/dist/jquery.min.js" asp-fallback-test="window.jQuery" crossorigin="anonymous" integrity="sha384-K+ctZQ+LL8q6tP7I94W+qzQsfRV2a+AfHIi9k8z8l9ggpc8X+Ytst4yBo/hH+8Fk"> -->
+            <!-- </script> -->
+            <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+            <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+            <!-- <script src="~/js/site.min.js" asp-append-version="true"></script> -->
+            <script src="~/lib/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+            <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+            <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
+            <script src="https://ssl.gstatic.com/inproduct_help/chatsupport/chatsupport_button.js"></script>
+            <script type="text/javascript">
+                $(document).ready(function () {
+                    var mql = window.matchMedia("screen and (max-width: 768px)")
+                    mediaqueryresponse(mql) // call listener function explicitly at run time
+                    mql.addListener(mediaqueryresponse) // attach listener function to listen in on state changes
+
+                    function mediaqueryresponse(mql) {
+                        if (mql.matches) {
+                            $(".taber").attr("data-toggle", "collapse");
+                            $('.collapse').collapse("hide");
+                        } else {
+                            $('.collapse').collapse("show");
+                            $("[data-toggle='collapse']").removeAttr("data-toggle");
+                        }
+                    }
+
+                    //Setup active link
+                    $('ul.nav.navbar-nav').find('a[href="' + location.pathname + '"]').closest('li').addClass('active');
+                    $('#btn-teacher-menu').on('click', function () {
+                        $('#teacher-menu-collapse').collapse('toggle');
+                    })
+                });
+            </script>
+        </head>
+
+        <body class="bg-grey">
+            <header class="header" role="banner">
+                <div class="header--wrap">
+                    <a class="header--logo">
+                        <div class="lockup">
+                            <img alt="Gdev apps" class="lockup--logo" src="../images/mainLogo.png"> @if
+                            (SignInManager.IsSignedIn(User)) {
+                            <span class="gb_9a pull-right">
+                                <img class="lightblue" src='@UserManager.GetUserAsync(User).Result.Avatar'>
+                            </span> }
+                        </div>
+                    </a>
+                </div>
+            </header>
+            <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" id="btn-teacher-menu" class="navbar-toggle collapsed btn btn-primary"
+                            data-toggle="collapse" data-target="#teacher-menu-collapse" aria-expanded="false">
+                            <span class="sr-only"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                    </div>
+
+                    <div class="collapse navbar-collapse" id="teacher-menu-collapse">
+                        <ul class="nav navbar-nav">
+                            <li><a asp-area="" asp-controller="Parent" asp-action="GetStudents">Students</a></li>
+                            <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
+                        </ul>
+                        @await Html.PartialAsync("_LoginPartial")
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container body-content main">
+                    @RenderBody()
+                    <hr />
+            </div>
+            <footer>
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-12 col-md-12 text-center">
+                            <p>
+                                <i>All of our apps integrate and work seamlessly with G Suite for Education as well as
+                                    personal Gmail accounts.</i>
+                                <p>
+                        </div>
+                    </div>
+                    <div class="row footer--nav cols-row">
+                        <div class="col-md-3 col-sm-4 col-md-offset-1">
+                            <div data-toggle="collapse" class="taber" data-parent="#accordion" href="#collapseOne"
+                                aria-expanded="false" aria-controls="collapseOne">
+                                Site Map
+                            </div>
+                            <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                                <ul>
+                                    <li class="footer--item"><a class="footer--link" asp-area="" asp-controller="Parent" asp-action="GetStudents">Students</a></li>
+                                    <li class="footer--item"><a class="footer--link" asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-4 col-md-offset-1">
+                            <div class="taber" data-toggle="collapse" data-parent="#accordion" href="#collapsetwo"
+                                aria-expanded="false" aria-controls="collapseOne">
+                                Contact Us
+                            </div>
+                            <div id="collapsetwo" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                                <ul>
+                                    <li class="footer--item"><i class='glyphicon glyphicon-globe'></i> 11-1 Fake Rd,
+                                        Fake Country</li>
+                                    <li class="footer--item"><i class='glyphicon glyphicon-phone'></i> (111) 1111 1111</li>
+                                    <li class="footer--item"><i class='glyphicon glyphicon-envelope'></i> <a class="footer--link"
+                                            href='mailto:help.desk@gdevapps.com'>help.desk@gdevapps.com</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-4 col-md-offset-1">
+                            <div class="taber" data-toggle="collapse" data-parent="#accordion" href="#collapsethree"
+                                aria-expanded="false" aria-controls="collapseOne">
+                                We're Social
+                            </div>
+                            <div id="collapsethree" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                                <ul>
+                                    <li class="footer--item"><a class="footer--link" href="https://www.youtube.com/channel/UCkYJFEtpllIhdwv4ZjHL9Qg/featured"
+                                            target="_blank">YouTube</a></li>
+                                    <li class="footer--item"><a class="footer--link" href="https://plus.google.com/u/1/communities/111566959427494515813"
+                                            target="_blank">Google +</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-12 text-center">
+                            <div class="blank-gap-10"></div>
+                            <span><a class="footer--link" href="https://gdevapps.com" target="_blank">Gdev apps Portal
+                                    &copy; 2018</a></span>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+            @RenderSection("Scripts", required: false)
+        </body>
+
+        </html>

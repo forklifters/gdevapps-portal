@@ -434,6 +434,8 @@ namespace GdevApps.Portal.Controllers
                         var user = await this._userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
                         //Update teacher
                         await _aspNetUserService.SetTeacherAspUserId(teacher.Id, user.Id);
+                        //Set the role
+                        await _userManager.AddToRoleAsync(user, UserRoles.Teacher);
 
                         var props = new AuthenticationProperties();
                         props.IsPersistent = true;
@@ -475,6 +477,7 @@ namespace GdevApps.Portal.Controllers
 
                         //Update parent
                         await _aspNetUserService.SetParentAspUserId(parent.Id, user.Id);
+                        await _userManager.AddToRoleAsync(user, UserRoles.Parent);
 
                         var props = new AuthenticationProperties();
                         props.IsPersistent = true;

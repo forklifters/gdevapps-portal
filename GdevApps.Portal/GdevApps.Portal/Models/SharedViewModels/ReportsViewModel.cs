@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GdevApps.Portal.Data;
 
-namespace GdevApps.Portal.Models.TeacherViewModels
+namespace GdevApps.Portal.Models.SharedViewModels
 {
     public class ReportsViewModel
     {

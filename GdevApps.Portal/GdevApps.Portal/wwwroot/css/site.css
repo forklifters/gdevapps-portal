@@ -207,6 +207,15 @@ a.navigation--item:hover {
     color: #448aff !important;
 }
 
+.bg-blue{
+    background-color: #4285f4 !important;
+    color: white !important;
+}
+
+.bg-grey{
+    background-color: #eee !important;
+}
+
 .pricing-plans__feature.feature-icon::before {
     background-size: 24px 24px;
     height: 24px;
@@ -223,7 +232,7 @@ a.navigation--item:hover {
 /*Main Logo Image*/
 .mainLogo{
     width: 204px; 
-    height: 49px; 
+    height: 58px; 
     object-fit: cover;
 }
 
