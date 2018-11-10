@@ -76,3 +76,5 @@ GdevApps.Portal/GdevApps.Portal/bin/Debug/netcoreapp2.0/GdevApps.Portal.runtimec
 GdevApps.Portal/GdevApps.Portal/bin/Debug/netcoreapp2.0/GdevApps.Portal.runtimeconfig.dev.json
 GdevApps.Portal/GdevApps.Portal/obj/GdevApps.Portal.csproj.nuget.g.props
 GdevApps.Portal/GdevApps.Portal/obj/project.assets.json
+.DS_Store
+GdevApps.Portal/.DS_Store
