@@ -541,11 +541,10 @@ namespace GdevApps.Portal.Controllers
             //check if user is in USers table (teacher)
             var parent = await _aspNetUserService.GetParentByEmailAsync(email);
             var teacher = await _aspNetUserService.GetTeacherByEmailAsync(email);
-            //TODO: Get teacher
             var loginInfo = new AccountLoginInfo
             {
                 isParent = parent != null,
-                isTeacher = true //teacher!=null;
+                isTeacher = teacher != null 
             };
 
             return View("MultipleSignInModel", loginInfo);

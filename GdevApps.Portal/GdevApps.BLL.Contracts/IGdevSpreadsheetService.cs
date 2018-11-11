@@ -62,8 +62,9 @@ namespace GdevApps.BLL.Contracts
         Task<GradeBook> GetGradebookByUniqueIdAsync(string gradebookId);
         GradeBook GetGradebookByIdAsync(int id);
         Task<bool> DeleteGradeBookAsync(string classroomId, string gradebookId); 
-        Task<IEnumerable<GradeBook>> GetGradeBooksByClassId(string classId);
-        Task<TaskResult<BoolResult, ICredential>> ShareGradeBook(
+        Task<IEnumerable<GradeBook>> GetGradeBooksByClassIdAsync(string classId, string userEmail);
+        Task<IEnumerable<GradeBook>> GetAllGradeBooksAsync(string userId);
+        Task<TaskResult<BoolResult, ICredential>> ShareGradeBookAsync(
             string externalAccessToken,
             string refreshToken,
             string userId,
@@ -72,7 +73,7 @@ namespace GdevApps.BLL.Contracts
             string className,
             string gradeBookId,
             string mainGradeBookId);
-        Task<TaskResult<BoolResult, ICredential>> ShareGradeBook(
+        Task<TaskResult<BoolResult, ICredential>> ShareGradeBookAsync(
             ICredential googleCredential,
             string refreshToken,
             string userId,
@@ -82,7 +83,7 @@ namespace GdevApps.BLL.Contracts
             string gradeBookId,
             string mainGradeBookId);
 
-        Task<TaskResult<BoolResult, ICredential>> UnShareGradeBook(
+        Task<TaskResult<BoolResult, ICredential>> UnShareGradeBookAsync(
             string externalAccessToken,
             string refreshToken,
             string userId,
@@ -90,7 +91,7 @@ namespace GdevApps.BLL.Contracts
             string gradeBookId,
             string mainGradeBookId
         );
-        Task<TaskResult<BoolResult, ICredential>> UnShareGradeBook(
+        Task<TaskResult<BoolResult, ICredential>> UnShareGradeBookAsync(
             ICredential googleCredential,
             string refreshToken,
             string userId,
@@ -99,14 +100,14 @@ namespace GdevApps.BLL.Contracts
             string mainGradeBookId
         );
 
-        Task<TaskResult<GradebookStudent, ICredential>> GetStudentInformationFromParentGradeBook(
+        Task<TaskResult<GradebookStudent, ICredential>> GetStudentInformationFromParentGradeBookAsync(
             string externalAccessToken,
             string refreshToken,
             string userId,
             string gradeBookId
         );
 
-        Task<TaskResult<GradebookStudent, ICredential>> GetStudentInformationFromParentGradeBook(
+        Task<TaskResult<GradebookStudent, ICredential>> GetStudentInformationFromParentGradeBookAsync(
             ICredential googleCredential,
             string refreshToken,
             string userId,
@@ -127,13 +128,13 @@ namespace GdevApps.BLL.Contracts
             );
 
 //TEST METHOD
-        Task<TaskResult<BoolResult, ICredential>> CreateSpreadsheet(
+        Task<TaskResult<BoolResult, ICredential>> CreateSpreadsheetAsync(
             ICredential googleCredential,
             string refreshToken,
             string userId
         );
 
-        Task<TaskResult<BoolResult, ICredential>> CreateSpreadsheet(
+        Task<TaskResult<BoolResult, ICredential>> CreateSpreadsheetAsync(
             string externalAccessToken,
             string refreshToken,
             string userId
@@ -144,8 +145,7 @@ namespace GdevApps.BLL.Contracts
             string refreshToken,
             string userId,
             GradebookStudent student, 
-            GradebookSettings settings, 
-            string parentEmail);
+            GradebookSettings settings);
 
         Task<List<GdevApps.BLL.Models.GDevClassroomService.GradeBook>> GetMainGradebooksByParentEmailAndStudentEmailAsync(string parentEmail, string studentEmail);
 

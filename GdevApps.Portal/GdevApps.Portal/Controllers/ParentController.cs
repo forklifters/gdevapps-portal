@@ -95,26 +95,15 @@ namespace GdevApps.Portal.Controllers
             var refreshToken = await GetRefreshTokenAsync();
             var gradebookId = await _spreadSheetService.GetParentGradebookUniqueIdByMainGradebookIdAsync(mainGradeBookId);
             var settings = await _spreadSheetService.GetSettingsFromParentGradeBookAsync(accessToken, refreshToken, userId, gradebookId);
-            var student = await _spreadSheetService.GetStudentInformationFromParentGradeBook(accessToken, refreshToken, userId, gradebookId);
-             var user = await _userManager.GetUserAsync(User);
+            var student = await _spreadSheetService.GetStudentInformationFromParentGradeBookAsync(accessToken, refreshToken, userId, gradebookId);
+            var user = await _userManager.GetUserAsync(User);
             var parentEmail = user.Email; 
-
             var report = _spreadSheetService.GetStudentReportInformation(
                 accessToken,
                 refreshToken,
                 userId,
                 student.ResultObject,
-                settings.ResultObject,
-                parentEmail);
-
-            var students = await _spreadSheetService.GetGradebookStudentsByParentEmailAsync(parentEmail);
-            var studentEmails = students.Select(s => new StudentsViewModel
-            {
-                Id = s.Email,
-                Name = s.Name ?? s.Email
-            });
-
-            var studentEmailsList = new SelectList(studentEmails, "Id", "Name");
+                settings.ResultObject);
 
             try
             {

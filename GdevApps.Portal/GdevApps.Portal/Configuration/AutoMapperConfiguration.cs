@@ -35,6 +35,9 @@ namespace GdevApps.Portal.Configuration
               .ForMember(d => d.Email, s => s.MapFrom(o => o.Email))
               .ForMember(d => d.Name, s => s.MapFrom(o => o.Name))
               .ForMember(d => d.HasAccount, x => x.Ignore());
+
+              config.CreateMap<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Teacher, GdevApps.BLL.Models.AspNetUsers.Teacher>();
+
           });
     }
 }

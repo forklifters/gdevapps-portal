@@ -841,15 +841,23 @@ namespace GdevApps.BLL.Domain
             }
         }
 
-        public async Task<IEnumerable<GradeBook>> GetGradeBooksByClassId(string classId)
+        public async Task<IEnumerable<GradeBook>> GetGradeBooksByClassIdAsync(string classId, string userId)
         {
-            var dataGradeBooks = await _gradeBookRepository.GetAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>(filter: f => f.ClassroomId == classId);
+            var dataGradeBooks = await _gradeBookRepository.GetAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>(filter: f => f.ClassroomId == classId && f.CreatedByNavigation.Id == userId);
             var gradeBooks = _mapper.Map<IEnumerable<GdevApps.BLL.Models.GDevClassroomService.GradeBook>>(dataGradeBooks);
 
             return gradeBooks;
         }
 
-        public async Task<TaskResult<BoolResult, ICredential>> ShareGradeBook(
+        public async Task<IEnumerable<GradeBook>> GetAllGradeBooksAsync(string userId)
+        {
+            var dataGradeBooks = await _gradeBookRepository.GetAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>(filter: f =>f.CreatedByNavigation.Id == userId);
+            var gradeBooks = _mapper.Map<IEnumerable<GdevApps.BLL.Models.GDevClassroomService.GradeBook>>(dataGradeBooks);
+
+            return gradeBooks;
+        }
+
+        public async Task<TaskResult<BoolResult, ICredential>> ShareGradeBookAsync(
             string externalAccessToken,
             string refreshToken,
             string userId,
@@ -861,7 +869,7 @@ namespace GdevApps.BLL.Domain
         {
 
             ICredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
-            return await ShareGradeBook(
+            return await ShareGradeBookAsync(
                 googleCredential,
                 refreshToken,
                 userId,
@@ -966,7 +974,7 @@ namespace GdevApps.BLL.Domain
             return new TaskResult<string, ICredential>(ResultType.SUCCESS, spreadSheet.SpreadsheetId, googleCredential);
         }
 
-        public async Task<TaskResult<BoolResult, ICredential>> ShareGradeBook(
+        public async Task<TaskResult<BoolResult, ICredential>> ShareGradeBookAsync(
             ICredential googleCredential,
             string refreshToken,
             string userId,
@@ -1157,7 +1165,7 @@ namespace GdevApps.BLL.Domain
         }
 
 
-        public async Task<TaskResult<BoolResult, ICredential>> UnShareGradeBook(
+        public async Task<TaskResult<BoolResult, ICredential>> UnShareGradeBookAsync(
             string externalAccessToken,
             string refreshToken,
             string userId,
@@ -1166,7 +1174,7 @@ namespace GdevApps.BLL.Domain
             string mainGradeBookId)
         {
             ICredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
-            return await UnShareGradeBook(
+            return await UnShareGradeBookAsync(
                 googleCredential,
                 refreshToken,
                 userId,
@@ -1176,7 +1184,7 @@ namespace GdevApps.BLL.Domain
             );
         }
 
-        public async Task<TaskResult<BoolResult, ICredential>> UnShareGradeBook(
+        public async Task<TaskResult<BoolResult, ICredential>> UnShareGradeBookAsync(
             ICredential googleCredential,
             string refreshToken,
             string userId,
@@ -1239,13 +1247,13 @@ namespace GdevApps.BLL.Domain
         }
 
 
-        public async Task<TaskResult<GradebookStudent, ICredential>> GetStudentInformationFromParentGradeBook(string externalAccessToken, string refreshToken, string userId, string gradeBookId)
+        public async Task<TaskResult<GradebookStudent, ICredential>> GetStudentInformationFromParentGradeBookAsync(string externalAccessToken, string refreshToken, string userId, string gradeBookId)
         {
             ICredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
-            return await GetStudentInformationFromParentGradeBook(googleCredential, refreshToken, userId, gradeBookId);
+            return await GetStudentInformationFromParentGradeBookAsync(googleCredential, refreshToken, userId, gradeBookId);
         }
 
-        public async Task<TaskResult<GradebookStudent, ICredential>> GetStudentInformationFromParentGradeBook(ICredential googleCredential, string refreshToken, string userId, string gradeBookId)
+        public async Task<TaskResult<GradebookStudent, ICredential>> GetStudentInformationFromParentGradeBookAsync(ICredential googleCredential, string refreshToken, string userId, string gradeBookId)
         {
             var parentGradeBook = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentGradeBook>(filter: g => g.GoogleUniqueId == gradeBookId);
             if (parentGradeBook == null)
@@ -1384,7 +1392,7 @@ namespace GdevApps.BLL.Domain
         }
 
 
-        public async Task<TaskResult<BoolResult, ICredential>> CreateSpreadsheet(ICredential googleCredential, string refreshToken, string userId)
+        public async Task<TaskResult<BoolResult, ICredential>> CreateSpreadsheetAsync(ICredential googleCredential, string refreshToken, string userId)
         {
             try
             {
@@ -1469,13 +1477,13 @@ namespace GdevApps.BLL.Domain
             }
         }
 
-        public async Task<TaskResult<BoolResult, ICredential>> CreateSpreadsheet(string externalAccessToken, string refreshToken, string userId)
+        public async Task<TaskResult<BoolResult, ICredential>> CreateSpreadsheetAsync(string externalAccessToken, string refreshToken, string userId)
         {
             ICredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
-            return await CreateSpreadsheet(googleCredential, refreshToken, userId);
+            return await CreateSpreadsheetAsync(googleCredential, refreshToken, userId);
         }
 
-        public GradebookStudentReport<StudentReport> GetStudentReportInformation(string externalAccessToken, string refreshToken, string userId, GradebookStudent student, GradebookSettings settings, string parentEmail)
+        public GradebookStudentReport<StudentReport> GetStudentReportInformation(string externalAccessToken, string refreshToken, string userId, GradebookStudent student, GradebookSettings settings)
         {
             //Conditions for course works (cw):
             // if no cw has no title - skip
