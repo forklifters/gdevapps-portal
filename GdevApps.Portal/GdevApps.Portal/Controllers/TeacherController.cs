@@ -32,7 +32,7 @@ using GdevApps.Portal.Models.SharedViewModels;
 namespace GdevApps.Portal.Controllers
 {
     [Authorize(Roles = UserRoles.Teacher)]
-    //[VerifyUserRole(UserRoles.Teacher)]
+    [VerifyUserRole(UserRoles.Teacher)]
     public class TeacherController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;

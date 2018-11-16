@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -88,6 +89,11 @@ namespace GdevApps.Portal.Configuration
             {
                 //options.IdleTimeout = TimeSpan.FromMinutes(60);//You can set Time   
             });
+        }
+
+        public static void AddGdevAppsPortalLogging(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddSingleton(Log.Logger);
         }
 
         public static void AddGoogleAuthentication(this IServiceCollection services, IConfiguration configuration)

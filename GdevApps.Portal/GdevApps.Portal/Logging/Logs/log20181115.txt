@@ -1,0 +1,11 @@
+2018-11-15 21:09:42.835 -05:00 [ERR] Error occurred while retrieving courseWorks for user f4827d14-0e7a-4f73-a63c-d9f79c3994b3
+System.ArgumentNullException: Value cannot be null.
+Parameter name: collection
+   at System.Collections.Generic.List`1.InsertRange(Int32 index, IEnumerable`1 collection)
+   at GdevApps.BLL.Domain.GdevClassroomService.GetAllClassesAsync(ICredential googleCredential, String refreshToken, String userId) in E:\gdevapps-portal\GdevApps.Portal\GdevApps.BLL.Domain\GdevClassroomService.cs:line 165
+2018-11-15 21:09:43.360 -05:00 [ERR] Error occured while retrieving students for user f4827d14-0e7a-4f73-a63c-d9f79c3994b3
+System.ArgumentNullException: Value cannot be null.
+Parameter name: collection
+   at System.Collections.Generic.List`1.InsertRange(Int32 index, IEnumerable`1 collection)
+   at GdevApps.BLL.Domain.GdevClassroomService.GetAllClassesAsync(ICredential googleCredential, String refreshToken, String userId) in E:\gdevapps-portal\GdevApps.Portal\GdevApps.BLL.Domain\GdevClassroomService.cs:line 183
+2018-11-15 21:09:46.822 -05:00 [INF] Classes were retrieved successfully for user f4827d14-0e7a-4f73-a63c-d9f79c3994b3

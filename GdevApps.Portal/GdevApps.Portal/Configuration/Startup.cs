@@ -16,16 +16,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Serilog;
+using Serilog.Events;
+using Serilog.Formatting.Compact;
+using System.IO;
 
 namespace GdevApps.Portal
 {
     public class Startup
     {
-
-        // public Startup(IConfiguration configuration)
-        // {
-        //     Configuration = configuration;
-        // }
 
         public Startup(IHostingEnvironment env)
         {
@@ -34,8 +33,6 @@ namespace GdevApps.Portal
                                .AddJsonFile("Configuration/appsettings.json", optional: false, reloadOnChange: true)
                                .AddJsonFile("Configuration/credentials.json", optional: false, reloadOnChange: true)
                                .AddEnvironmentVariables();
-                            //    .AddJsonFile("Configuration/ConnectionStrings.json", optional: true)
-                            //    .AddEnvironmentVariables();
             Configuration = builder.Build();
 
             if (env.IsDevelopment())
@@ -43,7 +40,29 @@ namespace GdevApps.Portal
                 builder.AddUserSecrets<Startup>();
             }
 
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .Enrich.FromLogContext()
+                .WriteTo.File(path: GetLogFilePath(env, ""), rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true, shared: true)
+                .CreateLogger();//formatter: new CompactJsonFormatter(),
+
             Configuration = builder.Build();
+        }
+
+
+        private static string GetLogFilePath(IHostingEnvironment env, string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                filePath = "Logging\\Logs\\log.txt";
+            }
+
+            if (!Path.IsPathRooted(filePath))
+            {
+                filePath = Path.Combine(env.ContentRootPath, filePath);
+            }
+
+            return filePath;
         }
 
         public IConfiguration Configuration { get; }
@@ -52,7 +71,8 @@ namespace GdevApps.Portal
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddApplicationSession();
-            services.AddMvc(config => {
+            services.AddMvc(config =>
+            {
                 var policy = new AuthorizationPolicyBuilder()
                                 .RequireAuthenticatedUser()
                                 .Build();
@@ -62,11 +82,12 @@ namespace GdevApps.Portal
             });
             services.AddDatabaseContexts(Configuration);
             services.AddAspNetIdentity();
-            services.AddGoogleAuthentication(Configuration);    
+            services.AddGoogleAuthentication(Configuration);
             services.AddRepositories();
             services.AddDomainServices();
             services.AddSingleton(AutoMapperConfiguration.MapperConfiguration.CreateMapper());
             services.AddSingleton<IConfiguration>(Configuration);
+            services.AddGdevAppsPortalLogging(Configuration);
 
             //TEST
             services.ConfigureApplicationCookie(options =>
@@ -108,7 +129,7 @@ namespace GdevApps.Portal
             app.UseStaticFiles();
             app.UseAuthentication();
             IdentityInitializer.SeedData(userManager, roleManager);
-            app.UseSession();  
+            app.UseSession();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

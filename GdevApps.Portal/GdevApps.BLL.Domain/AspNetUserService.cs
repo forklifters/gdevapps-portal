@@ -3,6 +3,7 @@ using GdevApps.BLL.Contracts;
 using GdevApps.BLL.Models.AspNetUsers;
 using GdevApps.BLL.Models.LicensedUser;
 using GdevApps.DAL.Repositories.AspNetUserRepository;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,22 +14,22 @@ namespace GdevApps.BLL.Domain
     {
         private readonly IAspNetUserRepository _aspNetUserRepository;
         private readonly IMapper _mapper;
+        private readonly ILogger _logger;
 
         public AspNetUserService(
             IAspNetUserRepository aspNetUserRepository,
-            IMapper mapper)
+            IMapper mapper,
+            ILogger logger)
         {
             _aspNetUserRepository = aspNetUserRepository;
             _mapper = mapper;
+            _logger = logger;
         }
 
 
         public Task<IEnumerable<AspNetUserToken>> GetAllTokens()
         {
-
             var m = _aspNetUserRepository.GetAllAsync<DAL.DataModels.AspNetUsers.AspNetUser.AspNetUserTokens>().Result;
-
-
             return _mapper.Map<Task<IEnumerable<AspNetUserToken>>>(
                 _aspNetUserRepository.GetAllAsync<DAL.DataModels.AspNetUsers.AspNetUser.AspNetUserTokens>());
         }

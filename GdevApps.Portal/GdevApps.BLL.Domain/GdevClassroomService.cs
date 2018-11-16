@@ -14,7 +14,7 @@ using Google.Apis.Classroom.v1;
 using Google.Apis.Classroom.v1.Data;
 using Google.Apis.Services;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace GdevApps.BLL.Domain
 {
@@ -29,7 +29,7 @@ namespace GdevApps.BLL.Domain
 
         public GdevClassroomService(
             IConfiguration configuration,
-            ILogger<GdevClassroomService> logger,
+            ILogger logger,
             IAspNetUserService aspUserService,
             IMapper mapper,
             IGradeBookRepository gradeBookRepository
@@ -63,9 +63,9 @@ namespace GdevApps.BLL.Domain
             ICredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
             return await GetClassByIdAsync(classroomId, googleCredential, refreshToken, userId);
         }
-        public async Task<TaskResult<IEnumerable<GoogleClass>, ICredential>> GetAllClassesAsync(ICredential googleCredential, string refreshToken, string userId)
+        public async Task<TaskResult<IEnumerable<GoogleClass>, ICredential>>  GetAllClassesAsync(ICredential googleCredential, string refreshToken, string userId)
         {
-            
+            _logger.Debug("User {UserId} requested all classes", userId);
             CoursesResource.ListRequest request;
             ListCoursesResponse response;
             List<Course> courses = new List<Course>();
@@ -83,10 +83,11 @@ namespace GdevApps.BLL.Domain
             }
             catch (Google.GoogleApiException ex)
             {
+                _logger.Error(ex, "An error occurred while retrieving courses from Google Classroom for user {UserId}", userId);
                 switch (ex?.Error?.Code)
                 {
                     case 401:
-                        _logger.LogError(ex, "An error occurred while retrieving courses from Google Classroom. Token is expired. Refreshing the token and trying again");
+                        _logger.Error(ex, "An error occurred while retrieving courses from Google Classroom. Token is expired. Refreshing the token and trying again");
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse
                         {
                             RefreshToken = refreshToken
@@ -117,11 +118,12 @@ namespace GdevApps.BLL.Domain
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while retrieving classes");
+                _logger.Error(ex, "An error occurred while retrieving courses from Google Classroom for user {UserId}", userId);
                 throw ex;
             }
             var errorList = new List<string>();
             if(response.Courses == null){
+                _logger.Information("No courses have been found for this user {UserId}", userId);
                 return new TaskResult<IEnumerable<GoogleClass>, ICredential>(ResultType.EMPTY, new List<GoogleClass>(), googleCredential, errorList);
             }
 
@@ -140,7 +142,7 @@ namespace GdevApps.BLL.Domain
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error occurred while continued to retrieve classes");
+                    _logger.Error(ex, "Error occurred while continued to retrieve classesfor user {UserId}", userId);
                     request.PageToken = null;//stop the loop
                     errorList.Add(ex.Message);
                 }
@@ -165,7 +167,7 @@ namespace GdevApps.BLL.Domain
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, "Error while retrieving courseWorks");
+                            _logger.Error(ex, "Error occurred while retrieving courseWorks for user {UserId}", userId);
                             courseWorksRequest.PageToken = null;
                             errorList.Add(ex.Message);
                         }
@@ -183,7 +185,7 @@ namespace GdevApps.BLL.Domain
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, "Error while retrieving students");
+                            _logger.Error(ex, "Error occured while retrieving students for user {UserId}", userId);
                             studentsListRequest.PageToken = null;
                             errorList.Add(ex.Message);
                         }
@@ -204,6 +206,7 @@ namespace GdevApps.BLL.Domain
                 }
             }
 
+            _logger.Information("Classes were retrieved successfully for user {UserId}", userId);
             return new TaskResult<IEnumerable<GoogleClass>, ICredential>(ResultType.SUCCESS, classes, googleCredential, errorList);
         }
         public async Task<TaskResult<GoogleClass, ICredential>> GetClassByIdAsync(string classroomId, ICredential googleCredential, string refreshToken, string userId)
@@ -226,7 +229,7 @@ namespace GdevApps.BLL.Domain
                 switch (ex?.Error?.Code)
                 {
                     case 401:
-                        _logger.LogError(ex, "An error occurred while retrieving courses from Google Classroom. Token is expired. Refreshing the token and trying again");
+                        _logger.Error(ex, "An error occurred while retrieving courses from Google Classroom. Token is expired. Refreshing the token and trying again");
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
                         googleCredential = new UserCredential(new GoogleAuthorizationCodeFlow(
                             new GoogleAuthorizationCodeFlow.Initializer
@@ -252,7 +255,7 @@ namespace GdevApps.BLL.Domain
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error occurred while retrieving class with id {classroomId}");
+                _logger.Error(ex, $"Error occurred while retrieving class with id {classroomId}");
                 throw ex;
             }
 
@@ -275,7 +278,7 @@ namespace GdevApps.BLL.Domain
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, "Error while retrieving courseWorks");
+                            _logger.Error(ex, "Error while retrieving courseWorks");
                             courseWorksRequest.PageToken = null;
                             errorList.Add(ex.Message);
                         }
@@ -293,7 +296,7 @@ namespace GdevApps.BLL.Domain
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, "Error while retrieving students");
+                            _logger.Error(ex, "Error while retrieving students");
                             studentsListRequest.PageToken = null;
                             errorList.Add(ex.Message);
                         }
@@ -316,7 +319,7 @@ namespace GdevApps.BLL.Domain
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while retrieving courseworks or students");
+                _logger.Error(ex, "Error occurred while retrieving courseworks or students");
                 throw ex;
             }
         }
@@ -342,7 +345,7 @@ namespace GdevApps.BLL.Domain
                 switch (ex?.Error?.Code)
                 {
                     case 401:
-                        _logger.LogError(ex, "An error occurred while retrieving students from Google Classroom. Refreshing the token and trying again");
+                        _logger.Error(ex, "An error occurred while retrieving students from Google Classroom. Refreshing the token and trying again");
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
                         googleCredential = new UserCredential(new GoogleAuthorizationCodeFlow(
                             new GoogleAuthorizationCodeFlow.Initializer
@@ -370,7 +373,7 @@ namespace GdevApps.BLL.Domain
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An error occured while retrieving students by course id: {classId}");
+                _logger.Error(ex, $"An error occured while retrieving students by course id: {classId}");
                 throw ex;
             }
 

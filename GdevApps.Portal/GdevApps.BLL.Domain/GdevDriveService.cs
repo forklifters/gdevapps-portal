@@ -20,6 +20,7 @@ using Google.Apis.Drive.v3.Data;
 using Google.Apis.Requests;
 using System.Collections.Concurrent;
 using GdevApps.BLL.Models.GDevDriveService;
+using Serilog;
 
 namespace GdevApps.BLL.Domain
 {
@@ -30,14 +31,20 @@ namespace GdevApps.BLL.Domain
         private readonly IConfiguration _configuration;
         private readonly IGradeBookRepository _gradeBookRepository;
         private readonly IMapper _mapper;
+        private readonly ILogger _logger;
 
 
-        public GdevDriveService(IAspNetUserService aspUserService, IConfiguration configuration, IGradeBookRepository gradeBookRepository, IMapper mapper)
+        public GdevDriveService(IAspNetUserService aspUserService,
+         IConfiguration configuration, 
+         IGradeBookRepository gradeBookRepository, 
+         IMapper mapper,
+         ILogger logger)
         {
             _aspUserService = aspUserService;
             _configuration = configuration;
             _gradeBookRepository = gradeBookRepository;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<TaskResult<string, ICredential>> CreateRootFolderAsync(string externalAccessToken, string refreshToken, string userId)

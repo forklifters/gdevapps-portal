@@ -19,7 +19,7 @@ using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using Serilog;
 using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource.UpdateRequest;
 
 namespace GdevApps.BLL.Domain
@@ -42,7 +42,7 @@ namespace GdevApps.BLL.Domain
 
         public GdevSpreadsheetService(
             IConfiguration configuration,
-            ILogger<GdevClassroomService> logger,
+            ILogger logger,
             IAspNetUserService aspUserService,
             IGdevDriveService driveService,
             IGdevClassroomService classroomService,
@@ -132,7 +132,7 @@ namespace GdevApps.BLL.Domain
                 switch (ex?.Error?.Code)
                 {
                     case 401:
-                        _logger.LogError(ex, "An error occurred while retrieving courses from Google Classroom. Refreshing the token and trying again");
+                        _logger.Error(ex, "An error occurred while retrieving courses from Google Classroom. Refreshing the token and trying again");
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
                         googleCredential = new UserCredential(new GoogleAuthorizationCodeFlow(
                             new GoogleAuthorizationCodeFlow.Initializer
@@ -179,7 +179,7 @@ namespace GdevApps.BLL.Domain
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "");
+                _logger.Error(ex, "");
                 return new TaskResult<BoolResult, ICredential>
                 {
                     Result = ResultType.ERROR,
@@ -223,7 +223,7 @@ namespace GdevApps.BLL.Domain
                 switch (ex?.Error?.Code)
                 {
                     case 401:
-                        _logger.LogError(ex, $"An error occurred while retrieving students from GradeBook with id {gradebookId}. Refreshing the token and trying again");
+                        _logger.Error(ex, $"An error occurred while retrieving students from GradeBook with id {gradebookId}. Refreshing the token and trying again");
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
                         googleCredential = new UserCredential(new GoogleAuthorizationCodeFlow(
                            new GoogleAuthorizationCodeFlow.Initializer
@@ -409,7 +409,7 @@ namespace GdevApps.BLL.Domain
                 switch (ex?.Error?.Code)
                 {
                     case 401:
-                        _logger.LogError(ex, $"An error occurred while retrieving students from GradeBook with id {gradebookId}. Token has expired. Refreshing the token and trying again");
+                        _logger.Error(ex, $"An error occurred while retrieving students from GradeBook with id {gradebookId}. Token has expired. Refreshing the token and trying again");
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse
                         {
                             RefreshToken = refreshToken
@@ -440,7 +440,7 @@ namespace GdevApps.BLL.Domain
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An error occurred while retrieving students from GradeBook with id {gradebookId}");
+                _logger.Error(ex, $"An error occurred while retrieving students from GradeBook with id {gradebookId}");
                 throw ex;
             }
 
@@ -1286,7 +1286,7 @@ namespace GdevApps.BLL.Domain
                 switch (ex?.Error?.Code)
                 {
                     case 401:
-                        _logger.LogError(ex, $"An error occurred while retrieving students from GradeBook with id {gradeBookId}. Refreshing the token and trying again");
+                        _logger.Error(ex, $"An error occurred while retrieving students from GradeBook with id {gradeBookId}. Refreshing the token and trying again");
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
                         googleCredential = new UserCredential(new GoogleAuthorizationCodeFlow(
                            new GoogleAuthorizationCodeFlow.Initializer
@@ -1735,7 +1735,7 @@ namespace GdevApps.BLL.Domain
                 switch (ex?.Error?.Code)
                 {
                     case 401:
-                        _logger.LogError(ex, $"An error occurred while retrieving settings from GradeBook with id {gradeBookId}. Token has expired. Refreshing the token and trying again");
+                        _logger.Error(ex, $"An error occurred while retrieving settings from GradeBook with id {gradeBookId}. Token has expired. Refreshing the token and trying again");
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse
                         {
                             RefreshToken = refreshToken
@@ -1766,7 +1766,7 @@ namespace GdevApps.BLL.Domain
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An error occurred while retrieving settings from GradeBook with id {gradeBookId}");
+                _logger.Error(ex, $"An error occurred while retrieving settings from GradeBook with id {gradeBookId}");
                 throw ex;
             }
 
