@@ -60,6 +60,8 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers
             builder.ApplyConfiguration(new ProductsConfig());
             builder.ApplyConfiguration(new LicensesConfig());
             builder.ApplyConfiguration(new AccountConfig());
+            builder.ApplyConfiguration(new ParentConfig());
+            builder.ApplyConfiguration(new TeacherConfig());
         }
     }
 }

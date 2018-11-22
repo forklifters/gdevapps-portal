@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using GdevApps.BLL.Contracts;
 using GdevApps.BLL.Models.AspNetUsers;
+using GdevApps.BLL.Models.GDevSpreadSheetService;
 using GdevApps.BLL.Models.LicensedUser;
 using GdevApps.DAL.Repositories.AspNetUserRepository;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GdevApps.BLL.Domain
@@ -156,8 +158,31 @@ namespace GdevApps.BLL.Domain
         {
             try
             {
-                var parentsDal = await _aspNetUserRepository.GetParentsByCreatorIdTempAsync(aspUserTeacherId);
-                var parentsBll = _mapper.Map<List<ParentModel>>(parentsDal);
+                //var parentsDal = await _aspNetUserRepository.GetParentsByCreatorIdTempAsync(aspUserTeacherId);
+                var parentsDal = await _aspNetUserRepository.GetAsync<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Parent>(filter: f=>f.CreatedBy == aspUserTeacherId);
+
+                var parentsBll = new List<ParentModel>();
+                foreach(var parent in parentsDal){
+                    var parentModel = new ParentModel{
+                        AspUserId = parent.AspUserId,
+                        Avatar = parent.Avatar,
+                        Email = parent.Email,
+                        Id = parent.Id,
+                        Name = parent.Name
+                    };
+                    foreach(var student in parent.ParentStudent)
+                    {
+                        var parentGradebook = parent.ParentSharedGradeBook?.Where(p=>p.ParentGradeBook.MainGradeBookId == student.GradeBook.Id).Select(p => p.ParentGradeBook).FirstOrDefault();
+                        var parentSpreadsheetInfo = new ParentSpreadsheet();
+                        if(parentGradebook != null){
+                            parentSpreadsheetInfo = _mapper.Map<ParentSpreadsheet>(parentGradebook);
+                        }
+
+                        parentSpreadsheetInfo.StudentEmail = student.StudentEmail;
+                        parentModel.ParentSpreadsheets.Add(parentSpreadsheetInfo);
+                    }
+                }
+
 
                 return parentsBll;
             }

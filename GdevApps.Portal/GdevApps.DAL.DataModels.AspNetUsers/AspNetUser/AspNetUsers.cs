@@ -7,18 +7,20 @@ namespace GdevApps.DAL.DataModels.AspNetUsers.AspNetUser
 {
      public partial class AspNetUsers
     {
-        public AspNetUsers()
+         public AspNetUsers()
         {
             AspNetUserClaims = new HashSet<AspNetUserClaims>();
             AspNetUserLogins = new HashSet<AspNetUserLogins>();
             AspNetUserRoles = new HashSet<AspNetUserRoles>();
             Folder = new HashSet<Folder>();
             GradeBook = new HashSet<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook>();
-            Parent = new HashSet<Parent>();
+            ParentAspUser = new HashSet<Parent>();
+            ParentCreatedByNavigation = new HashSet<Parent>();
             ParentGradeBook = new HashSet<ParentGradeBook>();
             ParentSharedGradeBook = new HashSet<ParentSharedGradeBook>();
             ParentStudent = new HashSet<ParentStudent>();
-            Teacher = new HashSet<Teacher>();
+            TeacherAspNetUser = new HashSet<Teacher>();
+            TeacherCreatedByNavigation = new HashSet<Teacher>();
         }
 
         public string Id { get; set; }
@@ -43,10 +45,12 @@ namespace GdevApps.DAL.DataModels.AspNetUsers.AspNetUser
         public ICollection<AspNetUserRoles> AspNetUserRoles { get; set; }
         public ICollection<Folder> Folder { get; set; }
         public ICollection<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook> GradeBook { get; set; }
-        public ICollection<Parent> Parent { get; set; }
+        public ICollection<Parent> ParentAspUser { get; set; }
+        public ICollection<Parent> ParentCreatedByNavigation { get; set; }
         public ICollection<ParentGradeBook> ParentGradeBook { get; set; }
         public ICollection<ParentSharedGradeBook> ParentSharedGradeBook { get; set; }
         public ICollection<ParentStudent> ParentStudent { get; set; }
-        public ICollection<Teacher> Teacher { get; set; }
+        public ICollection<Teacher> TeacherAspNetUser { get; set; }
+        public ICollection<Teacher> TeacherCreatedByNavigation { get; set; }
     }
 }

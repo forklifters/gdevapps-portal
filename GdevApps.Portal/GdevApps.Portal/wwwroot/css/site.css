@@ -324,6 +324,10 @@ img.lightblue{
     background-color: #FFA700 !important;
 }
 
+.bootstrap-dialog.type-primary .modal-header {
+    background-color: #4285f4 !important;
+}
+
 .bootstrap-dialog .modal-header {
      border-top-left-radius: 0px !important; 
      border-top-right-radius: 0px !important; 
@@ -456,4 +460,14 @@ a.footer--link {
 
 .navbar-default .navbar-nav>li>a:hover{
     color: #4071d9 !important;
+}
+
+/*POPOVER*/
+.popover-title {
+    background-color: #4071d9 !important;
+    color:white;
+    font-size: 16px !important;
+}
+.popover-content {
+    font-size: 14px !important;
 }

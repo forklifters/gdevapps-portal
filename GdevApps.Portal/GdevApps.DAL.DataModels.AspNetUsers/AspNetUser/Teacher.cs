@@ -6,15 +6,14 @@ namespace GdevApps.DAL.DataModels.AspNetUsers.AspNetUser
 {
    public partial class Teacher
     {
-        public int Id { get; set; }
+      public int Id { get; set; }
         public string Email { get; set; }
         public string Name { get; set; }
         public string Avatar { get; set; }
         public string AspNetUserId { get; set; }
-
-        //TODO: Add CreatedBy field not null
-
+        public string CreatedBy { get; set; }
 
         public AspNetUsers AspNetUser { get; set; }
+        public AspNetUsers CreatedByNavigation { get; set; }
     }
 }

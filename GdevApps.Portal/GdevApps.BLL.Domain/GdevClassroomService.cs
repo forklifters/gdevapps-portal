@@ -167,7 +167,7 @@ namespace GdevApps.BLL.Domain
                         }
                         catch (Exception ex)
                         {
-                            _logger.Error(ex, "Error occurred while retrieving courseWorks for user {UserId}", userId);
+                            _logger.Error(ex, "Error occurred while retrieving courseWorks for user {UserId}. End cycle", userId);
                             courseWorksRequest.PageToken = null;
                             errorList.Add(ex.Message);
                         }

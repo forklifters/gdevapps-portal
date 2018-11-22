@@ -17,8 +17,11 @@ namespace GdevApps.DAL.Repositories.AspNetUserRepository
             base(context)
         {
             context.Parent.Include(p => p.AspUser).LoadAsync();
+            context.Parent.Include(p => p.CreatedBy).LoadAsync();
             context.Parent.Include(p => p.ParentSharedGradeBook).LoadAsync();
             context.Parent.Include(p => p.ParentStudent).LoadAsync();
+            context.ParentSharedGradeBook.Include(p => p.ParentGradeBook).LoadAsync();
+            context.ParentStudent.Include(ps => ps.GradeBook).LoadAsync();
         }
 
         public AspNetUserRepository() :

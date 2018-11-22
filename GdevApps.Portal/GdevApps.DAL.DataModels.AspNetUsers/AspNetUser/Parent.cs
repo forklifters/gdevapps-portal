@@ -6,7 +6,7 @@ namespace GdevApps.DAL.DataModels.AspNetUsers.AspNetUser
 {
     public partial class Parent
     {
-        public Parent()
+       public Parent()
         {
             ParentSharedGradeBook = new HashSet<ParentSharedGradeBook>();
             ParentStudent = new HashSet<ParentStudent>();
@@ -17,11 +17,10 @@ namespace GdevApps.DAL.DataModels.AspNetUsers.AspNetUser
         public string Name { get; set; }
         public string Avatar { get; set; }
         public string AspUserId { get; set; }
+        public string CreatedBy { get; set; }
 
-        //TODO: Add CreatedBy field not null
-
-        
         public AspNetUsers AspUser { get; set; }
+        public AspNetUsers CreatedByNavigation { get; set; }
         public ICollection<ParentSharedGradeBook> ParentSharedGradeBook { get; set; }
         public ICollection<ParentStudent> ParentStudent { get; set; }
     }

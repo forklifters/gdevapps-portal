@@ -28,6 +28,8 @@ using GdevApps.BLL.Models;
 using GdevApps.Portal.Models.AccountViewModels;
 using GdevApps.Portal.Attributes;
 using GdevApps.Portal.Models.SharedViewModels;
+using GdevApps.BLL.Models.AspNetUsers;
+using GdevApps.BLL.Models.GDevSpreadSheetService;
 
 namespace GdevApps.Portal.Controllers
 {
@@ -76,30 +78,28 @@ namespace GdevApps.Portal.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
         public async Task<IActionResult> Test()
         {
-            // var gradeBookLink = "https://docs.google.com/spreadsheets/d/1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg/edit?usp=drive_web&ouid=106890447120707259670";
-            // var gradebookId = "1IyeKB6duG8M2go8G-41cY2VI2th9iGTd2fZtIbW69l0";
-            // var fileId = "1JYB-P0mcfYhJeKqG4_U22JaHj2L4MJURair1qkbe1sI";
-            // var folderId = "1QJY6E4Yww5y238DZgZ9drrSoJH0fgj2h";
-            // var userId = _userManager.GetUserId(User);
+            var gradeBookLink = "https://docs.google.com/spreadsheets/d/1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg/edit?usp=drive_web&ouid=106890447120707259670";
+            var gradebookId = "1IyeKB6duG8M2go8G-41cY2VI2th9iGTd2fZtIbW69l0";
+            //var gradebookId = "";
+            var fileId = "1JYB-P0mcfYhJeKqG4_U22JaHj2L4MJURair1qkbe1sI";
+            var folderId = "1QJY6E4Yww5y238DZgZ9drrSoJH0fgj2h";
+            var userId = _userManager.GetUserId(User);
 
-            // var accessToken = await GetAccessTokenAsync();
-            // var refreshToken = await GetRefreshTokenAsync();
+            // var resul = await _driveService.MoveFileToFolderAsync(fileId, folderId, await GetAccessTokenAsync(), await GetRefreshTokenAsync(), userId);
+            var accessToken = await GetAccessTokenAsync();
+            var refreshToken = await GetRefreshTokenAsync();
 
-            // var settings = await _spreadSheetService.GetSettingsFromParentGradeBookAsync(accessToken, refreshToken, userId, gradebookId);
-            // var student = await _spreadSheetService.GetStudentInformationFromParentGradeBookAsync(accessToken, refreshToken, userId, gradebookId);
+            var settings = await _spreadSheetService.GetSettingsFromParentGradeBookAsync(accessToken, refreshToken, userId, gradebookId);
+            var student = await _spreadSheetService.GetStudentInformationFromParentGradeBookAsync(accessToken, refreshToken, userId, gradebookId);
 
-            // var report = _spreadSheetService.GetStudentReportInformation(
-            //     accessToken,
-            //     refreshToken,
-            //     userId,
-            //     student.ResultObject,
-            //     settings.ResultObject);
-            var userId = "f4827d14-0e7a-4f73-a63c-d9f79c3994b3";
-//_userManager.GetUserId(User);
-            var parents = await _aspUserService.GetAllParentsByTeacherAsync(userId);
+            var report = _spreadSheetService.GetStudentReportInformation(
+                accessToken,
+                refreshToken,
+                userId,
+                student.ResultObject,
+                settings.ResultObject);
             return Ok();
         }
 
@@ -121,6 +121,40 @@ namespace GdevApps.Portal.Controllers
             };
 
             return View("StudentsReports", studentReportsModel);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> Parents()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetAllParents()
+        {
+            var userId = _userManager.GetUserId(User);
+            var parents = await _aspUserService.GetAllParentsByTeacherAsync(userId);
+            var parentsViewModel = new List<ParentStudentViewModel>();
+            foreach (var p in parents)
+            {
+                foreach (var gb in p.ParentSpreadsheets)
+                {
+                    var ps = new ParentStudentViewModel()
+                    {
+                        Email = p.Email,
+                        StudentEmail = gb.StudentEmail,
+                        ParentGradebookName = gb.Name,
+                        MainGradeBookName = gb.MainGradeBookName,
+                        HasAccount = !string.IsNullOrWhiteSpace(p.AspUserId),
+                        MainGradeBookNameUniqueId = gb.MainGradeBookGoogleUniqueId,
+                        ParentGradebookUniqueId = gb.GoogleUniqueId
+                    };
+                    parentsViewModel.Add(ps);
+                }
+            }
+
+            return Ok(new { data = parentsViewModel });;
         }
 
         [HttpPost]
@@ -159,6 +193,17 @@ namespace GdevApps.Portal.Controllers
             {
                 return BadRequest(ex);
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveParent(string parentEmail)
+        {
+            if(string.IsNullOrWhiteSpace(parentEmail))
+            return BadRequest(parentEmail);
+
+            //TODO: add service method to remove parent
+
+            return Ok();
         }
 
 

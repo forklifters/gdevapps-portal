@@ -14,6 +14,8 @@ namespace GdevApps.BLL.Models.GDevSpreadSheetService
         public string CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
         public int MainGradeBookId { get; set; }
+        public string MainGradeBookGoogleUniqueId { get; set; }
         public string MainGradeBookName { get; set; }
+        public string StudentEmail {get;set;}
     }
 }

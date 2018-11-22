@@ -1,0 +1,42 @@
+<script src="~/js/Teacher/parents.js" asp-append-version="true"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="~/js/bootstrap-dialog.min.js"></script>
+<link rel="stylesheet" href="~/css/bootstrap-dialog.min.css" />
+
+<script type="text/javascript">
+    $(function() {
+        Parents.init();
+    });
+</script>
+
+<h2>Parents</h2>
+@Html.AntiForgeryToken()
+<div class="row">
+    <div class="form-group">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"></h3>
+                    </div>
+                    <div class="panel-body">
+                        <table id="parents" class="table table-striped table-bordered table-hover responsive" width="100%">
+                            <thead class="thin-border-bottom">
+                                <tr>
+                                    <th>Action</th>
+                                    <th>Parent email</th>
+                                    <th>Student email</th>
+                                    <th>Parent Gradebook</th>
+                                    <th>Main Gradebook</th>
+                                    <th>Has Account</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modal-placeholder"></div>

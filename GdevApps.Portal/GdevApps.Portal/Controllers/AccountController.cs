@@ -707,11 +707,13 @@ namespace GdevApps.Portal.Controllers
                     return PartialView("_AddTeacher", userModel);
                 }
 
+                var userId = _userManager.GetUserId(User);
                 var parentModel = new Parent()
                 {
                     Avatar = _defaultAvatar,
                     Email = userModel.Email,
-                    Name = userModel.Name
+                    Name = userModel.Name,
+                    CreatedBy = userId
                 };
 
                 var result = _aspNetUserService.AddParent(parentModel);
