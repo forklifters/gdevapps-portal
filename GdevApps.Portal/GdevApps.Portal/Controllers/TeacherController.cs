@@ -76,28 +76,30 @@ namespace GdevApps.Portal.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Test()
         {
-            var gradeBookLink = "https://docs.google.com/spreadsheets/d/1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg/edit?usp=drive_web&ouid=106890447120707259670";
-            var gradebookId = "1IyeKB6duG8M2go8G-41cY2VI2th9iGTd2fZtIbW69l0";
-            //var gradebookId = "";
-            var fileId = "1JYB-P0mcfYhJeKqG4_U22JaHj2L4MJURair1qkbe1sI";
-            var folderId = "1QJY6E4Yww5y238DZgZ9drrSoJH0fgj2h";
-            var userId = _userManager.GetUserId(User);
+            // var gradeBookLink = "https://docs.google.com/spreadsheets/d/1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg/edit?usp=drive_web&ouid=106890447120707259670";
+            // var gradebookId = "1IyeKB6duG8M2go8G-41cY2VI2th9iGTd2fZtIbW69l0";
+            // var fileId = "1JYB-P0mcfYhJeKqG4_U22JaHj2L4MJURair1qkbe1sI";
+            // var folderId = "1QJY6E4Yww5y238DZgZ9drrSoJH0fgj2h";
+            // var userId = _userManager.GetUserId(User);
 
-            // var resul = await _driveService.MoveFileToFolderAsync(fileId, folderId, await GetAccessTokenAsync(), await GetRefreshTokenAsync(), userId);
-            var accessToken = await GetAccessTokenAsync();
-            var refreshToken = await GetRefreshTokenAsync();
+            // var accessToken = await GetAccessTokenAsync();
+            // var refreshToken = await GetRefreshTokenAsync();
 
-            var settings = await _spreadSheetService.GetSettingsFromParentGradeBookAsync(accessToken, refreshToken, userId, gradebookId);
-            var student = await _spreadSheetService.GetStudentInformationFromParentGradeBookAsync(accessToken, refreshToken, userId, gradebookId);
+            // var settings = await _spreadSheetService.GetSettingsFromParentGradeBookAsync(accessToken, refreshToken, userId, gradebookId);
+            // var student = await _spreadSheetService.GetStudentInformationFromParentGradeBookAsync(accessToken, refreshToken, userId, gradebookId);
 
-            var report = _spreadSheetService.GetStudentReportInformation(
-                accessToken,
-                refreshToken,
-                userId,
-                student.ResultObject,
-                settings.ResultObject);
+            // var report = _spreadSheetService.GetStudentReportInformation(
+            //     accessToken,
+            //     refreshToken,
+            //     userId,
+            //     student.ResultObject,
+            //     settings.ResultObject);
+            var userId = "f4827d14-0e7a-4f73-a63c-d9f79c3994b3";
+//_userManager.GetUserId(User);
+            var parents = await _aspUserService.GetAllParentsByTeacherAsync(userId);
             return Ok();
         }
 

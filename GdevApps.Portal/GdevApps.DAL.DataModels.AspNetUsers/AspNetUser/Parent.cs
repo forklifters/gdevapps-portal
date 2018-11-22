@@ -18,6 +18,8 @@ namespace GdevApps.DAL.DataModels.AspNetUsers.AspNetUser
         public string Avatar { get; set; }
         public string AspUserId { get; set; }
 
+        //TODO: Add CreatedBy field not null
+
         
         public AspNetUsers AspUser { get; set; }
         public ICollection<ParentSharedGradeBook> ParentSharedGradeBook { get; set; }

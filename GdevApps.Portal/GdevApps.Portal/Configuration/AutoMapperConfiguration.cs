@@ -37,7 +37,16 @@ namespace GdevApps.Portal.Configuration
               .ForMember(d => d.HasAccount, x => x.Ignore());
 
               config.CreateMap<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Teacher, GdevApps.BLL.Models.AspNetUsers.Teacher>();
-
+              config.CreateMap<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentGradeBook, GdevApps.BLL.Models.GDevSpreadSheetService.ParentSpreadsheet>()
+              .ForMember(d => d.MainGradeBookName, s => s.MapFrom(o => o.MainGradeBook.Name));
+            
+            // when mapping from DAL.Gradebook to BLL.Gradebook the ClassRoom name transforms into ClassRoomId
+            // when mapping from DAL.Gradebook to BLL.Gradebook MainGradeBookName and MainGradeBookId are ignored
+              config.CreateMap<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.GradeBook, GdevApps.BLL.Models.GDevSpreadSheetService.ParentSpreadsheet>()
+              .ForMember(d => d.MainGradeBookName, s => s.Ignore())
+              .ForMember(d => d.MainGradeBookId, s => s.Ignore())
+              .ForMember(d => d.ClassroomName, s => s.MapFrom(o => o.ClassroomId));
+              
           });
     }
 }

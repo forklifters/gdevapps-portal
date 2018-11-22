@@ -28,5 +28,6 @@ namespace GdevApps.BLL.Contracts
         Task<bool> SetParentAspUserId(int parentId, string aspUserId);
 
         Task<bool> SetTeacherAspUserId(int teacherId, string aspUserId);
+        Task<List<ParentModel>> GetAllParentsByTeacherAsync(string aspUserTeacherId);
     }
 }

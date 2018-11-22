@@ -151,5 +151,20 @@ namespace GdevApps.BLL.Domain
                 throw exception;
             }
         }
+
+        public async Task<List<ParentModel>> GetAllParentsByTeacherAsync(string aspUserTeacherId)
+        {
+            try
+            {
+                var parentsDal = await _aspNetUserRepository.GetParentsByCreatorIdTempAsync(aspUserTeacherId);
+                var parentsBll = _mapper.Map<List<ParentModel>>(parentsDal);
+
+                return parentsBll;
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
+        }
     }
 }

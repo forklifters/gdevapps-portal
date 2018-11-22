@@ -12,6 +12,9 @@ namespace GdevApps.DAL.DataModels.AspNetUsers.AspNetUser
         public string Avatar { get; set; }
         public string AspNetUserId { get; set; }
 
+        //TODO: Add CreatedBy field not null
+
+
         public AspNetUsers AspNetUser { get; set; }
     }
 }
