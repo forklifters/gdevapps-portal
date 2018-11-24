@@ -471,3 +471,7 @@ a.footer--link {
 .popover-content {
     font-size: 14px !important;
 }
+
+.auto-overflow{
+    overflow-x:auto;
+}

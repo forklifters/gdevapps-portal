@@ -216,7 +216,7 @@ namespace GdevApps.BLL.Domain
             {
                 request = service.Spreadsheets.Values.Get(gradebookId, _studentsRange);
                 request.ValueRenderOption = valueRenderOption;
-                response = request.Execute();
+                response = await request.ExecuteAsync();
             }
             catch (Google.GoogleApiException ex)
             {
@@ -243,7 +243,7 @@ namespace GdevApps.BLL.Domain
 
                         request = service.Spreadsheets.Values.Get(gradebookId, _studentsRange);
                         request.ValueRenderOption = valueRenderOption;
-                        response = request.Execute();
+                        response = await request.ExecuteAsync();
                         await UpdateAllTokens(userId, googleCredential as UserCredential);
                         break;
                     default: throw ex;
@@ -432,7 +432,7 @@ namespace GdevApps.BLL.Domain
 
                         request = service.Spreadsheets.Values.Get(gradebookId, _studentsRange);
                         request.ValueRenderOption = valueRenderOption;
-                        response = request.Execute();
+                        response = await request.ExecuteAsync();
                         await UpdateAllTokens(userId, googleCredential as UserCredential);
                         break;
                     default: throw ex;
@@ -1236,7 +1236,6 @@ namespace GdevApps.BLL.Domain
                 });
             }
 
-
             parentSharedGradeBook.SharedStatus = (int)SharedStatus.NOTSHARED;
             _gradeBookRepository.Update<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentSharedGradeBook>(parentSharedGradeBook);
             await _gradeBookRepository.SaveAsync();
@@ -1279,7 +1278,7 @@ namespace GdevApps.BLL.Domain
             {
                 request = service.Spreadsheets.Values.Get(gradeBookId, _studentsRange);
                 request.ValueRenderOption = valueRenderOption;
-                response = request.Execute();
+                response = await request.ExecuteAsync();
             }
             catch (Google.GoogleApiException ex)
             {
@@ -1306,7 +1305,7 @@ namespace GdevApps.BLL.Domain
 
                         request = service.Spreadsheets.Values.Get(gradeBookId, _studentsRange);
                         request.ValueRenderOption = valueRenderOption;
-                        response = request.Execute();
+                        response = await request.ExecuteAsync();
                         await UpdateAllTokens(userId, googleCredential as UserCredential);
                         break;
                     default: throw ex;
@@ -1758,7 +1757,7 @@ namespace GdevApps.BLL.Domain
 
                         settingsRequest = service.Spreadsheets.Values.Get(gradeBookId, _studentsRange);
                         settingsRequest.ValueRenderOption = valueRenderOption;
-                        settingsResponse = settingsRequest.Execute();
+                        settingsResponse = await settingsRequest.ExecuteAsync();
                         await UpdateAllTokens(userId, googleCredential as UserCredential);
                         break;
                     default: throw ex;

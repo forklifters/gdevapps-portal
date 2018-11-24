@@ -114,7 +114,7 @@ namespace GdevApps.Portal.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
+        public IActionResult Login(LoginViewModel model, string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
@@ -517,16 +517,16 @@ namespace GdevApps.Portal.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SignInAsTeacher(string email)
+        public IActionResult SignInAsTeacher(string email)
         {
             HttpContext.Session.SetString("UserCurrentRole", UserRoles.Teacher);  
-            return RedirectToAction(nameof(TeacherController.ClassesAsync), "Teacher");
+            return RedirectToAction(nameof(TeacherController.Classes), "Teacher");
         }
 
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SignInAsParent(string email)
+        public IActionResult SignInAsParent(string email)
         {
             HttpContext.Session.SetString("UserCurrentRole", UserRoles.Parent);  
             return RedirectToAction(nameof(HomeController.Index), "Home");

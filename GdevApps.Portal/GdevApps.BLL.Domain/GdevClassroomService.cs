@@ -388,7 +388,7 @@ namespace GdevApps.BLL.Domain
                         ClassId = classId,
                         Email = student.Profile.EmailAddress,
                         Id = student.UserId,
-                        IsInClassroom = false,
+                        IsInClassroom = true,
                         Name = student.Profile.Name.FullName
                     });
                 }

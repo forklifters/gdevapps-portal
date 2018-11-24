@@ -29,11 +29,17 @@ namespace GdevApps.BLL.Domain
         }
 
 
-        public Task<IEnumerable<AspNetUserToken>> GetAllTokens()
+        public async Task<IEnumerable<AspNetUserToken>> GetAllTokens()
         {
-            var m = _aspNetUserRepository.GetAllAsync<DAL.DataModels.AspNetUsers.AspNetUser.AspNetUserTokens>().Result;
-            return _mapper.Map<Task<IEnumerable<AspNetUserToken>>>(
-                _aspNetUserRepository.GetAllAsync<DAL.DataModels.AspNetUsers.AspNetUser.AspNetUserTokens>());
+            try
+            {
+                var allTokens = await _aspNetUserRepository.GetAllAsync<DAL.DataModels.AspNetUsers.AspNetUser.AspNetUserTokens>();
+                return _mapper.Map<IEnumerable<AspNetUserToken>>(allTokens);
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
         }
 
         public Task<IEnumerable<AspNetUser>> GetAllUsersAsync()
@@ -43,17 +49,44 @@ namespace GdevApps.BLL.Domain
 
         public async Task UpdateUserTokensAsync(AspNetUserToken userTokens)
         {
-            var userTokensModel = _mapper.Map<DAL.DataModels.AspNetUsers.AspNetUser.AspNetUserTokens>(userTokens);
-            _aspNetUserRepository.Update<DAL.DataModels.AspNetUsers.AspNetUser.AspNetUserTokens>(userTokensModel);
-            await _aspNetUserRepository.SaveAsync();
+            try
+            {
+                var userTokensModel = _mapper.Map<DAL.DataModels.AspNetUsers.AspNetUser.AspNetUserTokens>(userTokens);
+                _aspNetUserRepository.Update<DAL.DataModels.AspNetUsers.AspNetUser.AspNetUserTokens>(userTokensModel);
+                await _aspNetUserRepository.SaveAsync();
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
         }
 
-        public Task<IEnumerable<AspNetUserToken>> GetAllTokensByUserIdAsync(string userId)
+        public async Task<IEnumerable<AspNetUserToken>> GetAllTokensByUserIdAsync(string userId)
         {
-            var models = _aspNetUserRepository.GetAsync<DAL.DataModels.AspNetUsers.AspNetUser.AspNetUserTokens>(filter: (u => u.UserId == userId));
-            return _mapper.Map<Task<IEnumerable<AspNetUserToken>>>(models);
+            try
+            {
+                var models = await _aspNetUserRepository.GetAsync<DAL.DataModels.AspNetUsers.AspNetUser.AspNetUserTokens>(filter: (u => u.UserId == userId));
+                return _mapper.Map<IEnumerable<AspNetUserToken>>(models);
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
         }
 
+           public IEnumerable<AspNetUserToken> GetAllTokensByUserId(string userId)
+        {
+            try
+            {
+                var models = _aspNetUserRepository.Get<DAL.DataModels.AspNetUsers.AspNetUser.AspNetUserTokens>(filter: (u => u.UserId == userId));
+                return _mapper.Map<IEnumerable<AspNetUserToken>>(models);
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
+        }
+       
         public bool AddParent(Parent parent)
         {
              try
@@ -158,9 +191,7 @@ namespace GdevApps.BLL.Domain
         {
             try
             {
-                //var parentsDal = await _aspNetUserRepository.GetParentsByCreatorIdTempAsync(aspUserTeacherId);
-                var parentsDal = await _aspNetUserRepository.GetAsync<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Parent>(filter: f=>f.CreatedBy == aspUserTeacherId);
-
+                var parentsDal = (await _aspNetUserRepository.GetAsync<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Parent>(filter: f=>f.CreatedBy == aspUserTeacherId)).ToList();
                 var parentsBll = new List<ParentModel>();
                 foreach(var parent in parentsDal){
                     var parentModel = new ParentModel{
@@ -168,7 +199,8 @@ namespace GdevApps.BLL.Domain
                         Avatar = parent.Avatar,
                         Email = parent.Email,
                         Id = parent.Id,
-                        Name = parent.Name
+                        Name = parent.Name,
+                        ParentSpreadsheets = new List<ParentSpreadsheet>()
                     };
                     foreach(var student in parent.ParentStudent)
                     {
@@ -181,6 +213,8 @@ namespace GdevApps.BLL.Domain
                         parentSpreadsheetInfo.StudentEmail = student.StudentEmail;
                         parentModel.ParentSpreadsheets.Add(parentSpreadsheetInfo);
                     }
+
+                    parentsBll.Add(parentModel);
                 }
 
 

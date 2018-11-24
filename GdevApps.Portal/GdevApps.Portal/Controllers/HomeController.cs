@@ -24,14 +24,8 @@ namespace GdevApps.Portal.Controllers
          {
              _userManager = userManager;
          }
-        public async Task<IActionResult> Index()
+        public  IActionResult Index()
         {
-            // var user = await _userManager.GetUserAsync(User);
-            // var roles = ((ClaimsIdentity)User.Identity).Claims
-            //                 .Where(c => c.Type == ClaimTypes.Role)
-            //                 .Select(c => c.Value);
-            // //return View();
-
             var userCurrentRole = HttpContext.Session.GetString("UserCurrentRole");
             if (!string.IsNullOrWhiteSpace(userCurrentRole))
             {

@@ -41,12 +41,15 @@ namespace GdevApps.Portal.Configuration
         {
 
             services.AddDbContext<AspNetUserContext>(options =>
-                //options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))
-                options.UseMySql(configuration.GetConnectionString("DefaultConnection"))
+                options.UseMySql(configuration.GetConnectionString("DefaultConnection")),
+                ServiceLifetime.Scoped, 
+                ServiceLifetime.Scoped
                 );
 
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseMySql(configuration.GetConnectionString("DefaultConnection"))
+                options.UseMySql(configuration.GetConnectionString("DefaultConnection")),
+                ServiceLifetime.Scoped, 
+                ServiceLifetime.Scoped
                 );
         }
 
@@ -87,7 +90,7 @@ namespace GdevApps.Portal.Configuration
             services.AddDistributedMemoryCache();
             services.AddSession(options =>
             {
-                //options.IdleTimeout = TimeSpan.FromMinutes(60);//You can set Time   
+                options.IdleTimeout = TimeSpan.FromMinutes(30);//You can set Time   
             });
         }
 

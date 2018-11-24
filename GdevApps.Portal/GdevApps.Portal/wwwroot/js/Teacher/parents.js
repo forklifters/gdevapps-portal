@@ -11,58 +11,6 @@ var Parents  = (function () {
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
                 "lengthMenu": [[10, 25, -1], [10, 25, "All"]],
-                "ajax": {
-                    "url": "/Teacher/GetAllParents",
-                    "method": "POST",
-                    "headers": {
-                        "RequestVerificationToken": $('input[name="__RequestVerificationToken"').val()
-                    }
-                },
-                "columns": [
-                    {
-                        "className": 'details-control',
-                        "orderable": false,
-                        "data": '',
-                        "render": function (data, type, full, meta) {
-                            //https://stackoverflow.com/questions/35547647/how-to-make-datatable-row-or-cell-clickable
-                            return '<button class="btn btn-danger remove-parent" data-parent-email="'+full.email+'" title="Remove parent" onclick="Parents.remove(this)">Remove</button>';
-                        }
-                    },
-                {
-                    "data": "email",
-                    "render": function (data, type, full, meta) {
-                        //https://stackoverflow.com/questions/35547647/how-to-make-datatable-row-or-cell-clickable
-                        return data;
-                    }
-                },
-                {
-                    "data": "studentEmail",
-                    "render": function (data, type, full, meta) {
-                        return data;
-                    }
-                },
-                {
-                    "data": "parentGradebookName",
-                    "render": function (data, type, full, meta) {
-                        return "<a href="+full.parentGradebookLink+">"+full.parentGradebookName+"</a>";
-                    }
-                },
-                {
-                    "data": "mainGradeBookName",
-                    "render": function (data, type, full, meta) {
-                        return "<a href="+full.mainGradeBookLink+">"+full.mainGradeBookName+"</a>";
-                    }
-                },
-                {
-                    "data": "hasAccount",
-                    "render": function (data, type, full, meta) {
-                        if (data) {
-                            return "<span class='green'><i class='material-icons'>check_circle</i></span>"
-                        }
-                        return "<span class='red' data-toggle='popover' data-trigger='hover' title='Help' data-content='This user must sign in to the Portal to create an account.'><i class='material-icons'>error</i></span>";
-                    }
-                }
-                ],
                 "ordering": true,
                 "processing": true,
                 "language": {

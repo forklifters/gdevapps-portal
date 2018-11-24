@@ -16,6 +16,7 @@ namespace GdevApps.BLL.Models.GDevSpreadSheetService
         public int MainGradeBookId { get; set; }
         public string MainGradeBookGoogleUniqueId { get; set; }
         public string MainGradeBookName { get; set; }
+        public string MainGradeBookLink { get; set; }
         public string StudentEmail {get;set;}
     }
 }

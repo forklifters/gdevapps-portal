@@ -42,7 +42,7 @@ namespace GdevApps.Portal.Attributes
                         filterContext.Result = new RedirectToActionResult("", "Parent", "");
                         break;
                     case UserRoles.Teacher:
-                        filterContext.Result = new RedirectToActionResult("ClassesAsync", "Teacher", "");
+                        filterContext.Result = new RedirectToActionResult("Classes", "Teacher", "");
                         break;
                 }
             }

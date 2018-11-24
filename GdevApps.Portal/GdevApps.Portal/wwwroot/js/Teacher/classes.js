@@ -1,5 +1,5 @@
 var Classes = (function () {
-    var table;
+    var $table;
     var $classes;
     function init() {
         initDataTables();
@@ -9,18 +9,11 @@ var Classes = (function () {
     function initDataTables() {
         $classes = $('#classes');
         if (!$classes.data('loaded')) {
-            table = $classes.DataTable({
+            $table = $classes.DataTable({
                 "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
                 "lengthMenu": [[10, 25, -1], [10, 25, "All"]],
-                "ajax": {
-                    "url": "/Teacher/GetClasses",
-                    "method": "GET",
-                    "headers": {
-                        "RequestVerificationToken": $('input[name="__RequestVerificationToken"').val()
-                    }
-                },
                 "columns": [{
                     "className": 'details-control',
                     "orderable": false,
@@ -39,7 +32,31 @@ var Classes = (function () {
                     "render": function (data, type, full, meta) {
                         return data;
                     }
-                }
+                },
+                {
+                    "data": "description",
+                    "render": function (data, type, full, meta) {
+                        return data;
+                    }
+                },
+                {
+                    "data": "studentsCount",
+                    "render": function (data, type, full, meta) {
+                        return data;
+                    }
+                },
+                {
+                    "data": "courseWorksCount",
+                    "render": function (data, type, full, meta) {
+                        return data;
+                    }
+                },
+                {
+                    "data": "classroomSheets",
+                    "render": function (data, type, full, meta) {
+                        return data;
+                    }
+                },
                 ],
                 "columnDefs": [{
                     "targets": 2,
@@ -61,6 +78,7 @@ var Classes = (function () {
                     }
                 }
             });
+           
             $classes.data('loaded', true);
 
             function format(d) {
@@ -71,11 +89,11 @@ var Classes = (function () {
                     '</tr>' +
                     '<tr>' +
                     '<td class="col-xs-2">Number of students:</td>' +
-                    '<td colspan="2" class="col-xs-6">' + (d.studentsCount ? d.studentsCount : "No students") + '</td>' +
+                    '<td colspan="2" class="col-xs-6">' + (d.studentsCount > 0 ? d.studentsCount : "No students") + '</td>' +
                     '</tr>' +
                     '<tr>' +
                     '<td class="col-xs-2">Number of assignments:</td>' +
-                    '<td colspan="2" class="col-xs-6">' + (d.courseWorksCount ? d.courseWorksCount : "No assignments") + '</td>' +
+                    '<td colspan="2" class="col-xs-6">' + (d.courseWorksCount > 0 ? d.courseWorksCount : "No assignments") + '</td>' +
                     '</tr>' +
                     '<tr>' +
                     '<td class="col-xs-2">Gradebooks:</td>' +
@@ -87,22 +105,26 @@ var Classes = (function () {
 
             function getSheetInfoCell(d) {
                 var cell = "<div class='cols-xs-12'>";
-                d.classroomSheets.forEach(sheet => {
-                    cell = cell + '<div class="col-xs-8 list-group"><center><a href=' + sheet.link + ' class="list-group-item list-group-item-action editGradebook" data-unique-id="' + sheet.googleUniqueId + '" data-id="' + sheet.id + '" data-classroom-id="' + sheet.classroomId + '" onclick="Classes.linkClick(this)">' +
-                        '<div class="d-flex w-100 justify-content-between">' +
-                        ' <h4 class="mb-1">' + sheet.name + '</h4>' +
-                        '</div>' +
-                        '<h6 class="mb-1 wordwrap">' + sheet.googleUniqueId + '</h6></a></center></div>' +
-                        '<div class="col-xs-2 list-group"><button type="button" class="btn btn-danger" data-unique-id="' + sheet.googleUniqueId + '" data-id="' + sheet.id + '" data-classroom-id="' + sheet.classroomId + '" onclick="Classes.removeGradebook(this)">REMOVE</button>' +
-                        '</div>'
-                });
+                if(d.classroomSheets){
+                    var sheets = JSON.parse(d.classroomSheets);
+                    sheets.forEach(sheet => {
+                        cell = cell + '<div class="col-xs-8 list-group"><center><a href=' + sheet.Link + ' class="list-group-item list-group-item-action editGradebook" data-unique-id="' + sheet.GoogleUniqueId + '" data-id="' + sheet.Id + '" data-classroom-id="' + sheet.ClassroomId + '" onclick="Classes.linkClick(this)">' +
+                            '<div class="d-flex w-100 justify-content-between">' +
+                            ' <h4 class="mb-1">' + sheet.Name + '</h4>' +
+                            '</div>' +
+                            '<h6 class="mb-1 wordwrap">' + sheet.GoogleUniqueId + '</h6></a></center></div>' +
+                            '<div class="col-xs-2 list-group"><button type="button" class="btn btn-danger" data-unique-id="' + sheet.GoogleUniqueId + '" data-id="' + sheet.Id + '" data-classroom-id="' + sheet.ClassroomId + '" onclick="Classes.removeGradebook(this)">REMOVE</button>' +
+                            '</div>'
+                    });
+                }
+               
                 cell = cell + "</div>";
                 return cell;
             }
 
             $('#classes tbody').off('click').on('click', 'td.details-control', function () {
                 var tr = $(this).closest('tr');
-                var row = table.row(tr);
+                var row = $table.row(tr);
 
                 if (row.child.isShown()) {
                     // This row is already open - close it

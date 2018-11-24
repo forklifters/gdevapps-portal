@@ -14,7 +14,7 @@ namespace GdevApps.BLL.Contracts
         Task UpdateUserTokensAsync(AspNetUserToken userTokens);
 
         Task<IEnumerable<AspNetUserToken>> GetAllTokensByUserIdAsync(string userId);
-
+        IEnumerable<AspNetUserToken> GetAllTokensByUserId(string userId);
         bool AddParent(Parent parent);
 
         Task<Parent> GetParentByEmailAsync(string email);

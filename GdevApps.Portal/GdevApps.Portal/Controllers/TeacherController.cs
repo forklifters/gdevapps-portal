@@ -77,31 +77,7 @@ namespace GdevApps.Portal.Controllers
             _driveService = driveService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Test()
-        {
-            var gradeBookLink = "https://docs.google.com/spreadsheets/d/1RUoDCarKOkr2I1iSs9hEuGUTny8kJuOKm-vnvFDFTLg/edit?usp=drive_web&ouid=106890447120707259670";
-            var gradebookId = "1IyeKB6duG8M2go8G-41cY2VI2th9iGTd2fZtIbW69l0";
-            //var gradebookId = "";
-            var fileId = "1JYB-P0mcfYhJeKqG4_U22JaHj2L4MJURair1qkbe1sI";
-            var folderId = "1QJY6E4Yww5y238DZgZ9drrSoJH0fgj2h";
-            var userId = _userManager.GetUserId(User);
 
-            // var resul = await _driveService.MoveFileToFolderAsync(fileId, folderId, await GetAccessTokenAsync(), await GetRefreshTokenAsync(), userId);
-            var accessToken = await GetAccessTokenAsync();
-            var refreshToken = await GetRefreshTokenAsync();
-
-            var settings = await _spreadSheetService.GetSettingsFromParentGradeBookAsync(accessToken, refreshToken, userId, gradebookId);
-            var student = await _spreadSheetService.GetStudentInformationFromParentGradeBookAsync(accessToken, refreshToken, userId, gradebookId);
-
-            var report = _spreadSheetService.GetStudentReportInformation(
-                accessToken,
-                refreshToken,
-                userId,
-                student.ResultObject,
-                settings.ResultObject);
-            return Ok();
-        }
 
         [HttpGet]
         public async Task<IActionResult> GetGradebooksReport()
@@ -124,51 +100,49 @@ namespace GdevApps.Portal.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
         public async Task<IActionResult> Parents()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> GetAllParents()
         {
             var userId = _userManager.GetUserId(User);
             var parents = await _aspUserService.GetAllParentsByTeacherAsync(userId);
             var parentsViewModel = new List<ParentStudentViewModel>();
             foreach (var p in parents)
             {
+                var ps = new ParentStudentViewModel()
+                {
+                    Email = p.Email,
+                    HasAccount = !string.IsNullOrWhiteSpace(p.AspUserId),
+                };
                 foreach (var gb in p.ParentSpreadsheets)
                 {
-                    var ps = new ParentStudentViewModel()
-                    {
-                        Email = p.Email,
-                        StudentEmail = gb.StudentEmail,
-                        ParentGradebookName = gb.Name,
-                        MainGradeBookName = gb.MainGradeBookName,
-                        HasAccount = !string.IsNullOrWhiteSpace(p.AspUserId),
-                        MainGradeBookNameUniqueId = gb.MainGradeBookGoogleUniqueId,
-                        ParentGradebookUniqueId = gb.GoogleUniqueId
-                    };
-                    parentsViewModel.Add(ps);
-                }
-            }
+                    ps.StudentEmail = gb.StudentEmail;
 
-            return Ok(new { data = parentsViewModel });;
+                    ps.MainGradeBookName = gb.MainGradeBookName;
+                    ps.MainGradeBookNameUniqueId = gb.MainGradeBookGoogleUniqueId;
+                    ps.MainGradeBookLink = gb.MainGradeBookLink;
+
+                    ps.ParentGradebookName = gb.Name;
+                    ps.ParentGradebookUniqueId = gb.GoogleUniqueId;
+                    ps.ParentGradebookLink = gb.Link;
+                }
+
+                parentsViewModel.Add(ps);
+            }
+            return View(parentsViewModel);
         }
 
         [HttpPost]
         public async Task<IActionResult> GetReport(string mainGradeBookId, string studentEmail)
         {
             var userId = _userManager.GetUserId(User);
-            var accessToken = await GetAccessTokenAsync();
-            var refreshToken = await GetRefreshTokenAsync();
-            var settings = await _spreadSheetService.GetSettingsFromParentGradeBookAsync(accessToken, refreshToken, userId, mainGradeBookId);
-            var student = await _spreadSheetService.GetStudentByEmailFromGradebookAsync(studentEmail, accessToken, mainGradeBookId, refreshToken, userId);
+            var tokensInfo = await GetTokensInfoAsync();
+            var externalAccessToken = GetAccessToken(tokensInfo);
+            var refreshToken = GetRefreshToken(tokensInfo);
+            var settings = await _spreadSheetService.GetSettingsFromParentGradeBookAsync(externalAccessToken, refreshToken, userId, mainGradeBookId);
+            var student = await _spreadSheetService.GetStudentByEmailFromGradebookAsync(studentEmail, externalAccessToken, mainGradeBookId, refreshToken, userId);
              var user = await _userManager.GetUserAsync(User);
 
             var report = _spreadSheetService.GetStudentReportInformation(
-                accessToken,
+                externalAccessToken,
                 refreshToken,
                 userId,
                 student.ResultObject,
@@ -196,7 +170,7 @@ namespace GdevApps.Portal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RemoveParent(string parentEmail)
+        public IActionResult RemoveParent(string parentEmail)
         {
             if(string.IsNullOrWhiteSpace(parentEmail))
             return BadRequest(parentEmail);
@@ -211,7 +185,10 @@ namespace GdevApps.Portal.Controllers
         public async Task<IActionResult> GetGradebookStudents(string mainGradeBookId)
         {
             var userId = _userManager.GetUserId(User);
-            var students = await _spreadSheetService.GetStudentsFromGradebookAsync(await GetAccessTokenAsync(), mainGradeBookId, await GetRefreshTokenAsync(), userId);
+            var tokensInfo = await GetTokensInfoAsync();
+            var externalAccessToken = GetAccessToken(tokensInfo);
+            var refreshToken = GetRefreshToken(tokensInfo);
+            var students = await _spreadSheetService.GetStudentsFromGradebookAsync(externalAccessToken, mainGradeBookId, refreshToken, userId);
             var studentEmails = students.ResultObject.Select(s => new StudentsViewModel
             {
                 Id = s.Email,
@@ -223,28 +200,26 @@ namespace GdevApps.Portal.Controllers
 
         public IActionResult Index()
         {
-            return RedirectToAction("ClassesAsync");
-        }
-
-        public IActionResult ClassesAsync()
-        {
-            return View();
+            return RedirectToAction("Classes");
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetClasses()
+        public async Task<IActionResult> Classes()
         {
-            List<ClassesViewModel> classes = await GetClassesAsync();
-            return Ok(new { data = classes });
+            var classes = await GetAllClassesAsync();
+            return View(classes);
         }
 
         [HttpPost]
         public async Task<IActionResult> GetStudents(string classId, string gradeBookId)
         {
             var userId = _userManager.GetUserId(User);
-            var googleClassroomStudentResult = await _classroomService.GetStudentsByClassIdAsync(await GetAccessTokenAsync(),
+            var tokensInfo = await GetTokensInfoAsync();
+            var externalAccessToken = GetAccessToken(tokensInfo);
+            var refreshToken = GetRefreshToken(tokensInfo);
+            var googleClassroomStudentResult = await _classroomService.GetStudentsByClassIdAsync(externalAccessToken,
                                                                                 classId,
-                                                                                await GetRefreshTokenAsync(),
+                                                                                refreshToken,
                                                                                 userId);
             var googleStudents = googleClassroomStudentResult.ResultObject.ToList();
             //Get students from Gradebook
@@ -252,8 +227,8 @@ namespace GdevApps.Portal.Controllers
             {
                 var studentsTaskResult = await _spreadSheetService.GetStudentsFromGradebookAsync(googleClassroomStudentResult.Credentials,
                  gradeBookId,
-                  await GetRefreshTokenAsync(),
-                   userId);
+                 refreshToken,
+                 userId);
                 var gradebookStudents = _mapper.Map<IEnumerable<GoogleStudent>>(studentsTaskResult.ResultObject);
 
                 foreach (var student in gradebookStudents)
@@ -298,9 +273,12 @@ namespace GdevApps.Portal.Controllers
         public async Task<IActionResult> ShareGradeBook(string className, string parentEmail, string studentEmail, string mainGradeBookId)
         {
             var userId = _userManager.GetUserId(User);
+            var tokensInfo = await GetTokensInfoAsync();
+            var externalAccessToken = GetAccessToken(tokensInfo);
+            var refreshToken = GetRefreshToken(tokensInfo);
             var result = await _spreadSheetService.ShareGradeBookAsync(
-                await GetAccessTokenAsync(),
-                await GetRefreshTokenAsync(),
+                externalAccessToken,
+                refreshToken,
                 userId,
                 parentEmail,
                 studentEmail,
@@ -316,9 +294,12 @@ namespace GdevApps.Portal.Controllers
         public async Task<IActionResult> UnshareGradeBook(string parentEmail, string mainGradeBookId)
         {
             var userId = _userManager.GetUserId(User);
+            var tokensInfo = await GetTokensInfoAsync();
+            var externalAccessToken = GetAccessToken(tokensInfo);
+            var refreshToken = GetRefreshToken(tokensInfo);
             var result = await _spreadSheetService.UnShareGradeBookAsync(
-                await GetAccessTokenAsync(),
-                await GetRefreshTokenAsync(),
+                externalAccessToken,
+                refreshToken,
                 userId,
                 parentEmail,
                 "",
@@ -343,7 +324,7 @@ namespace GdevApps.Portal.Controllers
         [HttpGet]
         public async Task<IActionResult> GetClassesForStudents()
         {
-            var classes = await GetClassesAsync();
+            var classes = await GetAllClassesAsync();
             var classesList = new SelectList(classes, "Id", "Name");
 
             return View("ClassesForStudents", new ClassesForStudentsViewModel { Classes = classesList });
@@ -468,17 +449,21 @@ namespace GdevApps.Portal.Controllers
 
         #region "Private"
 
-        private async Task<List<ClassesViewModel>> GetClassesAsync()
+        private async Task<List<ClassesViewModel>> GetAllClassesAsync()
         {
-            var serviceClassesRespnse = await _classroomService.GetAllClassesAsync(await GetAccessTokenAsync(), await GetRefreshTokenAsync(), _userManager.GetUserId(User));
-            if (serviceClassesRespnse.Result == ResultType.SUCCESS || serviceClassesRespnse.Result == ResultType.EMPTY)
+            var tokensInfo = await GetTokensInfoAsync();
+            var externalAccessToken = GetAccessToken(tokensInfo); //await _context.GetTokenAsync("access_token"); 
+            var refreshToken = GetRefreshToken(tokensInfo); //await _context.GetTokenAsync("refresh_token");
+            var userId = _userManager.GetUserId(User);
+            var serviceClassesResponse = await _classroomService.GetAllClassesAsync(externalAccessToken, refreshToken, userId);
+            if (serviceClassesResponse.Result == ResultType.SUCCESS || serviceClassesResponse.Result == ResultType.EMPTY)
             {
-                var classes = _mapper.Map<List<ClassesViewModel>>(serviceClassesRespnse.ResultObject);
+                var classes = _mapper.Map<List<ClassesViewModel>>(serviceClassesResponse.ResultObject);
                 return classes;
             }
             else
             {
-                throw new Exception(string.Join(",", serviceClassesRespnse.Errors));
+                throw new Exception(string.Join(",", serviceClassesResponse.Errors));
             }
         }
 
@@ -487,64 +472,77 @@ namespace GdevApps.Portal.Controllers
             if (link.StartsWith("https://docs.google.com"))
             {
                 var gradebookId = GetGradeBookIdFromLink(link);
-                var isGradeBookAsyncResult = await _spreadSheetService.IsGradeBookAsync(gradebookId, await GetAccessTokenAsync(), await GetRefreshTokenAsync(), _userManager.GetUserId(User), link);
+                var tokensInfo = await GetTokensInfoAsync();
+                var accessToken = GetAccessToken(tokensInfo);
+                var refreshToken = GetRefreshToken(tokensInfo);
+                var isGradeBookAsyncResult = await _spreadSheetService.IsGradeBookAsync(gradebookId, accessToken, refreshToken, _userManager.GetUserId(User), link);
                 return isGradeBookAsyncResult.ResultObject.Result;
             }
             return false;
         }
 
-        private async Task<string> GetAccessTokenAsync()
-        {
-            // Include the access token in the properties
-            var accessToken = await _context.GetTokenAsync("access_token");
-            var tokensInfo = await GetTokensInfoAsync();
-            if (string.IsNullOrEmpty(accessToken) || tokensInfo.IsUpdated)
-            {
-                return tokensInfo.Tokens.Where(t => t.Name == "access_token").Select(t => t.Value).FirstOrDefault();
-            }
-
-            return accessToken;
-        }
-
-        private async Task<string> GetRefreshTokenAsync()
-        {
-            // Include the access token in the properties
-            var refreshToken = await _context.GetTokenAsync("refresh_token");
-            var tokensInfo = await GetTokensInfoAsync();
-            if (string.IsNullOrEmpty(refreshToken) || tokensInfo.IsUpdated)
-            {
-                return tokensInfo.Tokens.Where(t => t.Name == "refresh_token").Select(t => t.Value).FirstOrDefault();
-            }
-
-            return refreshToken;
-        }
-
-        private async Task<string> GetTockenUpdatedTimeAsync()
-        {
-            // Include the access token in the properties
-            var tockenUpdatedTime = await _context.GetTokenAsync("token_updated_time");
-            var tokensInfo = await GetTokensInfoAsync();
-            if (string.IsNullOrEmpty(tockenUpdatedTime) || tokensInfo.IsUpdated)
-            {
-                return tokensInfo.Tokens.Where(t => t.Name == "token_updated_time").Select(t => t.Value).FirstOrDefault();
-            }
-
-            return tockenUpdatedTime;
-        }
-
-        private async Task<IEnumerable<GdevApps.BLL.Models.AspNetUsers.AspNetUserToken>> GetAllUserTokens()
-        {
-            if (User.Identity.IsAuthenticated)
-            {
-                return await _aspUserService.GetAllTokensByUserIdAsync(_userManager.GetUserId(User));
-            }
-
-            return new List<GdevApps.BLL.Models.AspNetUsers.AspNetUserToken>();
-        }
-
         private async Task<TokenResponse> GetTokensInfoAsync()
         {
-            var allTokens = await GetAllUserTokens();
+            var allTokens = await GetAllUserTokensAsync();
+            var isUpdated = allTokens.Where(t => t.Name == "token_updated").Select(t => t.Value).FirstOrDefault();
+            bool isUpdatedParsed;
+            Boolean.TryParse(isUpdated, out isUpdatedParsed);
+            if (!string.IsNullOrEmpty(isUpdated) && isUpdatedParsed)
+            {
+                DateTime createdDate;
+                DateTime.TryParse(allTokens.Where(t => t.Name == "created").Select(t => t.Value).FirstOrDefault(), out createdDate);
+
+                DateTime updatedDate;
+                DateTime.TryParse(allTokens.Where(t => t.Name == "token_updated_time").Select(t => t.Value).FirstOrDefault(), out updatedDate);
+                if (updatedDate > createdDate)
+                {
+                    return new TokenResponse(isUpdatedParsed, allTokens);
+                }
+            }
+            return new TokenResponse(false, allTokens);
+        }
+
+        private string GetAccessToken(TokenResponse tokensInfo)
+        {
+            return tokensInfo.Tokens.Where(t => t.Name == "access_token").Select(t => t.Value).FirstOrDefault();
+        }
+
+        private string GetRefreshToken(TokenResponse tokensInfo)
+        {
+            return tokensInfo.Tokens.Where(t => t.Name == "refresh_token").Select(t => t.Value).FirstOrDefault();
+        }
+
+        private string GetTokenUpdatedTime(TokenResponse tokensInfo)
+        {
+            return tokensInfo.Tokens.Where(t => t.Name == "token_updated_time").Select(t => t.Value).FirstOrDefault();
+        }
+
+        private IEnumerable<GdevApps.BLL.Models.AspNetUsers.AspNetUserToken> GetAllUserTokens()
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                RedirectToAction("logoutFromAttr", "Account");
+                return null;
+                //var aspUser = (IAspNetUserService)_context.RequestServices.GetService(typeof(IAspNetUserService));
+            }
+
+            return _aspUserService.GetAllTokensByUserId(_userManager.GetUserId(User));
+        }
+
+        private async Task<IEnumerable<GdevApps.BLL.Models.AspNetUsers.AspNetUserToken>> GetAllUserTokensAsync()
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                RedirectToAction("logoutFromAttr", "Account");
+                return null;
+                //var aspUser = (IAspNetUserService)_context.RequestServices.GetService(typeof(IAspNetUserService));
+            }
+            return await _aspUserService.GetAllTokensByUserIdAsync(_userManager.GetUserId(User));
+        }
+
+          private TokenResponse GetTokensInfo()
+        {
+            var allTokens = GetAllUserTokens();
             var isUpdated = allTokens.Where(t => t.Name == "token_updated").Select(t => t.Value).FirstOrDefault();
             bool isUpdatedParsed;
             Boolean.TryParse(isUpdated, out isUpdatedParsed);
@@ -578,18 +576,5 @@ namespace GdevApps.Portal.Controllers
             }
         }
         #endregion
-    }
-
-    internal sealed class Singleton
-    {
-        private static Singleton instance = null;
-        private static readonly object padlock = new object();
-        public readonly List<ClassSheetsViewModel> Sheets;
-        public string ExternalAccessToken;
-        Singleton()
-        {
-            Sheets = new List<ClassSheetsViewModel>();
-            ExternalAccessToken = "";
-        }
     }
 }
