@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using GdevApps.Portal.Models.AccountViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using GdevApps.BLL.Models.AspNetUsers;
 
 namespace GdevApps.Portal.Attributes
 {

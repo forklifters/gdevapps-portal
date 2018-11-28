@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using GdevApps.BLL.Models.AspNetUsers;
 using GdevApps.Portal.Data;
 using GdevApps.Portal.Models;
 using GdevApps.Portal.Models.AccountViewModels;
@@ -27,6 +28,14 @@ namespace GdevApps.Portal.Controllers
         public  IActionResult Index()
         {
             var userCurrentRole = HttpContext.Session.GetString("UserCurrentRole");
+
+            var roles = ((ClaimsIdentity)User.Identity).Claims
+                            .Where(c => c.Type == ClaimTypes.Role)
+                            .Select(c => c.Value);
+
+
+
+
             if (!string.IsNullOrWhiteSpace(userCurrentRole))
             {
                 switch (userCurrentRole)
@@ -37,6 +46,8 @@ namespace GdevApps.Portal.Controllers
                         return RedirectToAction("Index", "Parent");
                     case UserRoles.Teacher:
                         return RedirectToAction("Index", "Teacher");
+                    case UserRoles.Admin:
+                        return RedirectToAction("Index", "Manage");
                     default:
                         return RedirectToAction("logoutFromAttr", "Account");
                 }

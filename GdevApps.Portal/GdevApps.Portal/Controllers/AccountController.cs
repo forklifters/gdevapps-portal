@@ -22,6 +22,8 @@ using Microsoft.AspNetCore.Http;
 namespace GdevApps.Portal.Controllers
 {
     [Route("[controller]/[action]")]
+    [Authorize(Roles = "Admin, Parent")]
+
     public class AccountController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -70,9 +72,26 @@ namespace GdevApps.Portal.Controllers
         {
             // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-            
+            HttpContext.Session.SetString("UserCurrentRole", UserRoles.Admin);  
             ViewData["ReturnUrl"] = returnUrl;
             return View();
+        }
+
+         [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        {
+            if (userId == null || code == null)
+            {
+                return RedirectToAction(nameof(HomeController.Index), "Home");
+            }
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                throw new ApplicationException($"Unable to load user with ID '{userId}'.");
+            }
+            var result = await _userManager.ConfirmEmailAsync(user, code);
+            return View(result.Succeeded ? "ConfirmEmail" : "Error");
         }
 
         [HttpPost]
@@ -91,10 +110,10 @@ namespace GdevApps.Portal.Controllers
                     _logger.LogInformation("User logged in.");
                     return RedirectToLocal(returnUrl);
                 }
-                if (result.RequiresTwoFactor)
-                {
-                    return RedirectToAction(nameof(LoginWith2fa), new { returnUrl, model.RememberMe });
-                }
+                // if (result.RequiresTwoFactor)
+                // {
+                //     return RedirectToAction(nameof(LoginWith2fa), new { returnUrl, model.RememberMe });
+                // }
                 if (result.IsLockedOut)
                 {
                     _logger.LogWarning("User account locked out.");
@@ -126,160 +145,43 @@ namespace GdevApps.Portal.Controllers
             return View(model);
         }
 
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> LoginWith2fa(bool rememberMe, string returnUrl = null)
-        {
-            // Ensure the user has gone through the username & password screen first
-            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+        // [HttpGet]
+        // [AllowAnonymous]
+        // public IActionResult Register(string returnUrl = null)
+        // {
+        //     ViewData["ReturnUrl"] = returnUrl;
+        //     return View();
+        // }
 
-            if (user == null)
-            {
-                throw new ApplicationException($"Unable to load two-factor authentication user.");
-            }
+        // [HttpPost]
+        // [AllowAnonymous]
+        // [ValidateAntiForgeryToken]
+        // public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
+        // {
+        //     ViewData["ReturnUrl"] = returnUrl;
+        //     if (ModelState.IsValid)
+        //     {
+        //         var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+        //         var result = await _userManager.CreateAsync(user, model.Password);
+        //         if (result.Succeeded)
+        //         {
+        //             _logger.LogInformation("User created a new account with password.");
+        //             // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
+        //             // Send an email with this link
+        //             //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        //             //var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
+        //             //await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
 
-            var model = new LoginWith2faViewModel { RememberMe = rememberMe };
-            ViewData["ReturnUrl"] = returnUrl;
+        //             await _signInManager.SignInAsync(user, isPersistent: false);
+        //             _logger.LogInformation("User created a new account with password.");
+        //             return RedirectToLocal(returnUrl);
+        //         }
+        //         AddErrors(result);
+        //     }
 
-            return View(model);
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> LoginWith2fa(LoginWith2faViewModel model, bool rememberMe, string returnUrl = null)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
-            if (user == null)
-            {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
-
-            var authenticatorCode = model.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
-
-            var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, rememberMe, model.RememberMachine);
-
-            if (result.Succeeded)
-            {
-                _logger.LogInformation("User with ID {UserId} logged in with 2fa.", user.Id);
-                return RedirectToLocal(returnUrl);
-            }
-            else if (result.IsLockedOut)
-            {
-                _logger.LogWarning("User with ID {UserId} account locked out.", user.Id);
-                return RedirectToAction(nameof(Lockout));
-            }
-            else
-            {
-                _logger.LogWarning("Invalid authenticator code entered for user with ID {UserId}.", user.Id);
-                ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
-                return View();
-            }
-        }
-
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> LoginWithRecoveryCode(string returnUrl = null)
-        {
-            // Ensure the user has gone through the username & password screen first
-            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
-            if (user == null)
-            {
-                throw new ApplicationException($"Unable to load two-factor authentication user.");
-            }
-
-            ViewData["ReturnUrl"] = returnUrl;
-
-            return View();
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> LoginWithRecoveryCode(LoginWithRecoveryCodeViewModel model, string returnUrl = null)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
-            if (user == null)
-            {
-                throw new ApplicationException($"Unable to load two-factor authentication user.");
-            }
-
-            var recoveryCode = model.RecoveryCode.Replace(" ", string.Empty);
-
-            var result = await _signInManager.TwoFactorRecoveryCodeSignInAsync(recoveryCode);
-
-            if (result.Succeeded)
-            {
-                _logger.LogInformation("User with ID {UserId} logged in with a recovery code.", user.Id);
-                return RedirectToLocal(returnUrl);
-            }
-            if (result.IsLockedOut)
-            {
-                _logger.LogWarning("User with ID {UserId} account locked out.", user.Id);
-                return RedirectToAction(nameof(Lockout));
-            }
-            else
-            {
-                _logger.LogWarning("Invalid recovery code entered for user with ID {UserId}", user.Id);
-                ModelState.AddModelError(string.Empty, "Invalid recovery code entered.");
-                return View();
-            }
-        }
-
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult Lockout()
-        {
-            return View();
-        }
-
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult Register(string returnUrl = null)
-        {
-            ViewData["ReturnUrl"] = returnUrl;
-            return View();
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
-        {
-            ViewData["ReturnUrl"] = returnUrl;
-            if (ModelState.IsValid)
-            {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-                var result = await _userManager.CreateAsync(user, model.Password);
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("User created a new account with password.");
-                    // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
-                    // Send an email with this link
-                    //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    //var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
-                    //await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
-
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    _logger.LogInformation("User created a new account with password.");
-                    return RedirectToLocal(returnUrl);
-                }
-                AddErrors(result);
-            }
-
-            // If we got this far, something failed, redisplay form
-            return View(model);
-        }
+        //     // If we got this far, something failed, redisplay form
+        //     return View(model);
+        // }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -514,8 +416,15 @@ namespace GdevApps.Portal.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpGet]
         [AllowAnonymous]
+        public IActionResult Lockout()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Teacher")]
         [ValidateAntiForgeryToken]
         public IActionResult SignInAsTeacher(string email)
         {
@@ -524,7 +433,7 @@ namespace GdevApps.Portal.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous]
+        [Authorize(Roles = "Parent")]
         [ValidateAntiForgeryToken]
         public IActionResult SignInAsParent(string email)
         {
@@ -582,22 +491,22 @@ namespace GdevApps.Portal.Controllers
             return View(nameof(ExternalLogin), model);
         }
 
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> ConfirmEmail(string userId, string code)
-        {
-            if (userId == null || code == null)
-            {
-                return RedirectToAction(nameof(HomeController.Index), "Home");
-            }
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                throw new ApplicationException($"Unable to load user with ID '{userId}'.");
-            }
-            var result = await _userManager.ConfirmEmailAsync(user, code);
-            return View(result.Succeeded ? "ConfirmEmail" : "Error");
-        }
+        // [HttpGet]
+        // [AllowAnonymous]
+        // public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        // {
+        //     if (userId == null || code == null)
+        //     {
+        //         return RedirectToAction(nameof(HomeController.Index), "Home");
+        //     }
+        //     var user = await _userManager.FindByIdAsync(userId);
+        //     if (user == null)
+        //     {
+        //         throw new ApplicationException($"Unable to load user with ID '{userId}'.");
+        //     }
+        //     var result = await _userManager.ConfirmEmailAsync(user, code);
+        //     return View(result.Succeeded ? "ConfirmEmail" : "Error");
+        // }
 
         [HttpGet]
         [AllowAnonymous]
@@ -644,6 +553,7 @@ namespace GdevApps.Portal.Controllers
         [AllowAnonymous]
         public IActionResult ResetPassword(string code = null)
         {
+            code = "test";
             if (code == null)
             {
                 throw new ApplicationException("A code must be supplied for password reset.");
@@ -651,6 +561,25 @@ namespace GdevApps.Portal.Controllers
             var model = new ResetPasswordViewModel { Code = code };
             return View(model);
         }
+
+// //TEST
+//         [HttpGet]
+//         [AllowAnonymous]
+//         public async Task<IActionResult> SetMyDefaultPassword()
+//         {
+//             var user = await _userManager.FindByEmailAsync("karac38@gmail.com");
+//             await _userManager.AddPasswordAsync(user, "123321zim");    
+//             return Ok();
+//         }
+// //TEST
+//          [HttpGet]
+//         [AllowAnonymous]
+//         public async Task<IActionResult> SetMyDefaultRole()
+//         {
+//             var user = await _userManager.FindByEmailAsync("karac38@gmail.com");
+//             await _userManager.AddToRoleAsync(user, "Admin");    
+//             return Ok();
+//         }
 
         [HttpPost]
         [AllowAnonymous]

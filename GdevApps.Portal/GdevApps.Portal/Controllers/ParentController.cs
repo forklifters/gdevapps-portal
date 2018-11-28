@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.Configuration;
 using GdevApps.BLL.Contracts;
+using GdevApps.BLL.Models.AspNetUsers;
 using GdevApps.Portal.Attributes;
 using GdevApps.Portal.Data;
 using GdevApps.Portal.Models;

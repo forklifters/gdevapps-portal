@@ -48,6 +48,9 @@ namespace GdevApps.Portal.Configuration
               .ForMember(d => d.MainGradeBookId, s => s.Ignore())
               .ForMember(d => d.MainGradeBookLink, s => s.Ignore())
               .ForMember(d => d.ClassroomName, s => s.MapFrom(o => o.ClassroomId));
+
+              config.CreateMap<GdevApps.BLL.Models.AspNetUsers.PortalRole, GdevApps.Portal.Models.ManageViewModels.PortalRoleViewModel>();
+              config.CreateMap<GdevApps.BLL.Models.AspNetUsers.PortalUser, GdevApps.Portal.Models.ManageViewModels.PortalUserViewModel>();
               
           });
     }

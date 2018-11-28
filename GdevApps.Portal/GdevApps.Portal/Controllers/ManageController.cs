@@ -1,8 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using AutoMapper;
+using GdevApps.BLL.Contracts;
+using GdevApps.BLL.Models.AspNetUsers;
 using GdevApps.Portal.Data;
 using GdevApps.Portal.Models.ManageViewModels;
 using GdevApps.Portal.Services;
@@ -10,12 +14,14 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace GdevApps.Portal.Controllers
 {
     [Authorize]
     [Route("[controller]/[action]")]
+    [Authorize(Roles = "Admin")]
+
     public class ManageController : Controller
     {
          private readonly UserManager<ApplicationUser> _userManager;
@@ -24,7 +30,8 @@ namespace GdevApps.Portal.Controllers
         private readonly ILogger _logger;
         private readonly UrlEncoder _urlEncoder;
         private readonly RoleManager<IdentityRole> _roleManager;
-
+        private readonly IAspNetUserService _aspUserService;
+        private readonly IMapper _mapper;
         private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
         private const string RecoveryCodesKey = nameof(RecoveryCodesKey);
 
@@ -32,9 +39,11 @@ namespace GdevApps.Portal.Controllers
           UserManager<ApplicationUser> userManager,
           SignInManager<ApplicationUser> signInManager,
           IEmailSender emailSender,
-          ILogger<ManageController> logger,
+          ILogger logger,
           UrlEncoder urlEncoder,
-          RoleManager<IdentityRole> roleManager)
+          RoleManager<IdentityRole> roleManager,
+          IAspNetUserService aspNetUserService,
+          IMapper mapper)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -42,6 +51,8 @@ namespace GdevApps.Portal.Controllers
             _logger = logger;
             _urlEncoder = urlEncoder;
             _roleManager = roleManager;
+            _aspUserService = aspNetUserService;
+            _mapper = mapper;
         }
 
         [TempData]
@@ -68,6 +79,59 @@ namespace GdevApps.Portal.Controllers
             };
 
             return View(model);
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> Users()
+        {
+            var users = await _aspUserService.GetAllUsersAsync();
+            var portalUsers = _mapper.Map<IEnumerable<GdevApps.Portal.Models.ManageViewModels.PortalUserViewModel>>(users);
+            return View(portalUsers);
+        }
+
+        //TODO: Uncomment
+        [HttpPost]
+        public async Task<IActionResult> DeleteUserRole(int userRoleId, string userRole, string userId)
+        {
+            _logger.Information("Delete user action was executed for Role id: {UserRoleId}, role: {UserRols}, User id: {UserId}", userRoleId, userRole, userId);
+
+            var userToDelete = await _userManager.FindByIdAsync(userId);
+            if(userToDelete == null)
+            {
+                _logger.Error("User with Id: {UserId} was not found", userId);
+                return BadRequest("User was not found");
+            }
+
+            if(string.IsNullOrWhiteSpace(userRole))
+            {
+                _logger.Error("userRole is empty", userId);
+                return BadRequest("User role is null or empty");
+            }
+
+            switch (userRole)
+            {
+                case UserRoles.Admin:
+                    {
+                        return Ok();
+                    }
+                case UserRoles.Parent:
+                    {
+                        //if(!_aspUserService.DeleteParentById(userRoleId))
+                        //    return BadRequest("User role is null or empty");
+                        return Ok();
+                    }
+                case UserRoles.Teacher:
+                    {
+                       // if (!_aspUserService.DeleteTeacherById(userRoleId))
+                       //     return BadRequest("User role is null or empty");
+                        return Ok();
+                    }
+            }
+
+            //await _userManager.RemoveFromRoleAsync(userToDelete, userRole);
+
+            throw new ApplicationException("test");
         }
 
         [HttpPost]
@@ -175,7 +239,7 @@ namespace GdevApps.Portal.Controllers
             }
 
             await _signInManager.SignInAsync(user, isPersistent: false);
-            _logger.LogInformation("User changed their password successfully.");
+            _logger.Information("User changed their password successfully.");
             StatusMessage = "Your password has been changed.";
 
             return RedirectToAction(nameof(ChangePassword));
@@ -242,7 +306,7 @@ namespace GdevApps.Portal.Controllers
             model.OtherLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync())
                 .Where(auth => model.CurrentLogins.All(ul => auth.Name != ul.LoginProvider))
                 .ToList();
-            model.ShowRemoveButton = await _userManager.HasPasswordAsync(user) || model.CurrentLogins.Count > 1;
+            model.ShowRemoveButton = false;//await _userManager.HasPasswordAsync(user) || model.CurrentLogins.Count > 1;
             model.StatusMessage = StatusMessage;
 
             return View(model);
@@ -362,7 +426,7 @@ namespace GdevApps.Portal.Controllers
                 throw new ApplicationException($"Unexpected error occured disabling 2FA for user with ID '{user.Id}'.");
             }
 
-            _logger.LogInformation("User with ID {UserId} has disabled 2fa.", user.Id);
+            _logger.Information("User with ID {UserId} has disabled 2fa.", user.Id);
             return RedirectToAction(nameof(TwoFactorAuthentication));
         }
 
@@ -411,7 +475,7 @@ namespace GdevApps.Portal.Controllers
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, true);
-            _logger.LogInformation("User with ID {UserId} has enabled 2FA with an authenticator app.", user.Id);
+            _logger.Information("User with ID {UserId} has enabled 2FA with an authenticator app.", user.Id);
             var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
             TempData[RecoveryCodesKey] = recoveryCodes.ToArray();
 
@@ -449,7 +513,7 @@ namespace GdevApps.Portal.Controllers
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);
             await _userManager.ResetAuthenticatorKeyAsync(user);
-            _logger.LogInformation("User with id '{UserId}' has reset their authentication app key.", user.Id);
+            _logger.Information("User with id '{UserId}' has reset their authentication app key.", user.Id);
 
             return RedirectToAction(nameof(EnableAuthenticator));
         }
@@ -487,7 +551,7 @@ namespace GdevApps.Portal.Controllers
             }
 
             var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
-            _logger.LogInformation("User with ID {UserId} has generated new 2FA recovery codes.", user.Id);
+            _logger.Information("User with ID {UserId} has generated new 2FA recovery codes.", user.Id);
 
             var model = new ShowRecoveryCodesViewModel { RecoveryCodes = recoveryCodes.ToArray() };
 

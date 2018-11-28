@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Google.Apis.Classroom.v1;
 using Google.Apis.Classroom.v1.Data;
 using System.Collections.Generic;
@@ -30,6 +29,7 @@ using GdevApps.Portal.Attributes;
 using GdevApps.Portal.Models.SharedViewModels;
 using GdevApps.BLL.Models.AspNetUsers;
 using GdevApps.BLL.Models.GDevSpreadSheetService;
+using Serilog;
 
 namespace GdevApps.Portal.Controllers
 {
@@ -54,7 +54,7 @@ namespace GdevApps.Portal.Controllers
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender,
-            ILogger<TeacherController> logger,
+            ILogger logger,
             IConfiguration configuration,
             IGdevClassroomService classroomService,
             IMapper mapper,

@@ -42,9 +42,62 @@ namespace GdevApps.BLL.Domain
             }
         }
 
-        public Task<IEnumerable<AspNetUser>> GetAllUsersAsync()
+        public async Task<IEnumerable<PortalUser>> GetAllUsersAsync()
         {
-            throw new NotImplementedException();
+           try
+            {
+                var aspUsers = (await _aspNetUserRepository.GetAllAsync<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.AspNetUsers>()).ToList();
+                var portalUsers = new List<PortalUser>();
+                foreach(var aspUser in aspUsers)
+                {
+                    var portalUser = new PortalUser()
+                    {
+                        Id = aspUser.Id,
+                        Email = aspUser.Email,
+                        UserName = aspUser.UserName
+                    };
+                    var roles = new List<PortalRole>();
+                    if(aspUser.ParentAspUser.Any())
+                    {
+                        foreach (var parent in aspUser.ParentAspUser)
+                        {
+                            var role = new PortalRole()
+                            {
+                                RoleId = parent.Id,
+                                Name = UserRoles.Parent,
+                                UserId = parent.AspUser.Id,
+                                CreatedByEmail = parent.CreatedByNavigation.Email,
+                                CreatedById = parent.CreatedBy
+                            };
+                            roles.Add(role);
+                        }
+                    }
+
+                    if (aspUser.TeacherAspNetUser.Any())
+                    {
+                        foreach (var teacher in aspUser.TeacherAspNetUser)
+                        {
+                            var role = new PortalRole()
+                            {
+                                RoleId = teacher.Id,
+                                Name = UserRoles.Teacher,
+                                UserId = teacher.AspNetUser.Id,
+                                CreatedByEmail = teacher.CreatedByNavigation.Email,
+                                CreatedById = teacher.CreatedBy
+                            };
+                            roles.Add(role);
+                        }
+                    }
+                    portalUser.Roles = roles;
+                    portalUsers.Add(portalUser);
+                }
+
+                return portalUsers;
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
         }
 
         public async Task UpdateUserTokensAsync(AspNetUserToken userTokens)
@@ -223,6 +276,34 @@ namespace GdevApps.BLL.Domain
             catch (Exception exception)
             {
                 throw exception;
+            }
+        }
+
+        public bool DeleteParentById(int id)
+        {
+            try
+            {
+                _aspNetUserRepository.Delete<Parent>(id);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Parent with id: {ParentId} was not deleted", id);
+                return false;
+            }
+        }
+
+        public bool DeleteTeacherById(int id)
+        {
+            try
+            {
+                _aspNetUserRepository.Delete<Teacher>(id);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Teacher with id: {TeacherId} was not deleted", id);
+                return false;
             }
         }
     }

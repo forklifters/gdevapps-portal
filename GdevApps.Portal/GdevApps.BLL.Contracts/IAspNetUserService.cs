@@ -7,7 +7,7 @@ namespace GdevApps.BLL.Contracts
 {
     public interface IAspNetUserService
     {
-        Task<IEnumerable<Models.AspNetUsers.AspNetUser>> GetAllUsersAsync();
+        Task<IEnumerable<PortalUser>> GetAllUsersAsync();
 
         Task<IEnumerable<AspNetUserToken>> GetAllTokens();
 
@@ -29,5 +29,8 @@ namespace GdevApps.BLL.Contracts
 
         Task<bool> SetTeacherAspUserId(int teacherId, string aspUserId);
         Task<List<ParentModel>> GetAllParentsByTeacherAsync(string aspUserTeacherId);
+
+        bool DeleteParentById(int id);
+        bool DeleteTeacherById(int id);
     }
 }
