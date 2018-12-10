@@ -64,16 +64,19 @@ namespace GdevApps.BLL.Domain
         }
         public async Task<TaskResult<string, ICredential>> GetRootFolderIdAsync(string externalAccessToken, string refreshToken, string userId)
         {
-            //find folder id using repository
+            _logger.Debug("User {userId} is trying to get the rool folder", userId);
             var rootFolder = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(
-                filter: f => f.CreatedBy == userId && 
-                f.FolderType == (int)FolderType.ROOT && 
+                filter: f => f.CreatedBy == userId &&
+                f.FolderType == (int)FolderType.ROOT &&
                 f.PrentFolderId == null &&
                 !f.IsDeleted);
             if (rootFolder == null || string.IsNullOrEmpty(rootFolder.GoogleFileId))
             {
+                _logger.Debug("Root folder was not found for user {userId}. Creating an new one.", userId);
                 return await CreateRootFolderAsync(externalAccessToken, refreshToken, userId);
             }
+
+            _logger.Debug("Root folder was successfully found for user {userId}.", userId);
             var rootFolderId = rootFolder.GoogleFileId;
 
             return new TaskResult<string, ICredential>(ResultType.SUCCESS, rootFolderId, GoogleCredential.FromAccessToken(externalAccessToken));
@@ -85,6 +88,7 @@ namespace GdevApps.BLL.Domain
         }
         public async Task<TaskResult<string, ICredential>> CreateRootFolderAsync(ICredential googleCredential, string refreshToken, string userId)
         {
+            _logger.Debug("Creating a root folder for user {UserId}", userId);
             var driveService = new DriveService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = googleCredential,
@@ -115,15 +119,18 @@ namespace GdevApps.BLL.Domain
                     PrentFolderId = null
                 };
                 _gradeBookRepository.Create<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(rootFolder);
-                _gradeBookRepository.Save();
+                await _gradeBookRepository.SaveAsync();
 
+                _logger.Debug("The oot folder for user {UserId} was successfully created", userId);
                 return new TaskResult<string, ICredential>(ResultType.SUCCESS, file.Id, googleCredential);
             }
             catch (Google.GoogleApiException exception)
             {
+                _logger.Error(exception, "An error occurred while creating a root folder for user {UserId}}.", userId);
                 switch (exception?.Error?.Code)
                 {
                     case 401:
+                        _logger.Error(exception, "Token is expired. Refreshing the token and trying again");
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
                         googleCredential = new UserCredential(new GoogleAuthorizationCodeFlow(
                            new GoogleAuthorizationCodeFlow.Initializer
@@ -143,15 +150,16 @@ namespace GdevApps.BLL.Domain
 
                         request = driveService.Files.Create(fileMetadata);
                         file = await request.ExecuteAsync();
-                        await UpdateAllTokens(userId, googleCredential as UserCredential);
+                        await UpdateAllTokensAsync(userId, googleCredential as UserCredential);
+                        _logger.Debug("The oot folder for user {UserId} was successfully created and all tokens were refreshed.", userId);
                         return new TaskResult<string, ICredential>(ResultType.SUCCESS, file.Id, googleCredential);
-
                     default: throw exception;
                 }
             }
         }
         public async Task<TaskResult<GdevApps.BLL.Models.GDevDriveService.Folder, ICredential>> CreateInnerFolderAsync(string rootFolderId, string folderName, ICredential googleCredential, string refreshToken, string userId)
         {
+            _logger.Debug("Creating an inner folder {FolderName} in the root folder {RootFolderId} for user {UserId}", folderName, rootFolderId, userId);
             var driveService = new DriveService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = googleCredential,
@@ -159,10 +167,12 @@ namespace GdevApps.BLL.Domain
             });
 
             // check if folder already exists. If yes return Error
-            var innerFolderResult = await GetInnerFolderIdAsync(googleCredential, refreshToken, userId, rootFolderId, folderName);
-            if (innerFolderResult.Result == ResultType.SUCCESS && !string.IsNullOrWhiteSpace(innerFolderResult.ResultObject))
+            var innerFolderResult = await GetInnerFolderAsync(googleCredential, refreshToken, userId, rootFolderId, folderName);
+            if (innerFolderResult.Result == ResultType.SUCCESS)
             {
-                throw new Exception("Folder already exists");
+                _logger.Warning("Folder {FolderName} is already exists in the root folder {RootFolderId} for user {UserId}", folderName, rootFolderId, userId);
+                var existingInnerFolder = _mapper.Map<GdevApps.BLL.Models.GDevDriveService.Folder>(innerFolderResult.ResultObject);
+                return new TaskResult<GdevApps.BLL.Models.GDevDriveService.Folder, ICredential>(ResultType.SUCCESS, existingInnerFolder, googleCredential);
             }
 
             FilesResource.GetRequest getRootFolderRequest;
@@ -174,9 +184,11 @@ namespace GdevApps.BLL.Domain
             }
             catch (Google.GoogleApiException exception)
             {
+                _logger.Error(exception, "An error occurred while retrieving the root folder {RootFolderId} for user {UserId}}.", rootFolderId, userId);
                 switch (exception?.Error?.Code)
                 {
                     case 401:
+                        _logger.Error(exception, "Token is expired. Refreshing the token and trying again");
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
                         googleCredential = new UserCredential(new GoogleAuthorizationCodeFlow(
                            new GoogleAuthorizationCodeFlow.Initializer
@@ -196,7 +208,7 @@ namespace GdevApps.BLL.Domain
 
                         getRootFolderRequest = driveService.Files.Get(rootFolderId);
                         rootFolder = await getRootFolderRequest.ExecuteAsync();
-                        await UpdateAllTokens(userId, googleCredential as UserCredential);
+                        await UpdateAllTokensAsync(userId, googleCredential as UserCredential);
                         break;
                     default: throw exception;
                 }
@@ -223,17 +235,20 @@ namespace GdevApps.BLL.Domain
                 PrentFolderId = rootFolderDal.Id
             };
             _gradeBookRepository.Create<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(innerFolder);
-            _gradeBookRepository.Save();
-
+            await _gradeBookRepository.SaveAsync();
+            _logger.Debug("Inner folder {FolderName} was successfully created in root folder {RootFolderId} by user {UserId}", folderName, rootFolderId, userId);
             var innderFodlerBll = _mapper.Map<GdevApps.BLL.Models.GDevDriveService.Folder>(innerFolder);
             return new TaskResult<GdevApps.BLL.Models.GDevDriveService.Folder, ICredential>(ResultType.SUCCESS, innderFodlerBll, googleCredential);
         }
 
-        //TODO: Return new result TRASHED
         public async Task<TaskResult<FileStateResult, ICredential>> IsFileExistsAsync(string fileId, ICredential googleCredential, string refreshToken, string userId)
         {
-            if(string.IsNullOrWhiteSpace(fileId))
+            _logger.Debug("User {UserId} is checking if the file {FileId} exists", userId, fileId);
+            if (string.IsNullOrWhiteSpace(fileId))
+            {
+                _logger.Debug("File {FileId} does not exist. User {UserId}", fileId, userId);
                 return new TaskResult<FileStateResult, ICredential>(ResultType.SUCCESS, new FileStateResult(FileState.NOTEXIST), googleCredential);
+            }
 
             FilesResource.GetRequest request;
             Google.Apis.Drive.v3.Data.File file;
@@ -250,22 +265,27 @@ namespace GdevApps.BLL.Domain
                 file = await request.ExecuteAsync();
                 if (file?.Trashed ?? false)
                 {
+                    _logger.Debug("File {FileId} was trashed not exist. User {UserId}", fileId, userId);
                     return new TaskResult<FileStateResult, ICredential>(ResultType.SUCCESS, new FileStateResult(FileState.TRASHED), googleCredential);
                 }
                 else if (file.Id != null)
                 {
+                    _logger.Debug("File {FileId} exists. User {UserId}", fileId, userId);
                     return new TaskResult<FileStateResult, ICredential>(ResultType.SUCCESS, new FileStateResult(FileState.EXISTS), googleCredential);
                 }
                 else
                 {
+                    _logger.Debug("File {FileId} does not exist. User {UserId}", fileId, userId);
                     return new TaskResult<FileStateResult, ICredential>(ResultType.SUCCESS, new FileStateResult(FileState.NOTEXIST), googleCredential);
                 }
             }
             catch (Google.GoogleApiException exception)
             {
+                _logger.Error(exception, "An error occurred while retrieving a file {FileId} for user {UserId}}.", fileId, userId);
                 switch (exception?.Error?.Code)
                 {
                     case 401:
+                        _logger.Error(exception, "Token is expired. Refreshing the token and trying again");
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
                         googleCredential = new UserCredential(new GoogleAuthorizationCodeFlow(
                            new GoogleAuthorizationCodeFlow.Initializer
@@ -286,18 +306,21 @@ namespace GdevApps.BLL.Domain
                         request = driveService.Files.Get(fileId);
                         request.Fields = "trashed, id";
                         file = await request.ExecuteAsync();
-                        await UpdateAllTokens(userId, googleCredential as UserCredential);
+                        await UpdateAllTokensAsync(userId, googleCredential as UserCredential);
                         bool exists = (file?.Trashed ?? false) && file.Id != null;
                         if (file?.Trashed ?? false)
                         {
+                            _logger.Debug("File {FileId} was trashed not exist for user {UserId}. All tokens were updated", fileId, userId);
                             return new TaskResult<FileStateResult, ICredential>(ResultType.SUCCESS, new FileStateResult(FileState.TRASHED), googleCredential);
                         }
                         else if (file.Id != null)
                         {
+                            _logger.Debug("File {FileId} exists for user {UserId}. All tokens were updated.", fileId, userId);
                             return new TaskResult<FileStateResult, ICredential>(ResultType.SUCCESS, new FileStateResult(FileState.EXISTS), googleCredential);
                         }
                         else
                         {
+                            _logger.Debug("File {FileId} does not exist for user {UserId}. All tokens were updated.", fileId, userId);
                             return new TaskResult<FileStateResult, ICredential>(ResultType.SUCCESS, new FileStateResult(FileState.NOTEXIST), googleCredential);
                         }
 
@@ -305,24 +328,24 @@ namespace GdevApps.BLL.Domain
                         throw exception;
                 }
             }
-            catch (Exception err)
-            {
-                throw err;
-            }
         }
         public async Task<TaskResult<string, ICredential>> GetRootFolderIdAsync(ICredential googleCredential, string refreshToken, string userId)
         {
+            _logger.Debug("User {UserId} requested the root folder id", userId);
             var rootFolder = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(filter: x => x.FolderType == (int)FolderType.ROOT && x.PrentFolderId == null);
 
             if (string.IsNullOrEmpty(rootFolder.GoogleFileId))
             {
+                _logger.Debug("Root folder was not found for user {UserId}. Creating new one.", userId);
                 return await CreateRootFolderAsync(googleCredential, refreshToken, userId);
             }
 
+            _logger.Debug("Root folder Id {RootFolderId} was successfully retrieved", rootFolder.GoogleFileId);
             return new TaskResult<string, ICredential>(ResultType.SUCCESS, rootFolder.GoogleFileId, googleCredential);
         }
         public async Task<TaskResult<BoolResult, ICredential>> MoveFileToFolderAsync(string fileId, string folderId, ICredential googleCredential, string refreshToken, string userId)
         {
+            _logger.Debug("User {UserId} requested to move file {FildeId} to the folder {FolderId}", userId, fileId, folderId);
             FilesResource.GetRequest request;
             File file;
             var driveService = new DriveService(new BaseClientService.Initializer()
@@ -338,9 +361,11 @@ namespace GdevApps.BLL.Domain
             }
             catch (Google.GoogleApiException exception)
             {
+                _logger.Error(exception, "An error occurred while retrieving a file {FileId} for user {UserId}.", fileId, userId);
                 switch (exception?.Error?.Code)
                 {
                     case 401:
+                        _logger.Error(exception, "Token is expired. Refreshing the token and trying again");
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
                         googleCredential = new UserCredential(new GoogleAuthorizationCodeFlow(
                            new GoogleAuthorizationCodeFlow.Initializer
@@ -364,10 +389,6 @@ namespace GdevApps.BLL.Domain
                     default: throw exception;
                 }
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
 
             try
             {
@@ -378,38 +399,45 @@ namespace GdevApps.BLL.Domain
                 updateRequest.RemoveParents = previousParents;
                 file = await updateRequest.ExecuteAsync();
 
+                _logger.Debug("File {FileName} with id {FileId} was successfully moved into the folder {FolderId} by the user {UserId}", file?.Name, fileId, folderId, userId);
                 return new TaskResult<BoolResult, ICredential>(ResultType.SUCCESS, new BoolResult(!string.IsNullOrEmpty(file.Id)), googleCredential);
             }
             catch (Exception ex)
             {
+                _logger.Error(ex, "An error occurred while mobing the file {FileName} with id {FileId} for user {UserId}", file?.Name, fileId, userId);
                 throw ex;
             }
         }
 
         public async Task<TaskResult<string, ICredential>> GetInnerFolderIdAsync(string externalAccessToken, string refreshToken, string userId, string rootFolderId, string folderName)
         {
+            _logger.Debug("User {UserId} reqeusted an inner folder {FolderName} bu the root folder id {RootFolderId}", userId, folderName, rootFolderId);
             ICredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
             var innerFolerResult = await GetInnerFolderAsync(googleCredential, refreshToken, userId, rootFolderId, folderName);
             if (innerFolerResult.Result == ResultType.SUCCESS && innerFolerResult.ResultObject != null)
             {
+                _logger.Debug("Folder {FolderName} was successfully found in root folder {RootFolderId}", folderName, rootFolderId);
                 return new TaskResult<string, ICredential>(ResultType.SUCCESS, innerFolerResult.ResultObject.GoogleFileId, googleCredential); ;
-
             }
             else
             {
+                _logger.Debug("Folder {FolderName} was not found in root folder {RootFolderId}", folderName, rootFolderId);
                 return new TaskResult<string, ICredential>(ResultType.EMPTY, "", googleCredential); ;
             }
         }
 
         public async Task<TaskResult<string, ICredential>> GetInnerFolderIdAsync(ICredential googleCredential, string refreshToken, string userId, string rootFolderId, string folderName)
         {
+            _logger.Debug("User {UserId} requested the inner folder {FolderName} id from the root folder {RootFolderId}", userId, folderName, rootFolderId);
             var innerFolerResult = await GetInnerFolderAsync(googleCredential, refreshToken, userId, rootFolderId, folderName);
             if (innerFolerResult.Result == ResultType.SUCCESS && innerFolerResult.ResultObject != null)
             {
+                _logger.Debug("Folder {FolderName} id {FolderId} was successfully found in root folder {RootFolderId}", folderName, innerFolerResult.ResultObject.Id, rootFolderId);
                 return new TaskResult<string, ICredential>(ResultType.SUCCESS, innerFolerResult.ResultObject.GoogleFileId, googleCredential); ;
             }
             else
             {
+                _logger.Debug("Folder {FolderName} was not found in root folder {RootFolderId}", folderName, rootFolderId);
                 return new TaskResult<string, ICredential>(ResultType.EMPTY, "", googleCredential); ;
             }
         }
@@ -422,6 +450,7 @@ namespace GdevApps.BLL.Domain
 
         public async Task<TaskResult<GdevApps.BLL.Models.GDevDriveService.Folder, ICredential>> GetInnerFolderAsync(ICredential googleCredential, string refreshToken, string userId, string rootFolderId, string folderName)
         {
+            _logger.Debug("User {UserId} requested the inner folder {FolderName} from the root folder {RootFolderId}", userId, folderName, rootFolderId);
             var parentFolder = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(filter: f => f.GoogleFileId == rootFolderId && !f.IsDeleted);
             var innerFolder = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(
                 filter: f => f.PrentFolderId == parentFolder.Id && 
@@ -433,23 +462,25 @@ namespace GdevApps.BLL.Domain
             var innerFolderBll = _mapper.Map<GdevApps.BLL.Models.GDevDriveService.Folder>(innerFolder);
             if (innerFolder != null)
             {
+                _logger.Debug("Folder {FolderName} was successfully found in root folder {RootFolderId}", folderName, rootFolderId);
                 return new TaskResult<GdevApps.BLL.Models.GDevDriveService.Folder, ICredential>(ResultType.SUCCESS, innerFolderBll, googleCredential); ;
             }
             else
             {
+                _logger.Debug("Folder {FolderName} was not found in root folder {RootFolderId}", folderName, rootFolderId);
                 return new TaskResult<GdevApps.BLL.Models.GDevDriveService.Folder, ICredential>(ResultType.EMPTY, null, googleCredential); ;
             }
         }
 
-
-        public async Task<TaskResult<BoolResult, ICredential>> GrantPermission(string externalAccessToken, string refreshToken, string userId, string fileId, string email, string permissionType, string role)
+        public async Task<TaskResult<BoolResult, ICredential>> GrantPermissionAsync(string externalAccessToken, string refreshToken, string userId, string fileId, string email, string permissionType, string role)
         {
             ICredential googleCredential = GoogleCredential.FromAccessToken(externalAccessToken);
-            return await GrantPermission(googleCredential, refreshToken, userId, fileId, email, permissionType, role);
+            return await GrantPermissionAsync(googleCredential, refreshToken, userId, fileId, email, permissionType, role);
         }
 
-        public async Task<TaskResult<BoolResult, ICredential>> GrantPermission(ICredential googleCredential, string refreshToken, string userId, string fileId, string email, string permissionType, string role)
+        public async Task<TaskResult<BoolResult, ICredential>> GrantPermissionAsync(ICredential googleCredential, string refreshToken, string userId, string fileId, string email, string permissionType, string role)
         {
+            _logger.Debug("User {UserId} is trying to grant permission {PermissionType} with role {Role} to the user {SharedUserEmail} for the file {FileId}", userId, permissionType, role, email, fileId);
             PermissionsResource.CreateRequest request;
             Permission permissionResult;
             var driveService = new DriveService(new BaseClientService.Initializer()
@@ -473,9 +504,11 @@ namespace GdevApps.BLL.Domain
             }
             catch (Google.GoogleApiException exception)
             {
+                _logger.Error(exception, "An error occurred while granting a permission {PermissionType} to the user {SharedUserEmail} for the file {FileId}.", permissionType, email, fileId);
                 switch (exception?.Error?.Code)
                 {
                     case 401:
+                    _logger.Error(exception, "Token is expired. Refreshing the token and trying again");
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
                         googleCredential = new UserCredential(new GoogleAuthorizationCodeFlow(
                            new GoogleAuthorizationCodeFlow.Initializer
@@ -500,11 +533,8 @@ namespace GdevApps.BLL.Domain
                     default: throw exception;
                 }
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
 
+            _logger.Debug("User {UserId} is successfully granted permission {PermissionType} with role {Role} to the user {SharedUserEmail} for the file {FileId}", userId, permissionType, role, email, fileId);
             return new TaskResult<BoolResult, ICredential>(ResultType.SUCCESS, new BoolResult(true), googleCredential);
         }
 
@@ -517,6 +547,8 @@ namespace GdevApps.BLL.Domain
 
         public async Task<TaskResult<BoolResult, ICredential>> DeletePermissionAsync(ICredential googleCredential, string refreshToken, string userId, string fileId, string permissionType = "", string role = "")
         {
+            _logger.Debug("User {UserId} is trying to remove permission {PermissionType} with role {Role} from the file {FileId}", userId, permissionType, role, fileId);
+
             PermissionsResource.ListRequest requestList;
             PermissionList permissionsResult;
             var driveService = new DriveService(new BaseClientService.Initializer()
@@ -532,9 +564,11 @@ namespace GdevApps.BLL.Domain
             }
             catch (Google.GoogleApiException exception)
             {
+                _logger.Error(exception, "An error occurred while removing a permission {PermissionType} from the file {FileId}.", permissionType, fileId);
                 switch (exception?.Error?.Code)
                 {
                     case 401:
+                        _logger.Error(exception, "Token is expired. Refreshing the token and trying again");
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
                         googleCredential = new UserCredential(new GoogleAuthorizationCodeFlow(
                            new GoogleAuthorizationCodeFlow.Initializer
@@ -557,10 +591,6 @@ namespace GdevApps.BLL.Domain
                         break;
                     default: throw exception;
                 }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
             }
 
             var permissionToDeleteQuery = permissionsResult.Permissions.Where(p => p.Role != PermissionRole.Owner);
@@ -600,6 +630,7 @@ namespace GdevApps.BLL.Domain
                 }
 
                 await batch.ExecuteAsync();
+                _logger.Debug("Such permission were removed: {DeleteIds} with such errors: {Errors} for the file {FileId}", string.Join(",", deletedIds), string.Join(",", errorsBag));
             }
 
             return new TaskResult<BoolResult, ICredential>(ResultType.SUCCESS, new BoolResult(true), googleCredential);
@@ -608,21 +639,27 @@ namespace GdevApps.BLL.Domain
         
         public async Task<bool> DeleteRootFolderAsync(string googleFolderId)
         {
+            _logger.Debug("Delete root folder {RootFolderId} was called", googleFolderId);
             if (string.IsNullOrWhiteSpace(googleFolderId))
                 throw new ArgumentNullException("googleFolderId");
 
             var rootFolder = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(
-                filter: f => f.GoogleFileId == googleFolderId && f.FolderType == (int)FolderType.ROOT && f.PrentFolderId == null && !f.IsDeleted
+                filter: f => f.GoogleFileId == googleFolderId &&
+                f.FolderType == (int)FolderType.ROOT &&
+                f.PrentFolderId == null &&
+                !f.IsDeleted
                 );
 
-            _gradeBookRepository.Delete<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(rootFolder);
+            await _gradeBookRepository.DeleteAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(rootFolder);
+            _logger.Debug("Root folder {RootFolderId} was deleted successfully", googleFolderId);
 
             return true;
-
         }
 
         public async Task<bool> DeleteInnerFolderAsync(string googleFolderId)
         {
+            _logger.Debug("Delete inner folder {RootFolderId} was called", googleFolderId);
+
             if (string.IsNullOrWhiteSpace(googleFolderId))
                 throw new ArgumentNullException("googleFolderId");
 
@@ -630,12 +667,14 @@ namespace GdevApps.BLL.Domain
                 filter: f => f.GoogleFileId == googleFolderId && f.FolderType == (int)FolderType.INNER && f.PrentFolderId != null && !f.IsDeleted
                 );
             
-            _gradeBookRepository.Delete<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(innerFolder);
+            await _gradeBookRepository.DeleteAsync<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder>(innerFolder);
+            _logger.Debug("Inner folder {RootFolderId} was deleted successfully", googleFolderId);
+
             return true;
         }
 
         #region Private methods
-        private async Task<Google.Apis.Drive.v3.Data.File> InsertFile(DriveService service, string title, string description, string parentId, string mimeType, string filename)
+        private async Task<Google.Apis.Drive.v3.Data.File> InsertFileAsync(DriveService service, string title, string description, string parentId, string mimeType, string filename)
         {
             // File's metadata.
             Google.Apis.Drive.v3.Data.File body = new Google.Apis.Drive.v3.Data.File();
@@ -690,8 +729,9 @@ namespace GdevApps.BLL.Domain
 
             return result;
         }
-        private async Task UpdateAllTokens(string userId, UserCredential credentials)
+        private async Task UpdateAllTokensAsync(string userId, UserCredential credentials)
         {
+            _logger.Debug("Update all tokens was called for user {UserId}", userId);
             var userLoginTokens = await _aspUserService.GetAllTokensByUserIdAsync(userId);
             if (userLoginTokens != null)
             {

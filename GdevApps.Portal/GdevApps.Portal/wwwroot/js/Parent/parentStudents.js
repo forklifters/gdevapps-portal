@@ -22,7 +22,7 @@ var ParentStudents = (function () {
                 url: url,
                 data: data,
                 headers: {
-                    RequestVerificationToken: $('input[name="__RequestVerificationToken"').val()
+                    RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
                 }
             })
                 .done(function (response) {
@@ -71,7 +71,7 @@ var ParentStudents = (function () {
                 url: url,
                 data: data,
                 headers: {
-                    RequestVerificationToken: $('input[name="__RequestVerificationToken"').val()
+                    RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
                 }
             }).done(function (result) {
                 $loader.addClass("hidden");

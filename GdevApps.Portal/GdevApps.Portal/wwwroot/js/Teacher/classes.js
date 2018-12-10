@@ -189,7 +189,7 @@ var Classes = (function () {
             url: url,
             data: data,
             headers: {
-                RequestVerificationToken: $('input[name="__RequestVerificationToken"').val()
+                RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
             }
         })
             .done(function (msg) {

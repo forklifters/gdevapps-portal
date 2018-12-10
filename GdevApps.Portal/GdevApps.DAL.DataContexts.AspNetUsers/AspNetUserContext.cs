@@ -4,10 +4,12 @@ using GdevApps.DAL.DataContexts.AspNetUsers.Config;
 using GdevApps.DAL.DataContexts.AspNetUsers.Config.AspNetUser;
 using GdevApps.DAL.DataContexts.AspNetUsers.Config.GradeBook;
 using GdevApps.DAL.DataModels.AspNetUsers.AspNetUser;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace GdevApps.DAL.DataContexts.AspNetUsers
 {
-    public class AspNetUserContext : DbContext
+    public class AspNetUserContext : IdentityDbContext<ApplicationUser>
     {
         public AspNetUserContext(DbContextOptions<AspNetUserContext> options) :
             base(options)
@@ -24,6 +26,8 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers
         public virtual DbSet<DataModels.AspNetUsers.AspNetUser.AspNetUserTokens> AspNetUserTokens { get; set; }
         public virtual DbSet<DataModels.AspNetUsers.AspNetUser.Parent> Parent { get; set; }
         public virtual DbSet<ParentStudent> ParentStudent { get; set; }
+        public virtual DbSet<DataModels.AspNetUsers.AspNetUser.Teacher> Teacher { get; set; }
+        public virtual DbSet<DataModels.AspNetUsers.AspNetUser.ApplicationUser> ApplicationUser { get; set; }
 
         public virtual DbSet<DataModels.AspNetUsers.GradeBook.Folder> Folder { get; set; }
         public virtual DbSet<DataModels.AspNetUsers.GradeBook.FolderType> FolderType { get; set; }
@@ -38,6 +42,7 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers
         public virtual DbSet<GdevApps.DAL.DataModels.AspNetUsers.LicensedUser.Roles> Roles { get; set; }
         public virtual DbSet<GdevApps.DAL.DataModels.AspNetUsers.LicensedUser.Users> Users { get; set; }
 
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.ApplyConfiguration(new AspNetRoleClaimsConfig());
@@ -47,6 +52,7 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers
             builder.ApplyConfiguration(new AspNetUserLoginsConfig());
             builder.ApplyConfiguration(new AspNetUserRolesConfig());
             builder.ApplyConfiguration(new AspNetUserTokensConfig());
+            builder.ApplyConfiguration(new ApplicationUserConfig());
 
             builder.ApplyConfiguration(new FolderConfig());
             builder.ApplyConfiguration(new FolderTypeConfig());
@@ -62,6 +68,14 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers
             builder.ApplyConfiguration(new AccountConfig());
             builder.ApplyConfiguration(new ParentConfig());
             builder.ApplyConfiguration(new TeacherConfig());
+
+            builder.Entity<ApplicationUser>(i => {
+                i.Property(o => o.EmailConfirmed).HasConversion<int>();
+                i.Property(o => o.LockoutEnabled).HasConversion<int>();
+                i.Property(o => o.PhoneNumberConfirmed).HasConversion<int>();
+                i.Property(o => o.TwoFactorEnabled).HasConversion<int>();
+                });
+            base.OnModelCreating(builder);
         }
     }
 }

@@ -4,8 +4,8 @@
 @using Microsoft.AspNetCore.Http.Authentication 
 @using GdevApps.Portal.Data 
 @model GdevApps.Portal.Models.AccountViewModels.AccountLoginInfo 
-@inject Microsoft.AspNetCore.Identity.SignInManager<GdevApps.Portal.Data.ApplicationUser> SignInManager 
-@inject UserManager<GdevApps.Portal.Data.ApplicationUser> UserManager
+@inject Microsoft.AspNetCore.Identity.SignInManager<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.ApplicationUser> SignInManager 
+@inject UserManager<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.ApplicationUser> UserManager
     @{ ViewData["Title"] = "Welcome to Gdev apps Portal"; } 
     @{ Layout = "/Views/Shared/_LoginLayout.cshtml"; }
     

@@ -12,6 +12,8 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.AspNetUser
     {
         public void Configure(EntityTypeBuilder<AspNetRoleClaims> entity)
         {
+            entity.ToTable("AspNetRoleClaims", "gradebook_license");
+
             entity.HasIndex(e => e.RoleId);
 
             entity.Property(e => e.Id).HasColumnType("int(11)");

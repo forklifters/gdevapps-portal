@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using GdevApps.BLL.Models.AspNetUsers;
+using GdevApps.DAL.DataModels.AspNetUsers.AspNetUser;
 using GdevApps.Portal.Data;
 using GdevApps.Portal.Models;
 using GdevApps.Portal.Models.AccountViewModels;
@@ -13,18 +14,19 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace GdevApps.Portal.Controllers
 {
     public class HomeController : Controller
     {
-         private readonly UserManager<ApplicationUser> _userManager;
-
-         public HomeController(UserManager<ApplicationUser> userManager)
-         {
-             _userManager = userManager;
-         }
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger _logger;
+        public HomeController(UserManager<ApplicationUser> userManager, ILogger logger)
+        {
+            _userManager = userManager;
+            _logger = logger;
+        }
         public  IActionResult Index()
         {
             var userCurrentRole = HttpContext.Session.GetString("UserCurrentRole");

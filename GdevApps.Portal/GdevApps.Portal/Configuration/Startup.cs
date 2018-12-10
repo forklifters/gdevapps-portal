@@ -20,6 +20,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
 using System.IO;
+using GdevApps.DAL.DataModels.AspNetUsers.AspNetUser;
 
 namespace GdevApps.Portal
 {

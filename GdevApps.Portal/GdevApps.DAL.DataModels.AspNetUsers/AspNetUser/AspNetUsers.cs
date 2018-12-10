@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using GdevApps.DAL.DataModels.AspNetUsers.AspNetUser;
 using GdevApps.DAL.DataModels.AspNetUsers.GradeBook;
-
 
 namespace GdevApps.DAL.DataModels.AspNetUsers.AspNetUser
 {
-     public partial class AspNetUsers
+    public partial class AspNetUsers
     {
-         public AspNetUsers()
+        public AspNetUsers()
         {
             AspNetUserClaims = new HashSet<AspNetUserClaims>();
             AspNetUserLogins = new HashSet<AspNetUserLogins>();
@@ -27,16 +27,16 @@ namespace GdevApps.DAL.DataModels.AspNetUsers.AspNetUser
         public int AccessFailedCount { get; set; }
         public string ConcurrencyStamp { get; set; }
         public string Email { get; set; }
-        public bool EmailConfirmed { get; set; }
-        public bool LockoutEnabled { get; set; }
+        public short EmailConfirmed { get; set; }
+        public short LockoutEnabled { get; set; }
         public DateTime? LockoutEnd { get; set; }
         public string NormalizedEmail { get; set; }
         public string NormalizedUserName { get; set; }
         public string PasswordHash { get; set; }
         public string PhoneNumber { get; set; }
-        public bool PhoneNumberConfirmed { get; set; }
+        public short PhoneNumberConfirmed { get; set; }
         public string SecurityStamp { get; set; }
-        public bool TwoFactorEnabled { get; set; }
+        public short TwoFactorEnabled { get; set; }
         public string UserName { get; set; }
         public string Avatar { get; set; }
 

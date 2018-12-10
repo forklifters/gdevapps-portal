@@ -51,6 +51,8 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.AspNetUser
                     .HasForeignKey(d => d.MainGradeBookId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("gradebook_parentgradebook_id");
+                    entity.Property( p=> p.IsDeleted).HasConversion<int>();
+
         }
     }
 }

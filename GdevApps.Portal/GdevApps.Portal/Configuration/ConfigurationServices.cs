@@ -17,6 +17,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using MySqlConnector;
+using GdevApps.DAL.DataModels.AspNetUsers.AspNetUser;
 
 namespace GdevApps.Portal.Configuration
 {
@@ -39,28 +41,23 @@ namespace GdevApps.Portal.Configuration
         public static void AddDatabaseContexts(this IServiceCollection services,
             IConfiguration configuration)
         {
-
+            //set up Db context
             services.AddDbContext<AspNetUserContext>(options =>
-                options.UseMySql(configuration.GetConnectionString("DefaultConnection")),
-                ServiceLifetime.Scoped, 
-                ServiceLifetime.Scoped
-                );
-
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseMySql(configuration.GetConnectionString("DefaultConnection")),
-                ServiceLifetime.Scoped, 
-                ServiceLifetime.Scoped
+                options.UseMySQL(configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("GdevApps.Portal")),
+                ServiceLifetime.Transient,
+                ServiceLifetime.Transient
                 );
         }
 
         public static void AddAspNetIdentity(this IServiceCollection services)
         {
-            services.AddIdentity<ApplicationUser, IdentityRole>(options => {
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
                 options.User.RequireUniqueEmail = true;
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ ";
             })
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+           .AddEntityFrameworkStores<AspNetUserContext>()
+           .AddDefaultTokenProviders();
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -80,17 +77,12 @@ namespace GdevApps.Portal.Configuration
             });
         }
 
-        public static void AddApplicationLogging(this IServiceCollection services)
-        {
-            // services.AddSingleton(Log.Logger);
-        }
-
         public static void AddApplicationSession(this IServiceCollection services)
         {
             services.AddDistributedMemoryCache();
             services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromMinutes(30);//You can set Time   
+                options.IdleTimeout = TimeSpan.FromMinutes(60);//You can set Time   
             });
         }
 
@@ -149,7 +141,6 @@ namespace GdevApps.Portal.Configuration
 
                       return Task.CompletedTask;
                   };
-
 
                   googleOptions.AuthorizationEndpoint += "?prompt=consent";// Hack so we always get a refresh token, it only comes on the first authorization response 
               });

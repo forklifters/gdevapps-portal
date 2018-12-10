@@ -65,6 +65,8 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.GradeBook
                     .HasForeignKey(d => d.PrentFolderId)
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("parentfolder_folder_id");
+
+                    entity.Property( p=> p.IsDeleted).HasConversion<int>();
         }
     }
 }

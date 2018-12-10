@@ -9,17 +9,35 @@ using GdevApps.Portal.Models;
 using GdevApps.Portal.Models.AccountViewModels;
 using GdevApps.Portal.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace GdevApps.Portal.Controllers
 {
     public class ErrorController : Controller
     {
+        private readonly ILogger _logger;
+
+        public ErrorController(ILogger logger)
+        {
+            _logger = logger;
+        }
         public IActionResult Index()
         {
+            var exceptionFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();
+            if (exceptionFeature != null)
+            {
+                // Get which route the exception occurred at
+                string routeWhereExceptionOccurred = exceptionFeature.Path;
+
+                // Get the exception that occurred
+                Exception exceptionThatOccurred = exceptionFeature.Error;
+                _logger.Error(exceptionThatOccurred, "An error occured while processing the request: {Path}", routeWhereExceptionOccurred);
+            }
+
             return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 

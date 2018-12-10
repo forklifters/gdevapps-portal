@@ -16,6 +16,9 @@ namespace GdevApps.DAL.Repositories.BaseRepository
         void Delete<TEntity>(object id)
             where TEntity : class;
 
+        Task DeleteAsync<TEntity>(object id)
+        where TEntity : class;
+
         void Delete<TEntity>(TEntity entity)
             where TEntity : class;
 

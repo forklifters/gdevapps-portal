@@ -20,8 +20,20 @@ namespace GdevApps.DAL.Repositories.AspNetUserRepository
             context.Parent.Include(p => p.CreatedBy).LoadAsync();
             context.Parent.Include(p => p.ParentSharedGradeBook).LoadAsync();
             context.Parent.Include(p => p.ParentStudent).LoadAsync();
+            context.Parent.Include(p => p.CreatedByNavigation).LoadAsync();
+
+            context.Teacher.Include(p => p.AspNetUser).LoadAsync();
+            context.Teacher.Include(p => p.CreatedByNavigation).LoadAsync();
+
             context.ParentSharedGradeBook.Include(p => p.ParentGradeBook).LoadAsync();
+            
             context.ParentStudent.Include(ps => ps.GradeBook).LoadAsync();
+
+            context.AspNetUsers.Include(p => p.AspNetUserRoles).LoadAsync();
+            context.AspNetUsers.Include(p => p.TeacherAspNetUser).LoadAsync();
+            context.AspNetUsers.Include(p => p.ParentAspUser).LoadAsync();
+
+            context.AspNetUserRoles.Include(r => r.Role).LoadAsync();
         }
 
         public AspNetUserRepository() :

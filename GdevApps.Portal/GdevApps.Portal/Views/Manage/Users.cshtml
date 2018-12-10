@@ -1,10 +1,13 @@
-@model List<PortalUserViewModel>
+@model List<GeneralPortalUserViewModel>
 @using Newtonsoft.Json;
+@using GdevApps.Portal.Views.Manage
 <script src="~/js/Manage/users.js" asp-append-version="true"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="~/js/bootstrap-dialog.min.js"></script>
+<link rel="stylesheet" href="~/css/Manage/users.css" />
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"/>
 @{
-    ViewData["Title"] = "Profile";
+    ViewData["Title"] = "All Users";
     ViewData.AddActivePage(ManageNavPages.Users);
 }
 
@@ -20,30 +23,53 @@
         <table id="users" class="table table-striped table-bordered table-hover responsive" width="100%">
             <thead class="thin-border-bottom">
                 <tr>
-                    <th class="col-xs-1 col-md-1"> </th>
                     <th>User Name</th>
                     <th>Id</th>
                     <th>Email</th>
-                    <th class="hidden"></th>
+                    <th>Roles</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var user in Model){
                     <tr>
-                        <td class="details-control">
-                            <span class="glyphicon glyphicon-th-list"></span>
-                        </td>
                         <td>@user.UserName</td>
                         <td>@user.Id</td>
                         <td>@user.Email</td>
-                        <td class="hidden">@JsonConvert.SerializeObject(user.Roles)</td>
+                        <td>
+                            @if(user.Roles.Any())
+                            {
+                                <ul>
+                                    @foreach(var role in user.Roles)
+                                    {
+                                        <li class="students-li">@role.Name (Created by: @role.CreatedByEmail)</li>
+                                    }
+                                </ul>
+                            }
+                        </td>
+                        <td>
+                             <form asp-action="RemoveUser" method="post">
+                                <div>
+                                    <input id="id_@user.Id" asp-for="@user.Id" name="Id" type="hidden" />
+                                    <input id="email_@user.Id" asp-for="@user.Email" name="Email" type="hidden" />
+                                    <input id="name_@user.Id" asp-for="@user.UserName" name="UserName" type="hidden"/>
+                                    <button type="submit" class="btn btn-danger" title="Remove this user">Remove</button>
+                                </div>
+                            </form>
+                            @if(!user.Roles.Any())
+                            {
+                                <a class="@ManageNavPages.AddRoleNavClass(ViewContext) btn btn-primary" asp-controller="Manage" asp-action="AddUserRole" asp-route-userEmail="@user.Email">Assign Role</a>
+                            }
+                        </td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
 </div>
-
+<a class="@ManageNavPages.AddUserNavClass(ViewContext) btn btn-primary" asp-controller="Manage" asp-action="AddUser">Add</a>
+<div id="modal-placeholder"></div>
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
 }
+

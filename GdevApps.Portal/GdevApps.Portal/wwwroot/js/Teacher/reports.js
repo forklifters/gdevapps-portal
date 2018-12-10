@@ -11,6 +11,8 @@ var StudentReports = (function () {
             var id = $(this).val(); // Use $(this) so you don't traverse the DOM again
             if (id === "-1") {//ignore the first element selection
                 event.preventDefault();
+                $('#divStudents').hide('slide', { direction: 'left' });
+                $('#dvReportResults').html('');
                 return;
             }
 
@@ -22,7 +24,7 @@ var StudentReports = (function () {
                 url: url,
                 data: data,
                 headers: {
-                    RequestVerificationToken: $('input[name="__RequestVerificationToken"').val()
+                    RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
                 }
             })
                 .done(function (response) {
@@ -47,7 +49,12 @@ var StudentReports = (function () {
                 })
                 .fail(function (msg) {
                     $loader.addClass("hidden");
-                    console.log("Error occurred while retrieving the Students: " + msg.responseText);
+                    $loader.addClass("hidden");
+                    BootstrapDialog.show({
+                        type: BootstrapDialog.TYPE_WARNING,
+                        message: 'Something went wrong! Please try again',
+                    });
+                    $("#ddlGradebooks").val(-1);
                 });
 
         });
@@ -57,6 +64,7 @@ var StudentReports = (function () {
             var id = $(this).val(); // Use $(this) so you don't traverse the DOM again
             if (id === "-1") {//ignore the first element selection
                 event.preventDefault();
+                $('#dvReportResults').html('');
                 return;
             }
             var gradebookId = $("#ddlGradebooks").val();
@@ -68,7 +76,7 @@ var StudentReports = (function () {
                 url: url,
                 data: data,
                 headers: {
-                    RequestVerificationToken: $('input[name="__RequestVerificationToken"').val()
+                    RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
                 }
             }).done(function (result) {
                 $loader.addClass("hidden");
@@ -77,7 +85,12 @@ var StudentReports = (function () {
                 initA4();
             }).fail(function (err) {
                 $loader.addClass("hidden");
-                console.log(err);
+                BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_WARNING,
+                    message: 'Something went wrong! Please try again',
+                });
+                $("#ddlStudents").val(-1);
+                //console.log(err);
             })
         });
 

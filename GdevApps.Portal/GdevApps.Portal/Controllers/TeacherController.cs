@@ -30,6 +30,7 @@ using GdevApps.Portal.Models.SharedViewModels;
 using GdevApps.BLL.Models.AspNetUsers;
 using GdevApps.BLL.Models.GDevSpreadSheetService;
 using Serilog;
+using GdevApps.DAL.DataModels.AspNetUsers.AspNetUser;
 
 namespace GdevApps.Portal.Controllers
 {
@@ -372,7 +373,7 @@ namespace GdevApps.Portal.Controllers
                     IsDeleted = false
                 };
 
-                var result = _spreadSheetService.AddGradebook(gradeBookModel);
+                var result = await _spreadSheetService.AddGradebookAsync(gradeBookModel);
 
                 return PartialView("_AddGradebook", model);
             }

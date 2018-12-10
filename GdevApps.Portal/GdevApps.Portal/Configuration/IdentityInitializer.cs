@@ -1,3 +1,4 @@
+using GdevApps.DAL.DataModels.AspNetUsers.AspNetUser;
 using GdevApps.Portal.Data;
 using Microsoft.AspNetCore.Identity;
 
@@ -13,17 +14,24 @@ namespace GdevApps.Portal.Configuration
 
         public static void SeedUsers(UserManager<ApplicationUser> userManager)
         {
-            if (userManager.FindByEmailAsync("karac38@gmail.com").Result == null)
+            try
             {
-                ApplicationUser user = new ApplicationUser();
-                user.UserName = "Pasha";
-                user.Email = "karac38@gmail.com";
-
-                IdentityResult result = userManager.CreateAsync(user, "2?}2cZrsfBvg_?ap").Result;
-                if (result.Succeeded)
+                if (userManager.FindByEmailAsync("karac38@gmail.com").Result == null)
                 {
-                    userManager.AddToRoleAsync(user,"Admin").Wait();
+                    ApplicationUser user = new ApplicationUser();
+                    user.UserName = "Pasha";
+                    user.Email = "karac38@gmail.com";
+
+                    IdentityResult result = userManager.CreateAsync(user, "2?}2cZrsfBvg_?ap").Result;
+                    if (result.Succeeded)
+                    {
+                        userManager.AddToRoleAsync(user, "Admin").Wait();
+                    }
                 }
+            }
+            catch (System.Exception ex)
+            {
+                throw ex;
             }
         }
 

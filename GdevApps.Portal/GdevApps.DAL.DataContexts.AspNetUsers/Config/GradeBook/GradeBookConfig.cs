@@ -40,6 +40,8 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.AspNetUser
                 .WithMany(p => p.GradeBook)
                 .HasForeignKey(d => d.CreatedBy)
                 .HasConstraintName("aspnet_user_id");
+                    entity.Property( p=> p.IsDeleted).HasConversion<int>();
+
         }
     }
 }

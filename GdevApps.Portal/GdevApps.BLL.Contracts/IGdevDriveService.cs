@@ -23,8 +23,8 @@ namespace GdevApps.BLL.Contracts
         Task<TaskResult<string, ICredential>> GetInnerFolderIdAsync(ICredential googleCredential, string refreshToken, string userId, string rootFolderId, string folderName);
         Task<TaskResult<Folder, ICredential>> GetInnerFolderAsync(string externalAccessToken, string refreshToken, string userId, string rootFolderId, string folderName);
         Task<TaskResult<Folder, ICredential>> GetInnerFolderAsync(ICredential googleCredential, string refreshToken, string userId, string rootFolderId, string folderName);
-        Task<TaskResult<BoolResult, ICredential>> GrantPermission(string externalAccessToken, string refreshToken, string userId, string fileId, string email, string permissionType, string role);
-        Task<TaskResult<BoolResult, ICredential>> GrantPermission(ICredential googleCredential, string refreshToken, string userId, string fileId, string email, string permissionType, string role);
+        Task<TaskResult<BoolResult, ICredential>> GrantPermissionAsync(string externalAccessToken, string refreshToken, string userId, string fileId, string email, string permissionType, string role);
+        Task<TaskResult<BoolResult, ICredential>> GrantPermissionAsync(ICredential googleCredential, string refreshToken, string userId, string fileId, string email, string permissionType, string role);
         
         //Permissions can not be deleted by email in v3 https://stackoverflow.com/questions/14148021/any-way-to-get-email-address-from-google-drive-api-permissions-so-i-can-differen
         //https://developers.google.com/drive/api/v3/migration

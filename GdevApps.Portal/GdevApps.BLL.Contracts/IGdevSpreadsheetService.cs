@@ -57,13 +57,13 @@ namespace GdevApps.BLL.Contracts
             string userId, 
             string parentEmail, 
             string parentGradebookName);
-        bool AddGradebook(GradeBook model);
+        Task<bool> AddGradebookAsync(GradeBook model);
         Task<bool> EditGradebookAsync(GradeBook model);
         Task<GradeBook> GetGradebookByUniqueIdAsync(string gradebookId);
         GradeBook GetGradebookByIdAsync(int id);
         Task<bool> DeleteGradeBookAsync(string classroomId, string gradebookId); 
-        Task<IEnumerable<GradeBook>> GetGradeBooksByClassIdAsync(string classId, string userEmail);
-        Task<IEnumerable<GradeBook>> GetAllGradeBooksAsync(string userId);
+        Task<List<GradeBook>> GetGradeBooksByClassIdAsync(string classId, string userEmail);
+        Task<List<GradeBook>> GetAllGradeBooksAsync(string userId);
         Task<TaskResult<BoolResult, ICredential>> ShareGradeBookAsync(
             string externalAccessToken,
             string refreshToken,

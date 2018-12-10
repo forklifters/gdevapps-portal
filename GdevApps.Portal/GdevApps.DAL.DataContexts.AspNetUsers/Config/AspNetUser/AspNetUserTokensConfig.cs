@@ -12,6 +12,8 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.AspNetUser
     {
         public void Configure(EntityTypeBuilder<AspNetUserTokens> entity)
         {
+            entity.ToTable("AspNetUserTokens", "gradebook_license");
+
             entity.HasKey(e => new { e.UserId, e.LoginProvider, e.Name });
 
             entity.Property(e => e.UserId).HasMaxLength(255);

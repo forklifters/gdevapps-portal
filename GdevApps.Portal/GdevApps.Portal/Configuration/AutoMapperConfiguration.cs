@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using GdevApps.BLL.Models.AspNetUsers;
 using GdevApps.Portal.Data;
 using GdevApps.Portal.Models.SharedViewModels;
 using GdevApps.Portal.Models.TeacherViewModels;
@@ -23,6 +24,7 @@ namespace GdevApps.Portal.Configuration
               .ForMember(opt => opt.ParentGradeBook, x => x.Ignore());
 
               config.CreateMap<GdevApps.BLL.Models.AspNetUsers.Parent, GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Parent>();
+              config.CreateMap<GdevApps.BLL.Models.AspNetUsers.Teacher, GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Teacher>();
               config.CreateMap<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.Folder, GdevApps.BLL.Models.GDevDriveService.Folder>();
               config.CreateMap<ClassSheetsViewModel, GdevApps.BLL.Models.GDevClassroomService.GradeBook>();
 
@@ -36,7 +38,9 @@ namespace GdevApps.Portal.Configuration
               .ForMember(d => d.Name, s => s.MapFrom(o => o.Name))
               .ForMember(d => d.HasAccount, x => x.Ignore());
 
-              config.CreateMap<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Teacher, GdevApps.BLL.Models.AspNetUsers.Teacher>();
+              config.CreateMap<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Teacher, GdevApps.BLL.Models.AspNetUsers.Teacher>()
+              .ForMember(d => d.CreatedByEmail, s => s.MapFrom(o => o.CreatedByNavigation.Email));
+
               config.CreateMap<GdevApps.DAL.DataModels.AspNetUsers.GradeBook.ParentGradeBook, GdevApps.BLL.Models.GDevSpreadSheetService.ParentSpreadsheet>()
               .ForMember(d => d.MainGradeBookName, s => s.MapFrom(o => o.MainGradeBook.Name))
               .ForMember(d => d.MainGradeBookLink, s => s.MapFrom(o => o.MainGradeBook.Link));
@@ -50,8 +54,42 @@ namespace GdevApps.Portal.Configuration
               .ForMember(d => d.ClassroomName, s => s.MapFrom(o => o.ClassroomId));
 
               config.CreateMap<GdevApps.BLL.Models.AspNetUsers.PortalRole, GdevApps.Portal.Models.ManageViewModels.PortalRoleViewModel>();
-              config.CreateMap<GdevApps.BLL.Models.AspNetUsers.PortalUser, GdevApps.Portal.Models.ManageViewModels.PortalUserViewModel>();
+              config.CreateMap<GdevApps.BLL.Models.AspNetUsers.PortalUser, GdevApps.Portal.Models.ManageViewModels.GeneralPortalUserViewModel>();
               
+              config.CreateMap<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Parent, GdevApps.BLL.Models.AspNetUsers.Parent>()
+              .ForMember(d => d.StudentEmails, s => s.MapFrom(o => o.ParentStudent.Select(st => st.StudentEmail).ToList()))
+              .ForMember(d => d.CreatedByEmail, s => s.MapFrom(o => o.CreatedByNavigation.Email));
+
+            //   config.CreateMap<GdevApps.BLL.Models.AspNetUsers.Parent, GdevApps.Portal.Models.ManageViewModels.RoleViewModel>()
+            //   .ForMember(d => d.Name, s => s.MapFrom( o=> UserRoles.Parent))
+            //   .ForMember(d => d.UserName, s => s.MapFrom( o=> o.Name));
+            //   config.CreateMap<GdevApps.BLL.Models.AspNetUsers.Teacher, GdevApps.Portal.Models.ManageViewModels.RoleViewModel>()
+            //   .ForMember(d => d.StudentEmails, s => s.Ignore())
+            //   .ForMember(d => d.Name, s => s.MapFrom( o=> UserRoles.Teacher))
+            //   .ForMember(d => d.UserName, s => s.MapFrom( o=> o.Name))
+            //   .ForMember(d => d.AspUserId, s => s.MapFrom( o=> o.AspNetUserId));
+
+              config.CreateMap<GdevApps.BLL.Models.AspNetUsers.Teacher, GdevApps.Portal.Models.ManageViewModels.PortalUserViewModel>()
+              .ForMember(d => d.UserName, s => s.MapFrom( o=> o.Name))
+              .ForMember(d => d.Id, s => s.MapFrom( o=> o.AspNetUserId))
+              .ForMember(d => d.Role, s => s.MapFrom( o=> new GdevApps.Portal.Models.ManageViewModels.PortalRoleViewModel(){
+                  Name = UserRoles.Teacher,
+                  CreatedByEmail = o.CreatedByEmail,
+                  CreatedById = o.CreatedBy,
+                  RoleId = o.Id,
+                  UserId = o.AspNetUserId
+              }));
+              config.CreateMap<GdevApps.BLL.Models.AspNetUsers.Parent, GdevApps.Portal.Models.ManageViewModels.PortalUserViewModel>()
+              .ForMember(d => d.UserName, s => s.MapFrom( o=> o.Name))
+              .ForMember(d => d.Id, s => s.MapFrom( o=> o.AspUserId))
+              .ForMember(d => d.Role, s => s.MapFrom( o=> new GdevApps.Portal.Models.ManageViewModels.PortalRoleViewModel(){
+                  Name = UserRoles.Teacher,
+                  CreatedByEmail = o.CreatedByEmail,
+                  CreatedById = o.CreatedBy,
+                  RoleId = o.Id,
+                  UserId = o.AspUserId
+              }));
+
           });
     }
 }

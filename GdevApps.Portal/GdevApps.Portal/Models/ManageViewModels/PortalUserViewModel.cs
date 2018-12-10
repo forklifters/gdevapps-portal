@@ -11,6 +11,6 @@ namespace GdevApps.Portal.Models.ManageViewModels
         public string Id { get; set; }
         public string UserName { get; set; }
         public string Email { get; set; }
-        public List<PortalRoleViewModel> Roles {get;set;}
+        public PortalRoleViewModel Role {get;set;}
     }
 }

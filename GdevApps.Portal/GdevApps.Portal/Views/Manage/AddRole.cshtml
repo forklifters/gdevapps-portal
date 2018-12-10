@@ -1,0 +1,61 @@
+@model GdevApps.Portal.Models.ManageViewModels.GeneralAddRoleViewModel;
+@using GdevApps.Portal.Views.Manage
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="~/js/bootstrap-dialog.min.js"></script>
+<link rel="stylesheet" href="~/css/Manage/users.css" />
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"/>
+@{
+    ViewData["Title"] = "Add Role";
+    ViewData.AddActivePage(ManageNavPages.Users);
+}
+
+<script type="text/javascript">
+    $(function() {
+        $('#ddlRoles').on('change', function(e){
+            $("#hdnRole").attr('value',this.value)
+        });
+    });
+</script>
+<div class="container">
+    <div class="row">
+            <div class="modal-dialog modal-margin-10" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                        <h4 class="modal-title" id="myModal-label">
+                            ASSIGN ROLE
+                        </h4>   
+                    </div>
+                        <form asp-antiforgery="true"  asp-action="AddUserRole" asp-controller="Manage">
+                            <div class="modal-body">
+                                <input name="IsValid" type="hidden" value="@ViewData.ModelState.IsValid.ToString()" />
+                                <div class="form-group">
+                                    <label asp-for="Email">Email</label>
+                                    <input asp-for="Email" class="form-control" readonly="@(true)"/>
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Name">Name</label>
+                                    <input asp-for="Name" class="form-control" readonly="@(true)"/>
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Roles"></label>
+                                    <select id="ddlRoles" class="form-control select2" asp-items="@Model.Roles">
+                                    </select>
+                                    <span asp-validation-for="RoleName" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <input id="hdnRole" asp-for="RoleName" class="form-control hidden"/>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" data-email="@Model.Email" class="btn btn-primary" data-add="modal" id="btnAdd">Assign</button>
+                                </div>
+                            </div>
+                        </form>
+                </div>
+            </div>
+    </div>
+</div>

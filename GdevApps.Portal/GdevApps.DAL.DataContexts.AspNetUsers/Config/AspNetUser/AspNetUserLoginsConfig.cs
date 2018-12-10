@@ -12,6 +12,8 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.AspNetUser
     {
         public void Configure(EntityTypeBuilder<AspNetUserLogins> entity)
         {
+            entity.ToTable("AspNetUserLogins", "gradebook_license");
+
             entity.HasKey(e => new { e.LoginProvider, e.ProviderKey });
 
             entity.HasIndex(e => e.UserId);

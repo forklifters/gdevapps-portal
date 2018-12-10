@@ -1,5 +1,5 @@
 ﻿@using GdevApps.Portal.Views.Manage
-@inject SignInManager<GdevApps.Portal.Data.ApplicationUser> SignInManager
+@inject SignInManager<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.ApplicationUser> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }
@@ -12,5 +12,7 @@
         <li class="@ManageNavPages.ExternalLoginsNavClass(ViewContext)"><a asp-action="ExternalLogins">External logins</a></li>
     }
     <li class="@ManageNavPages.UsersNavClass(ViewContext)"><a asp-action="Users">Users</a></li>
+    <li class="@ManageNavPages.TeachersNavClass(ViewContext)"><a asp-action="Teachers">Teachers</a></li>
+    <li class="@ManageNavPages.ParentsNavClass(ViewContext)"><a asp-action="Parents">Parents</a></li>
 </ul>
 

@@ -12,6 +12,8 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.AspNetUser
     {
         public void Configure(EntityTypeBuilder<AspNetRoles> entity)
         {
+            entity.ToTable("AspNetRoles", "gradebook_license");
+
             entity.HasIndex(e => e.NormalizedName)
                     .HasName("RoleNameIndex");
 

@@ -12,6 +12,8 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.AspNetUser
     {
         public void Configure(EntityTypeBuilder<AspNetUserClaims> entity)
         {
+            entity.ToTable("AspNetUserClaims", "gradebook_license");
+
             entity.HasIndex(e => e.UserId);
 
             entity.Property(e => e.Id).HasColumnType("int(11)");

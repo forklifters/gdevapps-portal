@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using GdevApps.BLL.Contracts;
+using GdevApps.DAL.DataModels.AspNetUsers.AspNetUser;
 using GdevApps.Portal.Data;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
@@ -31,12 +32,6 @@ namespace GdevApps.Portal.Controllers
             _signInManager = signInManager;
             _userManager = userManager;
             _aspNetUserService = aspNetUserService;
-        }
-
-        public async Task<IActionResult> GetTokens()
-        {
-            var result = await _aspNetUserService.GetAllTokens();
-            return Ok(result);
         }
 
         public async Task<IActionResult> Index()

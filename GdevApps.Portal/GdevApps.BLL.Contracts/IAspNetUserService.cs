@@ -7,15 +7,14 @@ namespace GdevApps.BLL.Contracts
 {
     public interface IAspNetUserService
     {
-        Task<IEnumerable<PortalUser>> GetAllUsersAsync();
-
-        Task<IEnumerable<AspNetUserToken>> GetAllTokens();
+        Task<List<PortalUser>> GetAllUsersAsync();
 
         Task UpdateUserTokensAsync(AspNetUserToken userTokens);
 
         Task<IEnumerable<AspNetUserToken>> GetAllTokensByUserIdAsync(string userId);
         IEnumerable<AspNetUserToken> GetAllTokensByUserId(string userId);
-        bool AddParent(Parent parent);
+        Task<bool> AddParentAsync(Parent parent);
+        Task<bool> AddTeacherAsync(Teacher parent);
 
         Task<Parent> GetParentByEmailAsync(string email);
 
@@ -25,12 +24,15 @@ namespace GdevApps.BLL.Contracts
 
         bool AddUserLogin(AspNetUserLogin userLogin);
 
-        Task<bool> SetParentAspUserId(int parentId, string aspUserId);
+        Task<bool> SetParentAspUserIdAsync(int parentId, string aspUserId);
 
-        Task<bool> SetTeacherAspUserId(int teacherId, string aspUserId);
+        Task<bool> SetTeacherAspUserIdAsync(int teacherId, string aspUserId);
         Task<List<ParentModel>> GetAllParentsByTeacherAsync(string aspUserTeacherId);
-
-        bool DeleteParentById(int id);
-        bool DeleteTeacherById(int id);
+        Task<bool> DeleteParentByIdAsync(int id);
+        Task<bool> DeleteTeacherByIdAsync(int id);
+        Task<Parent> GetParentByIdAsync(int id);
+        Task<Teacher> GetTeacherByIdAsync(int id);
+        Task<List<Parent>> GetAllParentsAsync();
+        Task<List<Teacher>> GetAllTeachersAsync();
     }
 }

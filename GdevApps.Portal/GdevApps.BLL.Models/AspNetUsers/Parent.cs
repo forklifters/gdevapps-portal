@@ -12,6 +12,7 @@ namespace GdevApps.BLL.Models.AspNetUsers
         public string Avatar { get; set; }
         public string AspUserId { get; set; }
         public string CreatedBy { get; set; }
-
+        public string CreatedByEmail { get; set; }
+        public ICollection<string> StudentEmails { get; set; }
     }
 }

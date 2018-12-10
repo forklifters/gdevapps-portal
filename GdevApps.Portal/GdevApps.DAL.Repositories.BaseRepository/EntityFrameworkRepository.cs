@@ -43,6 +43,13 @@ namespace GdevApps.DAL.Repositories.BaseRepository
             Delete(entity);
         }
 
+        public virtual async Task DeleteAsync<TEntity>(object id)
+            where TEntity : class
+        {
+            TEntity entity = await context.Set<TEntity>().FindAsync(id);
+            Delete(entity);
+        }
+
         public virtual void Delete<TEntity>(TEntity entity)
             where TEntity : class
         {

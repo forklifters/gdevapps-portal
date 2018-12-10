@@ -1,0 +1,15 @@
+li.students-li { 
+    display: block 
+}
+li.students-li:before {    
+    content: '\e008';
+    font-family: 'Glyphicons Halflings';
+    font-size: 12px;
+    float: left;
+    margin-top: 3px;
+    padding-right: 6px;
+}
+
+.modal-margin-10{
+    margin:10px !important;
+}

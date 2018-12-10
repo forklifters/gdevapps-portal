@@ -1,8 +1,8 @@
 @using Microsoft.AspNetCore.Identity
 @using GdevApps.Portal.Models
 
-@inject SignInManager<GdevApps.Portal.Data.ApplicationUser> SignInManager
-@inject UserManager<GdevApps.Portal.Data.ApplicationUser> UserManager
+@inject SignInManager<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.ApplicationUser> SignInManager
+@inject UserManager<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.ApplicationUser> UserManager
 
 <div class="js-navigation-scrollable">
 @if (SignInManager.IsSignedIn(User))

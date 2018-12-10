@@ -87,7 +87,7 @@ namespace GdevApps.BLL.Domain
                 switch (ex?.Error?.Code)
                 {
                     case 401:
-                        _logger.Error(ex, "An error occurred while retrieving courses from Google Classroom. Token is expired. Refreshing the token and trying again");
+                        _logger.Debug(ex, "Token is expired. Refreshing the token and trying again");
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse
                         {
                             RefreshToken = refreshToken
@@ -123,7 +123,7 @@ namespace GdevApps.BLL.Domain
             }
             var errorList = new List<string>();
             if(response.Courses == null){
-                _logger.Information("No courses have been found for this user {UserId}", userId);
+                _logger.Debug("No courses have been found for this user {UserId}", userId);
                 return new TaskResult<IEnumerable<GoogleClass>, ICredential>(ResultType.EMPTY, new List<GoogleClass>(), googleCredential, errorList);
             }
 
@@ -142,7 +142,7 @@ namespace GdevApps.BLL.Domain
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(ex, "Error occurred while continued to retrieve classesfor user {UserId}", userId);
+                    _logger.Debug(ex, "Error occurred while continued to retrieve courses for user {UserId}", userId);
                     request.PageToken = null;//stop the loop
                     errorList.Add(ex.Message);
                 }
@@ -167,7 +167,7 @@ namespace GdevApps.BLL.Domain
                         }
                         catch (Exception ex)
                         {
-                            _logger.Error(ex, "Error occurred while retrieving courseWorks for user {UserId}. End cycle", userId);
+                            _logger.Debug(ex, "Error occurred while retrieving courseWorks for user {UserId}. End cycle", userId);
                             courseWorksRequest.PageToken = null;
                             errorList.Add(ex.Message);
                         }
@@ -185,7 +185,7 @@ namespace GdevApps.BLL.Domain
                         }
                         catch (Exception ex)
                         {
-                            _logger.Error(ex, "Error occured while retrieving students for user {UserId}", userId);
+                            _logger.Debug(ex, "Error occured while retrieving students for user {UserId}", userId);
                             studentsListRequest.PageToken = null;
                             errorList.Add(ex.Message);
                         }
@@ -211,6 +211,7 @@ namespace GdevApps.BLL.Domain
         }
         public async Task<TaskResult<GoogleClass, ICredential>> GetClassByIdAsync(string classroomId, ICredential googleCredential, string refreshToken, string userId)
         {
+            _logger.Debug("User {UserId} requested a class {ClassId} information", userId, classroomId);
             CoursesResource.GetRequest request;
             Course response;
             ClassroomService service = new ClassroomService(new BaseClientService.Initializer()
@@ -226,10 +227,11 @@ namespace GdevApps.BLL.Domain
             }
             catch (Google.GoogleApiException ex)
             {
+                _logger.Error(ex, "An error occurred while retrieving classroom {ClassId} from the Google Classroom", classroomId);
                 switch (ex?.Error?.Code)
                 {
                     case 401:
-                        _logger.Error(ex, "An error occurred while retrieving courses from Google Classroom. Token is expired. Refreshing the token and trying again");
+                        _logger.Error(ex, "Token is expired. Refreshing the token and trying again");
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
                         googleCredential = new UserCredential(new GoogleAuthorizationCodeFlow(
                             new GoogleAuthorizationCodeFlow.Initializer
@@ -258,73 +260,65 @@ namespace GdevApps.BLL.Domain
                 _logger.Error(ex, $"Error occurred while retrieving class with id {classroomId}");
                 throw ex;
             }
-
-            try
+            var classes = new List<GoogleClass>();
+            List<CourseWork> courseWorks = new List<CourseWork>();
+            List<Student> students = new List<Student>();
+            var errorList = new List<string>();
+            if (response != null)
             {
-                var classes = new List<GoogleClass>();
-                List<CourseWork> courseWorks = new List<CourseWork>();
-                List<Student> students = new List<Student>();
-                var errorList = new List<string>();
-                if (response != null)
+                var courseWorksRequest = service.Courses.CourseWork.List(response.Id);
+                do
                 {
-                    var courseWorksRequest = service.Courses.CourseWork.List(response.Id);
-                    do
+                    try
                     {
-                        try
-                        {
-                            ListCourseWorkResponse cwList = await courseWorksRequest.ExecuteAsync();
-                            courseWorks.AddRange(cwList.CourseWork);
-                            courseWorksRequest.PageToken = cwList.NextPageToken;
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.Error(ex, "Error while retrieving courseWorks");
-                            courseWorksRequest.PageToken = null;
-                            errorList.Add(ex.Message);
-                        }
-
-                    } while (!string.IsNullOrEmpty(courseWorksRequest.PageToken));
-
-                    var studentsListRequest = service.Courses.Students.List(response.Id);
-                    do
+                        ListCourseWorkResponse cwList = await courseWorksRequest.ExecuteAsync();
+                        courseWorks.AddRange(cwList.CourseWork);
+                        courseWorksRequest.PageToken = cwList.NextPageToken;
+                    }
+                    catch (Exception ex)
                     {
-                        try
-                        {
-                            ListStudentsResponse studentList = await studentsListRequest.ExecuteAsync();
-                            students.AddRange(studentList.Students);
-                            studentsListRequest.PageToken = studentList.NextPageToken;
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.Error(ex, "Error while retrieving students");
-                            studentsListRequest.PageToken = null;
-                            errorList.Add(ex.Message);
-                        }
-                    } while (!string.IsNullOrEmpty(studentsListRequest.PageToken));
+                        _logger.Debug(ex, "Error while retrieving courseWorks");
+                        courseWorksRequest.PageToken = null;
+                        errorList.Add(ex.Message);
+                    }
 
+                } while (!string.IsNullOrEmpty(courseWorksRequest.PageToken));
 
-                    var googleClass = new GoogleClass
+                var studentsListRequest = service.Courses.Students.List(response.Id);
+                do
+                {
+                    try
                     {
-                        Name = response.Name,
-                        Id = response.Id,
-                        Description = response.Description,
-                        CourseWorksCount = courseWorks.Count,
-                        StudentsCount = students.Count
-                    };
+                        ListStudentsResponse studentList = await studentsListRequest.ExecuteAsync();
+                        students.AddRange(studentList.Students);
+                        studentsListRequest.PageToken = studentList.NextPageToken;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Debug(ex, "Error while retrieving students");
+                        studentsListRequest.PageToken = null;
+                        errorList.Add(ex.Message);
+                    }
+                } while (!string.IsNullOrEmpty(studentsListRequest.PageToken));
+                var googleClass = new GoogleClass
+                {
+                    Name = response.Name,
+                    Id = response.Id,
+                    Description = response.Description,
+                    CourseWorksCount = courseWorks.Count,
+                    StudentsCount = students.Count
+                };
 
-                    return new TaskResult<GoogleClass, ICredential>(ResultType.SUCCESS, googleClass, googleCredential, errorList);
-                }
-
-                return new TaskResult<GoogleClass, ICredential>(ResultType.EMPTY, null, googleCredential, errorList);
+                _logger.Information("The class {ClassId} was successfully retrieved by user {UserId}", classroomId, userId);
+                return new TaskResult<GoogleClass, ICredential>(ResultType.SUCCESS, googleClass, googleCredential, errorList);
             }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error occurred while retrieving courseworks or students");
-                throw ex;
-            }
+
+            _logger.Debug("The class {ClassId} was not found for user {UserId}", classroomId, userId);
+            return new TaskResult<GoogleClass, ICredential>(ResultType.EMPTY, null, googleCredential, errorList);
         }
         public async Task<TaskResult<IEnumerable<GoogleStudent>, ICredential>> GetStudentsByClassIdAsync(ICredential googleCredential, string classId, string refreshToken, string userId)
         {
+            _logger.Debug("User {UserId} requested all students for the class {ClassId}", userId, classId);
              ClassroomService service = new ClassroomService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = googleCredential,
@@ -342,10 +336,11 @@ namespace GdevApps.BLL.Domain
             }
             catch (Google.GoogleApiException ex)
             {
+                _logger.Error(ex, "An error occurred while retrieving students from Google Classroom {ClassId}.", classId);
                 switch (ex?.Error?.Code)
                 {
                     case 401:
-                        _logger.Error(ex, "An error occurred while retrieving students from Google Classroom. Refreshing the token and trying again");
+                        _logger.Error(ex, "Token is expired. Refreshing the token and trying again");
                         var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse { RefreshToken = refreshToken };
                         googleCredential = new UserCredential(new GoogleAuthorizationCodeFlow(
                             new GoogleAuthorizationCodeFlow.Initializer
@@ -373,7 +368,7 @@ namespace GdevApps.BLL.Domain
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"An error occured while retrieving students by course id: {classId}");
+                _logger.Error(ex, $"An error occured while retrieving students for class: {classId}");
                 throw ex;
             }
 
@@ -394,6 +389,7 @@ namespace GdevApps.BLL.Domain
                 }
             }
 
+            _logger.Debug("{Number} students were successfully retrieved for class {ClassId}", googleStudents.Count, classId);
             return new TaskResult<IEnumerable<GoogleStudent>, ICredential>(ResultType.SUCCESS, googleStudents, googleCredential);
         }
         public async Task<TaskResult<GoogleStudent, ICredential>> GetStudentByIdAsync(string studentId, ICredential googleCredential, string refreshToken, string userId)
@@ -404,6 +400,7 @@ namespace GdevApps.BLL.Domain
         #region Private methods
         private async Task UpdateAllTokens(string userId, UserCredential credentials)
         {
+            _logger.Debug("UpdateAllTokens was called for user {UserId}", userId);
             var userLoginTokens = await _aspUserService.GetAllTokensByUserIdAsync(userId);
             if (userLoginTokens != null)
             {

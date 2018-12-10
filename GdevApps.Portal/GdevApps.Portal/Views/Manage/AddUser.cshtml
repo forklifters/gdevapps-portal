@@ -1,0 +1,69 @@
+@model GdevApps.Portal.Models.ManageViewModels.AddUserViewModel;
+@using GdevApps.Portal.Views.Manage
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="~/js/bootstrap-dialog.min.js"></script>
+<link rel="stylesheet" href="~/css/Manage/users.css" />
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"/>
+@{
+    ViewData["Title"] = "Add User";
+    ViewData.AddActivePage(ManageNavPages.Users);
+}
+
+<script type="text/javascript">
+    $(function() {
+        $('#ddlRoles').on('change', function(e){
+            $("#hdnRole").attr('value',this.value)
+        });
+    });
+</script>
+
+<div class="container">
+    <div class="row">
+        <div class="modal-dialog modal-margin-10" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">
+                        Register new user
+                    </h4>
+                </div>
+                <form asp-antiforgery="true"  asp-action="AddUser" asp-controller="Manage">
+                    <div class="modal-body">
+                            <input name="IsValid" type="hidden" value="@ViewData.ModelState.IsValid.ToString()" />
+                            <div class="form-group">
+                                <label asp-for="UserEmail"></label>
+                                <input asp-for="UserEmail" class="form-control"/>
+                                <span asp-validation-for="UserEmail" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="UserName">Name</label>
+                                <input asp-for="UserName" class="form-control"/>
+                                <span asp-validation-for="UserName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Roles"></label>
+                                <select id="ddlRoles" class="form-control select2" asp-items="@Model.Roles">
+                                </select>
+                                <span asp-validation-for="UserRole" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Password"></label>
+                                <input asp-for="Password" class="form-control" />
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="ConfirmPassword"></label>
+                                <input asp-for="ConfirmPassword" class="form-control" />
+                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <input id="hdnRole" asp-for="UserRole" class="form-control hidden" />
+                            </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" data-add="modal" id="btnAdd">CREATE</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

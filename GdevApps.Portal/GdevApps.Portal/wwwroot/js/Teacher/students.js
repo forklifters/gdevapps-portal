@@ -16,7 +16,7 @@ var Students = (function () {
                 url: url,
                 data: data,
                 headers: {
-                    RequestVerificationToken: $('input[name="__RequestVerificationToken"').val()
+                    RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
                 }
             })
                 .done(function (response) {
@@ -106,7 +106,7 @@ var Students = (function () {
                     "method": "POST",
                     "data": data,
                     "headers": {
-                        "RequestVerificationToken": $('input[name="__RequestVerificationToken"').val()
+                        "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
                     }
                 },
                 "columns": [{
@@ -234,7 +234,7 @@ var Students = (function () {
                 url: url,
                 data: data,
                 headers: {
-                    RequestVerificationToken: $('input[name="__RequestVerificationToken"').val()
+                    RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
                 }
             }).done(function(response){
                 if($grdStudents_processing){
@@ -288,7 +288,7 @@ var Students = (function () {
                 url: url,
                 data: data,
                 headers: {
-                    RequestVerificationToken: $('input[name="__RequestVerificationToken"').val()
+                    RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
                 }
             }).done(function(response){
                 if($grdStudents_processing){

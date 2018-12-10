@@ -8,8 +8,10 @@ namespace GdevApps.DAL.DataContexts.AspNetUsers.Config.AspNetUser
     {
         public void Configure(EntityTypeBuilder<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.AspNetUsers> entity)
         {
-             entity.HasIndex(e => e.NormalizedEmail)
-                    .HasName("EmailIndex");
+            entity.ToTable("AspNetUsers", "gradebook_license");
+
+            entity.HasIndex(e => e.NormalizedEmail)
+                   .HasName("EmailIndex");
 
                 entity.HasIndex(e => e.NormalizedUserName)
                     .HasName("UserNameIndex")

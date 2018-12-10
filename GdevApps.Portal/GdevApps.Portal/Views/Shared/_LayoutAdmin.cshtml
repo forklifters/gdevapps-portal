@@ -1,8 +1,8 @@
 @using Microsoft.AspNetCore.Identity
 @using GdevApps.Portal.Models
 
-@inject SignInManager<GdevApps.Portal.Data.ApplicationUser> SignInManager
-    @inject UserManager<GdevApps.Portal.Data.ApplicationUser> UserManager
+@inject SignInManager<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.ApplicationUser> SignInManager
+    @inject UserManager<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.ApplicationUser> UserManager
 
         <!DOCTYPE html>
         <html>
@@ -66,11 +66,13 @@
                 <div class="header--wrap">
                     <a class="header--logo">
                         <div class="lockup">
-                            <img alt="Gdev apps" class="lockup--logo" src="../images/mainLogo.png"> @if
-                            (SignInManager.IsSignedIn(User)) {
-                            <span class="gb_9a pull-right">
-                                <img class="lightblue" src='@UserManager.GetUserAsync(User).Result.Avatar'>
-                            </span> }
+                            <img alt="Gdev apps" class="lockup--logo" src="../images/mainLogo.png"> 
+                            @if(SignInManager.IsSignedIn(User)) 
+                            {
+                                <span class="gb_9a pull-right">
+                                    <img class="lightblue" src='@UserManager.GetUserAsync(User).Result.Avatar'>
+                                </span> 
+                            }
                         </div>
                     </a>
                 </div>
