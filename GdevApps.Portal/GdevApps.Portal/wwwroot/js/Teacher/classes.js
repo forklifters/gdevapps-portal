@@ -69,10 +69,10 @@ var Classes = (function () {
                     "info": "Showing _START_ to _END_ of _TOTAL_ classes",
                     "lengthMenu": "Show _MENU_ classes",
                     "emptyTable": "There are no classes where you were assigned as a teacher",
-                    "processing":'<div id="loader"><img src="../images/google/google-loader.gif" alt="ASP.NET" class="loader-spin" /></div>'
+                    "processing":'<div class="loader"><img src="../images/google/google-loader.gif" alt="ASP.NET" class="loader-spin" /></div>'
                 },
                 "complete": function(){
-                    var spinner = $('#loader');
+                    var spinner = $('.loader');
                     if(spinner){
                         spinner.hide();
                     }

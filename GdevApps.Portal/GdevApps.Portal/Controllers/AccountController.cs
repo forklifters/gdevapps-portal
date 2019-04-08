@@ -321,6 +321,19 @@ namespace GdevApps.Portal.Controllers
                     _logger.Warning("User was not found by login provider and key combination. Trying to find by email {Email}", email);
                     user = await _userManager.FindByEmailAsync(email);
                 }
+
+                 //check if User was added to correct roles
+                var teacher = await _aspNetUserService.GetTeacherByEmailAsync(email);
+                var parent = await _aspNetUserService.GetParentByEmailAsync(email);
+                if (teacher != null && !(await _userManager.IsInRoleAsync(user, UserRoles.Teacher)))
+                {
+                    await _userManager.AddToRoleAsync(user, UserRoles.Teacher);
+                }
+                if (parent != null && !(await _userManager.IsInRoleAsync(user, UserRoles.Parent)))
+                {
+                    await _userManager.AddToRoleAsync(user, UserRoles.Parent);
+                }
+
                 await SignInAndUpdeteTokens(info, user);
                 _logger.Debug("Updating user {Email} avatar", user.Email);
                 user.Avatar = picture;

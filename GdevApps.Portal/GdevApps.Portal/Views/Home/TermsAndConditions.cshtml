@@ -1,0 +1,81 @@
+@using System.Collections.Generic 
+@using System.Linq 
+@using Microsoft.AspNetCore.Http 
+@using Microsoft.AspNetCore.Http.Authentication 
+@using GdevApps.Portal.Data 
+@model GdevApps.Portal.Models.AccountViewModels.LoginViewModel 
+@inject Microsoft.AspNetCore.Identity.SignInManager<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.ApplicationUser> SignInManager 
+    @{ ViewData["Title"] = "Welcome to Gdev apps Portal"; } 
+    @{ Layout = "/Views/Shared/_LoginLayout.cshtml"; }
+    <link rel="stylesheet" href="~/css/non-responsive.css" />
+    <link rel="stylesheet" href="~/css/Home/terms.css" />
+    <div class="container">
+        <div class="form-terms">
+                <img src="../images/mainLogo.png" class="form-img-term"> 
+            <div class="row col-centered">
+                <h1>Terms and Conditions</h1>
+            </div>
+            <div class="row col-centered">
+                <h5>Effective Date: December 21, 2018</h5>
+            </div>
+            <hr>
+            <div class="row">
+                <h3 class="col-centered">Welcome to Gdev apps’s Terms and Conditions policy!</h3>
+                <p><a href="https://www.gdevapps.com" target="_self">Gdev apps</a> cares deeply about the privacy of its visitors and users, and is fully committed to protect their personal information and use it properly in compliance with data privacy laws. This policy describes how we may collect and use personal information, and the rights and choices available to our visitors and users regarding such information.</p>
+                <p><span ><span ><span We strongly urge you to read this policy and make sure you fully understand it,&nbsp;before&nbsp;you access or use any of our services.</span></span></span></p>
+                <h3 class="col-centered">Section 1 - Please read carefully!</h3>
+                <h3 class="col-centered"></h3>
+                <p >This Gdev apps Privacy Policy (“Privacy Policy”) describes how we (Gdev apps) collect and use information pertaining to each of our unregistered visitors and registered users, including users with Paid Services (each, a “Visitor” or “User” (respectively), or “you”), in connection with their access to and use of Gdev apps’&nbsp;websites (including&nbsp;<a href="http://www.wix.com/" target="_blank" data-content="http://www.wix.com/" data-type="external" rel="undefined">www.gdevapps.com</a>&nbsp;and any of its subdomains, the “Website”), mobile applications (“Mobile Apps”), and related services (collectively, the “Services”).</p>
+                <p >The purpose of this Privacy Policy is to provide you with a clear explanation of when, why and how we collect and use your personal information, as well as an explanation of&nbsp;your statutory rights. &nbsp;This Privacy Policy is not intended to override the terms of any contract you have with us, nor any rights you might have under applicable data privacy laws.</p>
+                <p >Read&nbsp;this policy and make sure you fully understand our practices in relation to your personal information, before you access or use any of our Services. &nbsp;If you read and fully understand this Privacy Policy, and remain opposed to our practices, you must immediately leave this website, application or service, and avoid or discontinue all use of any of our Services. &nbsp;If you have any questions or concerns regarding this policy,&nbsp;please fill out this&nbsp;<span style="text-decoration:underline;"><a href="https://www.gdevapps.com/contact" target="_self">Contact Form&#8203;</a></span></p>
+                <h3 class="col-centered">Section 2 - What information do we collect?</h3>
+                <p >We receive, collect and store any information you enter on our website or provide us in any other way. In addition, we collect the Internet protocol (IP) address used to connect your computer to the Internet; login; e-mail address; password; computer and connection information and purchase history. We may use software tools to measure and collect session information, including page response times, length of visits to certain pages, page interaction information, and methods used to browse away from the page. We also collect personally identifiable information (including name, email, password, communications); payment details (including credit card information), comments, feedback, product reviews, recommendations, and personal profile.</p>
+                <h3 class="col-centered">Section 3 - How do we collect such information?</h3>
+                <p >When you conduct a transaction on our website, as part of the process, we collect personal information you give us such as your name, address and email address. Your personal information will be used for the specific reasons stated above only.</p>
+                <h3 class="col-centered">Section 4 -&nbsp;Why do we collect such information?</h3>
+                <p >We collect such Non-personal and Personal Information for the following purposes:</p>
+                <ul class="terms-ul">
+                    <li>
+                    <p >To provide and operate the Services;</p>
+                    </li>
+                    <li>
+                    <p >To provide our Users with ongoing customer assistance and technical support;</p>
+                    </li>
+                    <li>
+                    <p >To be able to contact our Visitors and Users with general or personalized service-related notices and promotional messages;</p>
+                    </li>
+                    <li>
+                    <p >To create aggregated statistical data and other aggregated and/or inferred Non-personal Information, which we or our business partners may use to provide and improve our respective services;&nbsp;</p>
+                    </li>
+                    <li>
+                    <p >To comply with any applicable laws and regulations.</p>
+                    </li>
+                </ul>
+                <p >Our Services are not permitted to children under 18 years of age. &nbsp;No one under age 18 should provide any personal information to us through any of our Services. &nbsp;We do not knowingly collect Personal Information from children under 18. Parents and guardians should supervise their children's activities at all times.</p>
+                <h3 class="col-centered">Section 5 - Where do we store your information?</h3>
+                <p >Our company is hosted on the Wix.com platform. Wix.com provides us with the online platform that allows us to sell our products and services to you. Your data may be stored through Wix.com’s data storage, databases and the general Wix.com applications. They store your data on secure servers behind a firewall.&nbsp;<br>
+                <br>
+                All direct payment gateways offered by Wix.com and used by our company adhere to the standards set by PCI-DSS as managed by the PCI Security Standards Council, which is a joint effort of brands like Visa, MasterCard, American Express and Discover. PCI-DSS requirements help ensure the secure handling of credit card information by our store and its service providers.</p>
+                <h3 class="col-centered">Section 6 - How do we communicate with site visitors?</h3>
+                <p >We may contact you to notify you regarding your account, to troubleshoot problems with your account, to resolve a dispute, to collect fees or monies owed, to poll your opinions through surveys or questionnaires, to send updates about our company, or as otherwise necessary to contact you to enforce our User Agreement, applicable national laws, and any agreement we may have with you. For these purposes we may contact you via email, telephone, text messages, and postal mail.</p>
+                <h3 class="col-centered">Section 7 - How do we use cookies and other tracking tools?</h3>
+                <p >If your website tracks personal information through the use of cookies, for example, you must make this clear to your site visitors. Be clear about what tracking tools (e.g. cookies, flash cookies, web beacons, etc.,) your website employs, what personal information they gather and why they are being used.<br>
+                <br>
+                It's important to note that third-party services, such as Google Analytics or other applications offered through the Wix App Market, placing cookies or utilizing other tracking technologies through Wix´s services, may have their own policies regarding how they collect and store information. As these are external services, such practices are not covered by the Wix Privacy Policy.</p>
+                <p >If you don’t want us to process your data anymore, please fill out this&nbsp;<span style="text-decoration:underline;"><a href="https://www.gdevapps.com/contact" target="_self">Contact Form&#8203;</a></span></p>
+                <h3 class="col-centered">Section 8 -&nbsp;Privacy policy updates</h3>
+                <p >We reserve the right to modify this privacy policy at any time, so please review it frequently. Changes and clarifications will take effect immediately upon their posting on the website. If we make material changes to this policy, we will notify you here that it has been updated, so that you are aware of what information we collect, how we use it, and under what circumstances, if any, we use and/or disclose it.&nbsp;</p>
+                <h3 class="col-centered">Section 9 - Data collection using our Google Chrome Store Apps</h3>
+                <p >When using our apps developed for the Google Chrome Store, Google Add-on Store and within the G Suite environment, <span style="font-weight:bold;">there is no advertising and no tracking of user data and activity.&nbsp; </span>All <span style="font-weight:bold;">data* </span>is stored on&nbsp;your&nbsp;Google Apps account and is never transferred to Gdev apps or other external service.&nbsp;&nbsp;</p>
+                <p >*With the exception of your email. When you install our apps from the Google Chrome Store or the Google Add-ons Store you agree to the collection of your email linked to your Google account from which you installed the app. Your email is <span style="font-weight:bold;">only&nbsp;</span>used to check if a valid license exists. If you do not have a valid license then your email is never stored or transferred to our servers. If you do have a valid license then your email is stored securely for the sole purpose of validating your license. Gdev apps does not share your email to any third parties unless required by law.&nbsp;</p>
+                <h3 class="col-centered">Questions and contact information</h3>
+                <p >If you would like to: access, correct, amend or delete any personal information we have about you, register a complaint, or simply want more information then please fill out this&nbsp;<span style="text-decoration:underline;"><a href="https://www.gdevapps.com/contact" target="_self">Contact Form</a></span></p>
+            </div>
+            <div class="row col-centered top-buffer">
+                <div class="col-md-2">
+                    <a class="btn btn-block btn-social btn-google" asp-controller="Account" asp-action="Login">Go Back</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    @section Scripts { @await Html.PartialAsync("_ValidationScriptsPartial") }

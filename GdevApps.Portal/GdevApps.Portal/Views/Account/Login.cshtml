@@ -17,16 +17,6 @@
             });
     </script>
     <link rel="stylesheet" href="~/css/Login/login.css" />
-    <!-- <div class="row">
-        <div class="col-md-4">
-            <img alt="Gdev apps" class="lockup--logo mainLogo" src="../images/mainLogo.png">
-        </div>
-        <div class="col-md-8">
-            <h2>@ViewData["Title"]</h2>
-        </div>
-    </div> -->
-    
-
     <div class="container">
         <div class="formLogin">
             <img src="../images/mainLogo.png" class="formImg"> 
@@ -39,7 +29,7 @@
                                 <span></span>
                                 <span class="check"></span>
                                 <span class="box"></span>
-                                I agree to the <a href="#">Terms and Conditions</a>
+                                I agree to the <a asp-controller="Home" asp-action="TermsAndConditions">Terms and Conditions</a>
                                 </label>  
                         </div>
                     </div>

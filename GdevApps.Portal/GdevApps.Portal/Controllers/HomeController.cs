@@ -30,13 +30,9 @@ namespace GdevApps.Portal.Controllers
         public  IActionResult Index()
         {
             var userCurrentRole = HttpContext.Session.GetString("UserCurrentRole");
-
             var roles = ((ClaimsIdentity)User.Identity).Claims
                             .Where(c => c.Type == ClaimTypes.Role)
                             .Select(c => c.Value);
-
-
-
 
             if (!string.IsNullOrWhiteSpace(userCurrentRole))
             {
@@ -70,6 +66,12 @@ namespace GdevApps.Portal.Controllers
         {
             ViewData["Message"] = "Your contact page.";
 
+            return View();
+        }
+
+        [AllowAnonymous]
+        public IActionResult TermsAndConditions()
+        {
             return View();
         }
 

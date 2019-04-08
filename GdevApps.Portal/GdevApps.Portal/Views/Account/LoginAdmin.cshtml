@@ -13,42 +13,40 @@
             Login.init();
         });
     </script>
-    <div class="row">
-        <div class="col-md-4">
-            <img alt="Gdev apps" class="lockup--logo mainLogo" src="../images/mainLogo.png">
-        </div>
-        <div class="col-md-8">
-            <h2>@ViewData["Title"]</h2>
-        </div>
-    </div>
-    <hr />
     <div class="container">
-        <div class="row">
-            <div class="Absolute-Center is-Responsive col-centered">
-                <div id="logo-container"></div>
-                <div class="col-xs-6 col-md-5">
-                    <div asp-validation-summary="All" class="text-danger"></div>
-                    <form returnurl="@ViewData[" ReturnUrl "]" method="post">
-                        <div class="form-group input-group">
-                            <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-                            <input id="txtEmail" asp-for="Email" class="form-control" type="text" name='Email' placeholder="Email" />
-                            <span asp-validation-for="Email" class="text-danger"></span>
-                        </div>
-                        <div class="form-group input-group">
-                            <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
-                            <input asp-for="Password" class="form-control" type="password" name='Password' placeholder="Password" />
-                            <span asp-validation-for="Password" class="text-danger"></span>
-                        </div>
-                        <div class="form-group text-center">
-                            <a asp-action="ForgotPassword">Forgot your password?</a>&nbsp;|&nbsp;<a href="#">Support</a>
-                        </div>
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-def btn-block">Login</button>
-                        </div>
-                        <div class="form-group">
-                             <input type="checkbox" asp-for="AgreeWithTerms" value="true" aria-checked="true" checked/>  
-                        </div>
-                    </form>
+        <div class="formLogin">
+             <img src="../images/mainLogo.png" class="formImg">
+            <!-- <div class="row">
+                    <h2>@ViewData["Title"]</h2>
+            </div> -->
+            <hr />
+            <div class="row">
+                <div class="Absolute-Center is-Responsive col-centered">
+                    <div id="logo-container"></div>
+                    <div class="col-xs-10">
+                        <div asp-validation-summary="All" class="text-danger"></div>
+                        <form returnurl="@ViewData[" ReturnUrl "]" method="post">
+                            <div class="form-group input-group">
+                                <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                                <input id="txtEmail" asp-for="Email" class="form-control" type="text" name='Email' placeholder="Email" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                            <div class="form-group input-group">
+                                <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                                <input asp-for="Password" class="form-control" type="password" name='Password' placeholder="Password" />
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+                            <div class="form-group text-center">
+                                <a asp-action="ForgotPassword">Forgot your password?</a>&nbsp;|&nbsp;<a href="#">Support</a>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-def btn-block">Login</button>
+                            </div>
+                            <div class="form-group">
+                                <input type="checkbox" asp-for="AgreeWithTerms" value="true" aria-checked="true" checked/>  
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

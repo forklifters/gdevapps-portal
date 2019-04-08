@@ -1,11 +1,10 @@
 var StudentReports = (function () {
-    var table;
     function init() {
         intiDdls();
     }
 
-
     function intiDdls() {
+        hideSpinner();
         $('#ddlGradebooks').on("change", function (item) {
             var url = "/Teacher/GetGradebookStudents";
             var id = $(this).val(); // Use $(this) so you don't traverse the DOM again
@@ -17,8 +16,7 @@ var StudentReports = (function () {
             }
 
             var data = { mainGradeBookId: id }
-            var $loader = $('#loader');
-            $loader.removeClass("hidden");
+            showSpinner();
             $.ajax({
                 method: "POST",
                 url: url,
@@ -28,7 +26,7 @@ var StudentReports = (function () {
                 }
             })
                 .done(function (response) {
-                    $loader.addClass("hidden");
+                    hideSpinner();
                     var $ddlStudents = $('#ddlStudents');
                     $ddlStudents.empty();
                     //set the first element
@@ -48,15 +46,13 @@ var StudentReports = (function () {
                     }
                 })
                 .fail(function (msg) {
-                    $loader.addClass("hidden");
-                    $loader.addClass("hidden");
+                    hideSpinner();
                     BootstrapDialog.show({
                         type: BootstrapDialog.TYPE_WARNING,
                         message: 'Something went wrong! Please try again',
                     });
                     $("#ddlGradebooks").val(-1);
                 });
-
         });
 
         $("#ddlStudents").on("change", function (event) {
@@ -69,8 +65,7 @@ var StudentReports = (function () {
             }
             var gradebookId = $("#ddlGradebooks").val();
             var data = { mainGradeBookId: gradebookId, studentEmail: id };
-            var $loader = $('#loader');
-            $loader.removeClass("hidden");
+            showSpinner();
             $.ajax({
                 method: "POST",
                 url: url,
@@ -79,22 +74,33 @@ var StudentReports = (function () {
                     RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
                 }
             }).done(function (result) {
-                $loader.addClass("hidden");
+                hideSpinner();
                 $('#dvReportResults').html(result);
                 initDdlPartial();
                 initA4();
             }).fail(function (err) {
-                $loader.addClass("hidden");
+                hideSpinner();
                 BootstrapDialog.show({
                     type: BootstrapDialog.TYPE_WARNING,
                     message: 'Something went wrong! Please try again',
                 });
                 $("#ddlStudents").val(-1);
-                //console.log(err);
             })
         });
+    }
 
+    function hideSpinner(){
+        var $spinner = $('.loader');
+        if ($spinner) {
+            $spinner.hide();
+        }
+    }
 
+    function showSpinner(){
+        var $spinner = $('.loader');
+        if ($spinner) {
+            $spinner.show();
+        }
     }
 
     function initDdlPartial() {

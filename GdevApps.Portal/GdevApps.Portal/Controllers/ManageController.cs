@@ -181,6 +181,22 @@ namespace GdevApps.Portal.Controllers
             var users = await _aspUserService.GetAllParentsAsync();
             _logger.Debug("{Number} parents were found", users.Count);
             var parents = _mapper.Map<IEnumerable<GdevApps.Portal.Models.ManageViewModels.PortalUserViewModel>>(users);
+            var result = TempData["result"]?.ToString();
+            if (!string.IsNullOrEmpty(result))
+            {
+                ViewBag.result = $@"<script type='text/javascript'>
+                                $( document ).ready(function() {{
+                                BootstrapDialog.show({{
+                                            type: BootstrapDialog.TYPE_PRIMARY,
+                                            title: 'Delete a parent',
+                                            message: '{result}',
+                                        }});
+                                }});
+                            </script>";
+            }else{
+                ViewBag.result = "";
+            }
+
             return View(parents);
         }
 
@@ -194,7 +210,8 @@ namespace GdevApps.Portal.Controllers
                 if (!result)
                 {
                     _logger.Error("Parent {Email} with id {ParentId} was not deleted", model.Email, model.Id);
-                    return BadRequest("Parent was not deleted");
+                    TempData["result"] = $"Parent {model.Email} with id {model.Id} was not deleted";
+                    return RedirectToAction("Parents");
                 }
                 var userToUnsign = await _userManager.FindByEmailAsync(model.Email);
                 if (userToUnsign != null)
@@ -202,16 +219,20 @@ namespace GdevApps.Portal.Controllers
                     var unsignResult = await _userManager.RemoveFromRoleAsync(userToUnsign, UserRoles.Teacher);
                     if (!unsignResult.Succeeded)
                     {
-                        _logger.Error("An error occurred during removing user {UserEmail} from role {Role}. Error: {Error}", model.Email, UserRoles.Teacher, unsignResult.ToString());
-                        return BadRequest($"User was not removed from the {UserRoles.Teacher} role");
+                        _logger.Error("An error occurred during removing user {UserEmail} from role {Role}. Error: {Error}", model.Email, UserRoles.Parent, unsignResult.ToString());
+                        TempData["result"] = $"An error occurred during removing user {model.Email} from role {UserRoles.Parent}";
+
+                        return RedirectToAction("Parents");
                     }
                 }
 
-                _logger.Information("User {UserEmail} was successfully removed from the role {Role}", model.Email, UserRoles.Teacher);
+                _logger.Information("User {UserEmail} was successfully removed from the role {Role}", model.Email, UserRoles.Parent);
+                TempData["result"] = $"User {model.Email} was successfully removed from the role {UserRoles.Parent}";
+
                 return RedirectToAction("Parents");
             }
 
-            return BadRequest("Parent model is not valid");
+            return RedirectToAction("Parents", "Parent model is not valid");
         }
 
 

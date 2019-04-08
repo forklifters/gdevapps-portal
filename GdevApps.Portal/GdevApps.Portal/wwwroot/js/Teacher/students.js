@@ -9,7 +9,12 @@ var Students = (function () {
         $('#ddlClasses').on("change", function (item) {
             var url = "/Teacher/GetGradeBooks";
             var id = $(this).val(); // Use $(this) so you don't traverse the DOM again
-            var data = { classId: id }
+            var data = { classId: id };
+            var $grdStudents_processing = $("#grdStudents_processing");
+            var $processing = $('#processing');
+            if($processing){
+                $processing.css("display","block");
+            };
 
             $.ajax({
                 method: "POST",
@@ -20,6 +25,10 @@ var Students = (function () {
                 }
             })
                 .done(function (response) {
+                    if($processing){
+                        $processing.css("display","none");
+                    };
+
                     var $ddlGradeBooks = $('#ddlGradeBooks');
                     $ddlGradeBooks.empty();
                     $.each(response, function (index, item) {
@@ -27,6 +36,7 @@ var Students = (function () {
                             $ddlGradeBooks.append($('<option></option>').text(item.text).val(item.uniqueId));
                         }
                     });
+                   
                     var gradeBookId = '';
                     var classId = $('#ddlClasses').val();
                     var hasValue = !!$('#ddlGradeBooks option').filter(function() { return !this.disabled; }).length; 
@@ -47,9 +57,16 @@ var Students = (function () {
                     $grdStudents.removeAttr('hidden');
                 })
                 .fail(function (msg) {
-                    alert("Error occurred while retrieving the Gradeboks: " + msg.responseText);
-                });
+                    if($processing){
+                        $processing.css("display","none");
+                    };
 
+                    BootstrapDialog.show({
+                        type: BootstrapDialog.TYPE_DANGER,
+                        title: 'Unshare GradeBook',
+                        message: 'Error occurred while retrieving the Gradeboks!',
+                    });
+                });
         });
     }
 
@@ -146,10 +163,10 @@ var Students = (function () {
                     "emptyTable": "There are no students in this class",
                     "search": "<i class='fa fa-search'></i>",
                     "searchPlaceholder": "Search",
-                    "processing":'<div id="loader"><img src="../images/google/google-loader.gif" alt="ASP.NET" class="loader-spin" /></div>'
+                    "processing":'<div class="loader"><img src="../images/google/google-loader.gif" alt="ASP.NET" class="loader-spin" /></div>'
                 },
                 "complete": function(){
-                    var spinner = $('#loader');
+                    var spinner = $('.loader');
                     if(spinner){
                         spinner.hide();
                     }

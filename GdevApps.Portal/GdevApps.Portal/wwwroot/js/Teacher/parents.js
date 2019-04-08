@@ -17,13 +17,13 @@ var Parents  = (function () {
                     "info": "Showing _START_ to _END_ of _TOTAL_ parents",
                     "lengthMenu": "Show _MENU_ parents",
                     "emptyTable": "There are no parents where you were assigned by this teacher",
-                    "processing":'<div id="loader"><img src="../images/google/google-loader.gif" alt="ASP.NET" class="loader-spin" /></div>'
+                    "processing":'<div class="loader"><img src="../images/google/google-loader.gif" alt="ASP.NET" class="loader-spin" /></div>'
                 },
                 'createdRow': function( row, data, dataIndex ) {
                     $(row).attr('data-maingb-id', data.mainGradeBookNameUniqueId).attr('data-parentgb-id', data.parentGradebookUniqueId);
                 },
                 "initComplete": function(){
-                    var spinner = $('#loader');
+                    var spinner = $('.loader');
                     if (spinner) {
                         spinner.hide();
                     };
@@ -68,6 +68,7 @@ var Parents  = (function () {
                     })
                 })
                     .fail(function (response) {
+                        debugger;
                         if ($parentsProcessing) {
                             $parentsProcessing.css("display", "none");
                         };

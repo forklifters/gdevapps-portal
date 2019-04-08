@@ -37,6 +37,8 @@ namespace GdevApps.BLL.Domain
         private const string _settingsLetterGradesRange = "Settings!M3:O17";
         private const string _statisticsRange = "Statistics!A1:N21";
         private const string _statisticsAverageMedianRange = "Statistics!G4:K4";
+        private const string _defaultAvatar = "https://www.dropbox.com/s/5r1f49l2zx5e2yv/quokka_lg.png?raw=1";
+
         private readonly IGradeBookRepository _gradeBookRepository;
         private readonly IMapper _mapper;
 
@@ -1041,9 +1043,22 @@ namespace GdevApps.BLL.Domain
 
                 var innerFolderName = $"{studentEmail}";
                 var parentGradeBookName = $"{className} - {parentEmail} - {studentEmail}";
-                var parent = await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Parent>(filter: f => f.Email == parentEmail);
+                var parent = await _aspUserService.GetParentByEmailAsync(parentEmail); //await _gradeBookRepository.GetOneAsync<GdevApps.DAL.DataModels.AspNetUsers.AspNetUser.Parent>(filter: f => f.Email == parentEmail);
                 if (parent == null)
-                    throw new Exception($"Parent with email {parentEmail} was not found");
+                {
+                    parent = new GdevApps.BLL.Models.AspNetUsers.Parent
+                    {
+                        CreatedBy = userId,
+                        Email = parentEmail,
+                        Name = parentEmail,
+                        Avatar = _defaultAvatar
+                    };
+
+                    if (!(await _aspUserService.AddParentAsync(parent)))
+                    {
+                        throw new Exception($"Parent with email {parentEmail} was not found and an error occurred while parent creation");
+                    }
+                }
 
                 var innerFolderResult = await _driveService.GetInnerFolderAsync(googleCredential, refreshToken, userId, rootFolderId, innerFolderName);
                 //if inner folder does not exist create a new one

@@ -9,11 +9,6 @@
 <script type="text/javascript">
     $(function() {
         Students.init();
-       // var $ddlClasses = $('#ddlClasses');
-       // var hasValues = $ddlClasses.has('option').length > 0;
-        // if (hasValues) {
-        //     $ddlClasses.change();
-        // }
     })
 </script>
 
@@ -47,16 +42,22 @@
                     <h3 class="panel-title"></h3>
                 </div>
                 <div class="panel-body">
-                    <div class="table-responsive"><table id="grdStudents" class="table table-striped table-bordered table-hover responsive" hidden>
-                        <thead class="thin-border-bottom">
-                            <tr>
-                                <th class="googleHeader"></th>
-                                <th class="googleHeader">Student name</th>
-                                <th class="googleHeader">Email</th>
-                                <th class="googleHeader">Is student in Classroom</th>
-                            </tr>
-                        </thead>
-                    </table>
+                    <div class="table-responsive">
+                        <table id="grdStudents" class="table table-striped table-bordered table-hover responsive" hidden>
+                            <thead class="thin-border-bottom">
+                                <tr>
+                                    <th class="googleHeader"></th>
+                                    <th class="googleHeader">Student name</th>
+                                    <th class="googleHeader">Email</th>
+                                    <th class="googleHeader">Is student in Classroom</th>
+                                </tr>
+                            </thead>
+                        </table>
+                        <div id="processing" class="card" style="display: none;">
+                            <div class="loader">
+                                <img src="../images/google/google-loader.gif" alt="ASP.NET" class="loader-spin">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
